@@ -1,0 +1,17 @@
+{
+    "format_version": "1.1.0",
+    "meta": {
+        "name": "Create",
+        "version": "0.0.0",
+        "namespace": "fx_create",
+        "author": "FrederoxDev",
+        "uuid": "83fda108-79f7-4f66-8092-41343fc32bd1",
+        "dependencies": [
+            {
+                "dependency_uuid": "e56c3987-fd4a-4590-9923-a07fc4be7250",
+                "dependency_namespace": "amethyst",
+                "version_range": ">=2.1.0 <2.2.0"
+            }
+        ]
+    }
+}
