@@ -1,8 +1,9 @@
 #pragma once
 #include <optional>
 #include <mc/src/common/world/phys/AABB.hpp>
+#include "foundation/blockEntity/SynchedBlockEntity.hpp"
 
-class CachedRenderBBBlockEntity : public SyncedBlockEntity {
+class CachedRenderBBBlockEntity : public SynchedBlockEntity {
 private:
     std::optional<AABB> renderBoundingBox;
 

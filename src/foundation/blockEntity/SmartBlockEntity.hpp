@@ -1,8 +1,9 @@
 #pragma once
 #include <amethyst/Imports.hpp>
 #include "foundation/blockEntity/behaviour/BlockEntityBehaviour.hpp"
+#include "foundation/blockEntity/CachedRenderBBBlockEntity.hpp"
 
-class SmartBlockEntity {
+class SmartBlockEntity : public CachedRenderBBBlockEntity {
 private:
     bool initialized;
     bool firstNbtRead;
@@ -11,6 +12,7 @@ protected:
     int lazyTickRate;
     int lazyTickCounter;
     std::unordered_map<void*, std::shared_ptr<BlockEntityBehaviour>> behaviours;
+    bool virtualMode;
 
 public:
     virtual ~SmartBlockEntity() = default;
@@ -70,7 +72,46 @@ public:
 		lazyTick();
 	}
 
+    virtual void setRemoved() override {
+        CachedRenderBBBlockEntity::setRemoved();
+        if (!chunkUnloaded)
+            remove();
+
+        invalidate();
+    }
+
+    /**
+	 * Block destroyed or Chunk unloaded. Usually invalidates capabilities
+	 */
+	void invalidate() {
+        forEachBehaviour([](const std::shared_ptr<BlockEntityBehaviour>& b) { 
+            b->unload(); 
+        });
+	}
+
+    /**
+	 * Block destroyed or picked up by a contraption. Usually detaches kinetics
+	 */
+	virtual void remove() {}
+
+    /**
+	 * Block destroyed or replaced. Requires Block to call IBE::onRemove
+	 */
+	void destroy() {
+        forEachBehaviour([](const std::shared_ptr<BlockEntityBehaviour>& b) { 
+            b->destroy(); 
+        });
+	}
+
     void onChunkUnloaded() { chunkUnloaded = true; }
+
+    void markVirtual() {
+		virtualMode = true;
+	}
+
+    bool isVirtual() {
+		return virtualMode;
+	}
 
     bool isChunkUnloaded() const { return chunkUnloaded; }
 };

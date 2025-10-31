@@ -59,14 +59,14 @@ public:
     /**
 	 * Block destroyed or Chunk unloaded. Usually invalidates capabilities
 	 */
-	// public void unload() {
-	// }
+	void unload() {
+	}
 
 	/**
 	 * Block destroyed or removed. Requires block to call ITE::onRemove
 	 */
-	// public void destroy() {
-	// }
+	void destroy() {
+	}
 
     void setLazyTickRate(int slowTickRate) {
         this->lazyTickRate = slowTickRate;

@@ -1,7 +1,11 @@
 #pragma once
-#include <mc/src/common/world/level/block/actor/BlockActor.hpp>
+#include "porting/JavaBlockEntity.hpp"
 
-class SynchedBlockEntity : public BlockActor {
+class Dimension;
+
+class SynchedBlockEntity : public JavaBlockEntity {
+public:
+
 	// public SyncedBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
 	// 	super(type, pos, state);
 	// }
@@ -38,17 +42,17 @@ class SynchedBlockEntity : public BlockActor {
 	// 	return tag;
 	// }
 
-	// public void sendData() {
-	// 	if (level instanceof ServerLevel serverLevel)
-	// 		serverLevel.getChunkSource().blockChanged(getBlockPos());
-	// }
+	void sendData() {
+		// if (level instanceof ServerLevel serverLevel)
+		// 	serverLevel.getChunkSource().blockChanged(getBlockPos());
+	}
 
-	// public void notifyUpdate() {
-	// 	setChanged();
-	// 	sendData();
-	// }
+	void notifyUpdate() {
+		setChanged();
+		sendData();
+	}
 
 	// public HolderGetter<Block> blockHolderGetter() {
 	// 	return level != null ? level.holderLookup(Registries.BLOCK) : BuiltInRegistries.BLOCK.asLookup();
 	// }
-}
+};
