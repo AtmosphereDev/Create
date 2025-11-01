@@ -1,5 +1,6 @@
 #include "KineticNetwork.hpp"
 #include "content/kinetics/base/KineticBlockEntity.hpp"
+#include "content/kinetics/TorquePropagator.hpp"
 
 void KineticNetwork::initFromTE(float maxStress, float currentStress, int membersCount)
  {

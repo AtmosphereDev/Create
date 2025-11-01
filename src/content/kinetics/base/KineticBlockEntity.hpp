@@ -3,7 +3,6 @@
 #include "foundation/blockEntity/SmartBlockEntity.hpp"
 #include "api/stress/BlockStressValues.hpp"
 #include "content/kinetics/KineticNetwork.hpp"
-#include "Create.hpp"
 #include "content/kinetics/base/IRotate.hpp"
 #include "content/kinetics/RotationPropagator.hpp"
 #include <mc/src-deps/core/math/Math.hpp>
@@ -311,9 +310,7 @@ public:
 		network->add(this);
 	}
 
-	KineticNetwork* getOrCreateNetwork() {
-		return Create::TORQUE_PROPAGATOR.getOrCreateNetworkFor(this);
-	}
+	KineticNetwork* getOrCreateNetwork();
 
 	bool hasNetwork() {
 		return network != 0;
