@@ -4,7 +4,7 @@
 #include <mc/src/common/world/level/block/Block.hpp>	
 #include <mc/src/common/world/level/block/BlockLegacy.hpp>
 
-class IRotate {
+class IRotate : public BlockLegacy {
 public:
     struct StressImpact {
         enum Type { LOW, MEDIUM, HIGH, OVERSTRESSED };
