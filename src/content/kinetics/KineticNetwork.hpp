@@ -78,7 +78,7 @@ public:
         be->updateFromNetwork(0, 0, 0);
 
         if (members.empty()) {
-            TorquePropagator::networks[be->getLevel()].erase(this->id);
+            TorquePropagator::networks[be->level->mId].erase(this->id);
             return;
         }
 
@@ -127,7 +127,7 @@ public:
         float presentCapacity = 0;
         for (auto it = sources.begin(); it != sources.end(); ) {
             KineticBlockEntity* be = it->first;
-            if (be->getLevel()->getBlockEntity(be->getBlockPos()) != be) {
+            if (be->level->mBlockSource->getBlockEntity(be->getBlockPos()) != be) {
                 it = sources.erase(it);
                 continue;
             }
@@ -141,7 +141,7 @@ public:
         float presentStress = 0;
         for (auto it = members.begin(); it != members.end(); ) {
             KineticBlockEntity* be = it->first;
-            if (be->getLevel()->getBlockEntity(be->getBlockPos()) != be) {
+            if (be->level->mBlockSource->getBlockEntity(be->getBlockPos()) != be) {
                 it = members.erase(it);
                 continue;
             }

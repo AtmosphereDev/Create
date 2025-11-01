@@ -1,4 +1,8 @@
 #pragma once
+#include <algorithm>
+#include <mc/src/common/world/Facing.hpp>
+#include <mc/src/common/world/level/block/Block.hpp>	
+#include <mc/src/common/world/level/block/BlockLegacy.hpp>
 
 class IRotate {
 public:
@@ -9,11 +13,11 @@ public:
             return true;
             // return !AllConfigs.server().kinetics.disableStress.get(); TODO
         }
-    }
+    };
 
     // public boolean hasShaftTowards(LevelReader world, BlockPos pos, BlockState state, Direction face);
 
-	// public Axis getRotationAxis(BlockState state);
+	Facing::Axis getRotationAxis(const Block& state);
 
 	// public default SpeedLevel getMinimumRequiredSpeedLevel() {
 	// 	return SpeedLevel.NONE;
@@ -26,4 +30,9 @@ public:
 	// public default boolean showCapacityWithAnnotation() {
 	// 	return false;
 	// }
+
+	static bool isIRotate(const Block& block) {
+		// Idk a better way to do this rn
+		return std::find(block.mTags.begin(), block.mTags.end(), HashedString("IRotate")) != block.mTags.end();
+	} 
 };

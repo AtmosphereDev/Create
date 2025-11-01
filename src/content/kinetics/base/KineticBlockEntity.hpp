@@ -5,6 +5,8 @@
 #include "content/kinetics/KineticNetwork.hpp"
 #include "Create.hpp"
 #include "content/kinetics/base/IRotate.hpp"
+#include "content/kinetics/RotationPropagator.hpp"
+#include <mc/src-deps/core/math/Math.hpp>
 
 class KineticBlockEntity : public SmartBlockEntity {
 public:
@@ -143,11 +145,7 @@ public:
 	void onSpeedChanged(float previousSpeed) {
 		bool fromOrToZero = (previousSpeed == 0) != (getSpeed() == 0);
 
-		auto signum = [](float x) -> int {
-			return (x > 0) - (x < 0); 
-		};
-
-		bool directionSwap = !fromOrToZero && signum(previousSpeed) != signum(getSpeed());
+		bool directionSwap = !fromOrToZero && mce::Math::signum(previousSpeed) != mce::Math::signum(getSpeed());
 		if (fromOrToZero || directionSwap)
 			flickerTally = getFlickerScore() + 5;
 		setChanged();
@@ -263,24 +261,25 @@ public:
 		return source != std::nullopt;
 	}
 
-	// void setSource(BlockPos source) {
-	// 	this.source = source;
-	// 	if (level == null || level.isClientSide)
-	// 		return;
+	void setSource(const BlockPos& source) {
+		this->source = source;
+		if (level == nullptr || level->isClientSide())
+			return;
 
-	// 	BlockEntity blockEntity = level.getBlockEntity(source);
-	// 	if (!(blockEntity instanceof KineticBlockEntity sourceBE)) {
-	// 		removeSource();
-	// 		return;
-	// 	}
+		const BlockActor* blockEntity = level->mBlockSource->getBlockEntity(source);
+		if (blockEntity == nullptr || !KineticBlockEntity::isKineticBlockEntity(*blockEntity)) {
+			removeSource();
+			return;
+		}
 
-	// 	setNetwork(sourceBE.network);
-	// 	copySequenceContextFrom(sourceBE);
-	// }
+		const KineticBlockEntity& sourceBE = static_cast<const KineticBlockEntity&>(*blockEntity);
+		setNetwork(sourceBE.network);
+		copySequenceContextFrom(sourceBE);
+	}
 
-	// void copySequenceContextFrom(KineticBlockEntity sourceBE) {
-	// 	sequenceContext = sourceBE.sequenceContext;
-	// }
+	void copySequenceContextFrom(const KineticBlockEntity& sourceBE) {
+		// sequenceContext = sourceBE.sequenceContext;
+	}
 
 	void removeSource() {
 		float prevSpeed = getSpeed();
@@ -322,7 +321,7 @@ public:
 
 	void attachKinetics() {
 		updateSpeed = false;
-		RotationPropagator.handleAdded(level, mPosition, this);
+		RotationPropagator::handleAdded(*level, mPosition, *this);
 	}
 
 	void detachKinetics() {
@@ -391,8 +390,8 @@ public:
 		return flickerTally;
 	}
 
-	static float convertToDirection(float axisSpeed, Direction d) {
-		return d.getAxisDirection() == AxisDirection.POSITIVE ? axisSpeed : -axisSpeed;
+	static float convertToDirection(float axisSpeed, FacingID d) {
+		return Facing::getAxisDirection(d) == Facing::AxisDirection::POSITIVE ? axisSpeed : -axisSpeed;
 	}
 
 	static float convertToLinear(float speed) {
@@ -439,21 +438,24 @@ public:
 	 * @param neighbours
 	 * @return
 	 */
-	// public List<BlockPos> addPropagationLocations(IRotate block, BlockState state, List<BlockPos> neighbours) {
-	// 	if (!canPropagateDiagonally(block, state))
-	// 		return neighbours;
+	std::vector<BlockPos> addPropagationLocations(IRotate& block, const Block& state, std::vector<BlockPos> neighbours) {
+		if (!canPropagateDiagonally(block, state))
+			return neighbours;
 
-	// 	Axis axis = block.getRotationAxis(state);
-	// 	BlockPos.betweenClosedStream(new BlockPos(-1, -1, -1), new BlockPos(1, 1, 1))
-	// 		.forEach(offset -> {
-	// 			if (axis.choose(offset.getX(), offset.getY(), offset.getZ()) != 0)
-	// 				return;
-	// 			if (offset.distSqr(BlockPos.ZERO) != 2)
-	// 				return;
-	// 			neighbours.add(worldPosition.offset(offset));
-	// 		});
-	// 	return neighbours;
-	// }
+		Facing::Axis axis = block.getRotationAxis(state);
+
+		for (auto& offset : BlockPos::betweenClosed(BlockPos(-1, -1, -1), BlockPos(1, 1, 1))) {
+			if (Facing::choose(axis, offset.x, offset.y, offset.z) != 0)
+				return;
+
+			if (offset.distSqr(BlockPos::ZERO) != 2)
+				return;
+
+			neighbours.push_back(mPosition + offset);
+		};
+			
+		return neighbours;
+	}
 
 	/**
 	 * Specify whether this component can propagate speed to the other in any
@@ -467,13 +469,14 @@ public:
 	 * @return true if this and the other component should check their propagation
 	 * factor and are not already connected via integrated cogs or shafts
 	 */
-	// public boolean isCustomConnection(KineticBlockEntity other, BlockState state, BlockState otherState) {
-	// 	return false;
-	// }
+	bool isCustomConnection(KineticBlockEntity& other, const Block& state, const Block& otherState) {
+		return false;
+	}
 
-	// protected boolean canPropagateDiagonally(IRotate block, BlockState state) {
-	// 	return ICogWheel.isSmallCog(state);
-	// }
+	virtual bool canPropagateDiagonally(IRotate& block, const Block& state) {
+		// return ICogWheel.isSmallCog(state);
+		return false;
+	}
 
 	// @Override
 	// public void requestModelDataUpdate() {
@@ -486,11 +489,16 @@ public:
 		return true;
 	}
 
-	int getRotationAngleOffset(Axis axis) {
+	int getRotationAngleOffset(Facing::Axis axis) {
 		return 0;
 	}
 
 	bool syncSequenceContext() {
 		return false;
 	}
+
+	// port helpers
+	static bool isKineticBlockEntity(const BlockActor& be) {
+		return be.getType() == KineticBlockEntity::TYPE;
+	} 
 };
