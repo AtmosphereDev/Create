@@ -276,47 +276,9 @@ public:
 
 	static KineticBlockEntity* findConnectedNeighbour(KineticBlockEntity& currentTE, const BlockPos& neighbourPos);
 
-	static bool isConnected(KineticBlockEntity& from, KineticBlockEntity& to) {
-		const Block& stateFrom = from.getBlock();
-		const Block& stateTo = to.getBlock();
-		
-		return isLargeCogToSpeedController(stateFrom, stateTo, to.getBlockPos() - from.getBlockPos()) 
-			|| getRotationSpeedModifier(from, to) != 0
-			|| from.isCustomConnection(to, stateFrom, stateTo);
-	}
+	static bool isConnected(KineticBlockEntity& from, KineticBlockEntity& to);
 
-	static std::vector<KineticBlockEntity*> getConnectedNeighbours(KineticBlockEntity& be) {
-		std::vector<KineticBlockEntity*> neighbours;
-		for (BlockPos neighbourPos : getPotentialNeighbourLocations(be)) {
-			KineticBlockEntity* neighbourBE = findConnectedNeighbour(be, neighbourPos);
-			if (neighbourBE == nullptr)
-				continue;
+	static std::vector<KineticBlockEntity*> getConnectedNeighbours(KineticBlockEntity& be);
 
-			neighbours.push_back(neighbourBE);
-		}
-		return neighbours;
-	}
-
-	static std::vector<BlockPos> getPotentialNeighbourLocations(KineticBlockEntity& be) {
-		std::vector<BlockPos> neighbours;
-		BlockPos blockPos = be.getBlockPos();
-		Dimension& level = be.getLevel();
-
-		if (!level.mBlockSource->areChunksFullyLoaded(blockPos, 1))
-			return neighbours;
-
-		for (FacingID facing : Facing::DIRECTIONS) {
-			BlockPos relative = blockPos.neighbor(facing);
-			if (level.mBlockSource->areChunksFullyLoaded(relative, 1))
-				neighbours.push_back(relative);
-		}
-
-        const Block& block = be.getBlock();
-        if (!IRotate::isIRotate(block))
-            return neighbours;
-
-        IRotate& rotate = *(IRotate*)nullptr; // TODO: Get IRotate implementation from blocklegacy
-
-		return be.addPropagationLocations(rotate, block, neighbours);
-	}
+	static std::vector<BlockPos> getPotentialNeighbourLocations(KineticBlockEntity& be);
 };

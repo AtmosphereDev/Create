@@ -1,8 +1,10 @@
 #pragma once
 #include <amethyst/Imports.hpp>
 #include <mc/src-deps/core/utility/AutomaticID.hpp>
-#include "src/content/kinetics/base/KineticBlockEntity.hpp"
 #include <mc/src/common/world/level/dimension/Dimension.hpp>
+
+class KineticBlockEntity;
+class KineticNetwork;
 
 class TorquePropagator {
 public:
@@ -20,21 +22,5 @@ public:
 	// 	Create.LOGGER.debug("Removed Kinetic Network Space for " + WorldHelper.getDimensionID(world));
 	// }
 
-    KineticNetwork* getOrCreateNetworkFor(KineticBlockEntity* be) {
-        if (!be || be->network == std::nullopt)
-            return nullptr;
-
-        auto& map = networks[be->level->mId];
-
-        auto it = map.find(be->network.value());
-        if (it != map.end()) {
-            return &it->second;
-        }
-
-        KineticNetwork newNetwork;
-        newNetwork.id = be->network.value();
-
-        auto [insertedIt, inserted] = map.emplace(be->network.value(), std::move(newNetwork));
-        return &insertedIt->second;
-    }
+    KineticNetwork* getOrCreateNetworkFor(KineticBlockEntity* be);
 };

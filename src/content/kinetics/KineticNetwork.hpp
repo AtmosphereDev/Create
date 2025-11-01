@@ -1,7 +1,8 @@
 #pragma once
 #include <amethyst/Imports.hpp>
 #include <unordered_map>
-#include "src/content/kinetics/base/KineticBlockEntity.hpp"
+
+class KineticBlockEntity;
 
 class KineticNetwork {
 public:
@@ -20,150 +21,37 @@ private:
 public:
     KineticNetwork() : id(0), initialized(false), currentCapacity(0), currentStress(0), unloadedCapacity(0), unloadedStress(0), unloadedMembers(0) {}
 
-    void initFromTE(float maxStress, float currentStress, int membersCount) {
-        unloadedCapacity = maxStress;
-        unloadedStress = currentStress;
-        unloadedMembers = membersCount;
-        initialized = true;
-        updateStress();
-        updateCapacity();
-    }
+    void initFromTE(float maxStress, float currentStress, int membersCount);
 
-    void addSilently(KineticBlockEntity* be, float lastCapacity, float lastStress) {
-        if (members.find(be) != members.end())
-            return;
+    void addSilently(KineticBlockEntity* be, float lastCapacity, float lastStress);
 
-        if (be->isSource()) {
-            unloadedCapacity -= lastCapacity * getStressMultiplierForSpeed(be->getGeneratedSpeed());
-            float addedStressCapacity = be->calculateAddedStressCapacity();
-            sources[be] = addedStressCapacity;
-        }
+    void add(KineticBlockEntity* be);
 
-        unloadedStress -= lastStress * getStressMultiplierForSpeed(be->getTheoreticalSpeed());
-        float stressApplied = be->calculateStressApplied();
-        members[be] = stressApplied;
+    void updateCapacityFor(KineticBlockEntity* be, float capacity);
 
-        unloadedMembers--;
-        if (unloadedMembers < 0) unloadedMembers = 0;
-        if (unloadedCapacity < 0) unloadedCapacity = 0;
-        if (unloadedStress < 0) unloadedStress = 0;
-    }
+    void updateStressFor(KineticBlockEntity* be, float stress);
 
-    void add(KineticBlockEntity* be) {
-        if (members.find(be) != members.end())
-            return;
-        if (be->isSource())
-            sources[be] = be->calculateAddedStressCapacity();
-        members[be] = be->calculateStressApplied();
-        updateFromNetwork(be);
-        be->networkDirty = true;
-    }
+    void remove(KineticBlockEntity* be);
 
-    void updateCapacityFor(KineticBlockEntity* be, float capacity) {
-        sources[be] = capacity;
-        updateCapacity();
-    }
+    void sync();
 
-    void updateStressFor(KineticBlockEntity* be, float stress) {
-        members[be] = stress;
-        updateStress();
-    }
+    void updateFromNetwork(KineticBlockEntity* be);
 
-    void remove(KineticBlockEntity* be) {
-        if (members.find(be) == members.end())
-            return;
-        if (be->isSource())
-            sources.erase(be);
-        members.erase(be);
-        be->updateFromNetwork(0, 0, 0);
+    void updateCapacity();
 
-        if (members.empty()) {
-            TorquePropagator::networks[be->level->mId].erase(this->id);
-            return;
-        }
+    void updateStress();
 
-        auto it = members.begin();
-        if (it != members.end()) {
-            it->first->networkDirty = true;
-        }
-    }
+    void updateNetwork();
 
-    void sync() {
-        for (auto& [be, _] : members)
-            updateFromNetwork(be);
-    }
+    float calculateCapacity();
 
-    void updateFromNetwork(KineticBlockEntity* be) {
-        be->updateFromNetwork(currentCapacity, currentStress, getSize());
-    }
+    float calculateStress();
 
-    void updateCapacity() {
-        float newMaxStress = calculateCapacity();
-        if (currentCapacity != newMaxStress) {
-            currentCapacity = newMaxStress;
-            sync();
-        }
-    }
+    float getActualCapacityOf(KineticBlockEntity* be);
 
-    void updateStress() {
-        float newStress = calculateStress();
-        if (currentStress != newStress) {
-            currentStress = newStress;
-            sync();
-        }
-    }
+    float getActualStressOf(KineticBlockEntity* be);
 
-    void updateNetwork() {
-        float newStress = calculateStress();
-        float newMaxStress = calculateCapacity();
-        if (currentStress != newStress || currentCapacity != newMaxStress) {
-            currentStress = newStress;
-            currentCapacity = newMaxStress;
-            sync();
-        }
-    }
+    static float getStressMultiplierForSpeed(float speed);
 
-    float calculateCapacity() {
-        float presentCapacity = 0;
-        for (auto it = sources.begin(); it != sources.end(); ) {
-            KineticBlockEntity* be = it->first;
-            if (be->level->mBlockSource->getBlockEntity(be->getBlockPos()) != be) {
-                it = sources.erase(it);
-                continue;
-            }
-            presentCapacity += getActualCapacityOf(be);
-            ++it;
-        }
-        return presentCapacity + unloadedCapacity;
-    }
-
-    float calculateStress() {
-        float presentStress = 0;
-        for (auto it = members.begin(); it != members.end(); ) {
-            KineticBlockEntity* be = it->first;
-            if (be->level->mBlockSource->getBlockEntity(be->getBlockPos()) != be) {
-                it = members.erase(it);
-                continue;
-            }
-            presentStress += getActualStressOf(be);
-            ++it;
-        }
-        return presentStress + unloadedStress;
-    }
-
-    float getActualCapacityOf(KineticBlockEntity* be) {
-        return sources[be] * getStressMultiplierForSpeed(be->getGeneratedSpeed());
-    }
-
-    float getActualStressOf(KineticBlockEntity* be) {
-        return members[be] * getStressMultiplierForSpeed(be->getTheoreticalSpeed());
-    }
-
-    static float getStressMultiplierForSpeed(float speed) {
-        return std::abs(speed);
-    }
-
-    int getSize() {
-        return unloadedMembers + static_cast<int>(members.size());
-    }
+    int getSize();
 };

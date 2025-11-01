@@ -446,10 +446,10 @@ public:
 
 		for (auto& offset : BlockPos::betweenClosed(BlockPos(-1, -1, -1), BlockPos(1, 1, 1))) {
 			if (Facing::choose(axis, offset.x, offset.y, offset.z) != 0)
-				return;
+				return neighbours;
 
 			if (offset.distSqr(BlockPos::ZERO) != 2)
-				return;
+				return neighbours;
 
 			neighbours.push_back(mPosition + offset);
 		};
