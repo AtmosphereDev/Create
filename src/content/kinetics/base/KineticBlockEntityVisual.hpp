@@ -10,7 +10,6 @@ public:
     KineticBlockEntityVisual(const VisualizationContext& ctx, T* blockEntity, float partialTick) 
         : AbstractBlockEntityVisual<T>(ctx, blockEntity, partialTick) {}
 
-protected:
     static float rotationOffset(const Block& state, Facing::Axis axis, const BlockPos& pos) {
         if (shouldOffset(axis, pos)) {
             return 22.5f;

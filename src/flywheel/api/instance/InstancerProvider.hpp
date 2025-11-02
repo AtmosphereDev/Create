@@ -1,8 +1,10 @@
 #pragma once
+#include "flywheel/api/instance/Instancer.hpp"
+#include "flywheel/api/model/Model.hpp"
 
 class InstancerProvider {
 public:
-    	/**
+    /**
 	 * Get an instancer for the given instance type rendering the given model.
 	 *
 	 * <p>Calling this method twice with the same arguments in the
@@ -30,6 +32,6 @@ public:
 	 *                Instancers are rendered in ascending order by bias.
 	 * @return An instancer.
 	 */
-    Instancer instancer(/*InstanceType<I> type,*/ std::shared_ptr<Model> model, int bias);
+    virtual Instancer instancer(std::shared_ptr<Model> model) = 0;
 	// <I extends Instance> Instancer<I> instancer(InstanceType<I> type, Model model, int bias);
 };
