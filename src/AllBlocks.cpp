@@ -24,7 +24,9 @@ void AllBlocks::RegisterBlockItems(RegisterItemsEvent &ev)
 
 void AllBlocks::InitBlockGraphics(InitBlockGraphicsEvent &ev)
 {
-
+    BlockGraphics* graphics = BlockGraphics::createBlockGraphics(SHAFT->mNameInfo.mFullName, BlockShape::INVISIBLE);
+    graphics->setTextureItem("missing");
+    graphics->setDefaultCarriedTextures();
 }
 
 void AllBlocks::AddEventListeners()

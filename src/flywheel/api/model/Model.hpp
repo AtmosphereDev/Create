@@ -5,7 +5,7 @@
 class Model {
 public:
     struct ConfiguredMesh {
-        Material material;
+        flywheel::Material material;
         mce::Mesh mesh;
     };
 

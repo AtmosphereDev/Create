@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include "flywheel/api/instance/InstanceHandle.hpp"
+#include "flywheel/api/instance/InstanceType.hpp"
 
 class Instance {
 public:

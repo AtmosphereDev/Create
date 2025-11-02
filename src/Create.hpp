@@ -1,6 +1,7 @@
 #pragma once
 #include "content/kinetics/TorquePropagator.hpp"
 #include "AllBlocks.hpp"
+#include "AllPartialModels.hpp"
 
 class Create {
 public:
@@ -8,5 +9,6 @@ public:
 
     static void Initialize() {
         AllBlocks::AddEventListeners();
+        AllPartialModels::AddEventListeners();
     }
 };

@@ -15,6 +15,9 @@ protected:
     bool virtualMode;
 
 public:
+    SmartBlockEntity(BlockActorType typeIn, const BlockPos& pos, const std::string& id)
+        : CachedRenderBBBlockEntity(typeIn, pos, id) {}
+
     virtual ~SmartBlockEntity() = default;
 
     template <typename T>

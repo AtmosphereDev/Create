@@ -17,15 +17,15 @@ public:
 	) = 0;
 };	
 
-class InstancerProvider {
+class InstancerProvider : public InstancerProviderBase {
 public:
 	template <typename I>
 	std::shared_ptr<Instancer<I>> instancer(
-		InstanceType<I> type,
+		std::shared_ptr<InstanceType<I>> type,
 		std::shared_ptr<Model> model,
 		int bias
 	) {
-		auto typePtr = std::make_shared<InstanceType<I>>(type);
+		auto typePtr = std::static_pointer_cast<void>(type);
 		auto base = instancerBase(typePtr, model, bias, typeid(I));
 		return std::static_pointer_cast<Instancer<I>>(base);
 	}

@@ -8,6 +8,8 @@ private:
     std::optional<AABB> renderBoundingBox;
 
 public:
+    CachedRenderBBBlockEntity(BlockActorType typeIn, const BlockPos& pos, const std::string& id)
+        : SynchedBlockEntity(typeIn, pos, id), renderBoundingBox(std::nullopt) {}
     // public CachedRenderBBBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
     //     super(type, pos, state);
     // }

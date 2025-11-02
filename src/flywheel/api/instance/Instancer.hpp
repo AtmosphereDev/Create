@@ -13,7 +13,7 @@ public:
     /**
 	 * @return a handle to a new copy of this model.
 	 */
-    std::shared_ptr<I> createInstance() = 0;
+    virtual std::shared_ptr<I> createInstance() = 0;
 
     // default void createInstances(I[] arr) {
 	// 	for (int i = 0; i < arr.length; i++) {

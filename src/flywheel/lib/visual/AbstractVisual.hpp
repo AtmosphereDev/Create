@@ -26,6 +26,10 @@ protected:
         return visualizationContext.instancerProvider();
     }
 
+    InstancerProvider& instancerProvider() {
+        return visualizationContext.instancerProvider();
+    }
+
     const BlockPos& renderOrigin() const {
         return visualizationContext.renderOrigin();
     }

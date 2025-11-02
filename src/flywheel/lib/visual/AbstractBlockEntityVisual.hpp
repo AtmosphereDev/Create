@@ -40,4 +40,8 @@ public:
     const BlockPos& getBlockPos() const {
         return pos;
     }
+
+    const BlockPos& getVisualPosition() const {
+        return visualPos;
+    }
 };

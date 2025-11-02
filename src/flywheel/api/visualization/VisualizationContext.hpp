@@ -34,5 +34,5 @@ public:
 	 * @return The embedding.
 	 * @see VisualEmbedding
 	 */
-    virtual VisualEmbedding& createEmbedding() = 0;
+    // virtual VisualEmbedding& createEmbedding() = 0;
 };

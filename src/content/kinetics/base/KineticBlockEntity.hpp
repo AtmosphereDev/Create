@@ -30,11 +30,12 @@ public:
 
     // SequenceContext sequenceContext;
 
-    // public KineticBlockEntity(BlockEntityType<?> typeIn, BlockPos pos, BlockState state) {
-	// 	super(typeIn, pos, state);
-	// 	effects = new KineticEffectHandler(this);
-	// 	updateSpeed = true;
-	// }
+    KineticBlockEntity(BlockActorType typeIn, const BlockPos& pos, const std::string& id)
+		: SmartBlockEntity(typeIn, pos, id) 
+	{
+		// effects = new KineticEffectHandler(this);
+		updateSpeed = true;
+	}
 
 	virtual void initialize() override {
 		if (hasNetwork() && !level->mLevel->isClientSide()) {
