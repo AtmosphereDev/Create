@@ -9,12 +9,12 @@ class InstancerProvider;
 
 class AbstractVisual : public Visual {
 protected:
-    const VisualizationContext& visualizationContext;
+    VisualizationContext& visualizationContext;
     const Dimension& dimension;
     bool deleted = false;
 
 public:
-    AbstractVisual(const VisualizationContext& ctx, const Dimension& dimension, float partialTick)
+    AbstractVisual(VisualizationContext& ctx, const Dimension& dimension, float partialTick)
         : visualizationContext(ctx), dimension(dimension) {}
 
 protected:

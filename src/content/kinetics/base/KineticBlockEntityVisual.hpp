@@ -7,7 +7,7 @@ template <typename T>
 requires std::is_base_of_v<KineticBlockEntity, T>
 class KineticBlockEntityVisual : public AbstractBlockEntityVisual<T> {
 public:
-    KineticBlockEntityVisual(const VisualizationContext& ctx, T* blockEntity, float partialTick) 
+    KineticBlockEntityVisual(VisualizationContext& ctx, T* blockEntity, float partialTick) 
         : AbstractBlockEntityVisual<T>(ctx, blockEntity, partialTick) {}
 
     static float rotationOffset(const Block& state, Facing::Axis axis, const BlockPos& pos) {

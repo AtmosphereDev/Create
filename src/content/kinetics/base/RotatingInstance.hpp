@@ -34,7 +34,7 @@ public:
 	glm::quat rotation = glm::quat();
 
     RotatingInstance(std::shared_ptr<InstanceTypeBase> type, std::shared_ptr<InstanceHandle> handle) 
-        : ColoredLitOverlayInstance(type, handle) {}
+        : ColoredLitOverlayInstance(type, handle), rotationAxisX(0), rotationAxisY(0), rotationAxisZ(0), x(0), y(0), z(0), rotationalSpeed(0) {}
 
     RotatingInstance& setup(KineticBlockEntity* blockEntity) {
         const Block& blockState = blockEntity->getBlock();
@@ -114,6 +114,27 @@ public:
 
     RotatingInstance& setRotationOffset(float offset) {
         this->rotationOffset = offset;
+        return *this;
+    }
+
+    RotatingInstance& setPosition(const Vec3& position) {
+        this->x = position.x;
+        this->y = position.y;
+        this->z = position.z;
+        return *this;
+    }
+
+    RotatingInstance& setPosition(const BlockPos& position) {
+        this->x = (float)position.x;
+        this->y = (float)position.y;
+        this->z = (float)position.z;
+        return *this;
+    }
+
+    RotatingInstance& setPosition(float x, float y, float z) {
+        this->x = x;
+        this->y = y;
+        this->z = z;
         return *this;
     }
 };

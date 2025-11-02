@@ -6,14 +6,19 @@
 #include <mc/src-client/common/client/renderer/blockActor/BlockActorRenderer.hpp>
 #include "content/kinetics/base/ShaftVisual.hpp"
 #include "flywheel/api/visualization/VisualizationContext.hpp" 
-#include "flywheel/api/instance/InstancerProvider.hpp"
+// #include "flywheel/api/instance/InstancerProvider.hpp"
+#include "flywheel/backend/engine/InstancerProviderImpl.hpp"
 
 class TestVisualizationContext : public VisualizationContext {
 public:
-    InstancerProvider _instancerProvider;
+    InstancerProviderImpl _instancerProvider;
 
-    virtual InstancerProvider& instancerProvider() const override {
-        return const_cast<InstancerProvider&>(_instancerProvider);
+    virtual const InstancerProvider& instancerProvider() const override {
+        return _instancerProvider;
+    }
+
+    virtual InstancerProvider& instancerProvider() override {
+        return _instancerProvider;
     }
 
     virtual const BlockPos& renderOrigin() const override {
@@ -33,7 +38,18 @@ public:
     {
         Log::Info("TestBlockActor created at position: ({}, {}, {}) with id: {}", pos.x, pos.y, pos.z, id);
         mRendererId = (BlockActorRendererId)((int)BlockActorRendererId::Count + 1);
+    }
+
+    virtual void onPlace(BlockSource& unk0) override {
+        KineticBlockEntity::onPlace(unk0);
+
+        if (mBlock == nullptr) {
+            Log::Error("TestBlockActor::onPlace called but mBlock is null at position: ({}, {}, {})", mPosition.x, mPosition.y, mPosition.z);
+            return;
+		}
+
         testVisuals = std::make_unique<ShaftVisual<TestBlockActor>>(globalVisualizationContext, this, 0.0f);
+        Log::Info("TestBlockActor::onPlace called at position: ({}, {}, {})", mPosition.x, mPosition.y, mPosition.z);
     }
 };
 
@@ -43,7 +59,7 @@ public:
 
     virtual void render(BaseActorRenderContext& ctx, BlockActorRenderData& data) override {
         TestBlockActor& actor = static_cast<TestBlockActor&>(data.entity);
-        // actor.testVisuals.
+        Log::Info("{}", actor.mBlock == nullptr ? "mBlock is null" : "mBlock is valid");
     }
 };
 

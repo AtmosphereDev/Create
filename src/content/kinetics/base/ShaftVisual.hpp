@@ -6,6 +6,6 @@
 template <typename T>
 class ShaftVisual : public SingleAxisRotatingVisual<T> {
 public:
-    ShaftVisual(const VisualizationContext& ctx, T* blockEntity, float partialTick) 
+    ShaftVisual(VisualizationContext& ctx, T* blockEntity, float partialTick) 
         : SingleAxisRotatingVisual<T>(ctx, blockEntity, partialTick, Models::partial(AllPartialModels::SHAFT)) {}
 };

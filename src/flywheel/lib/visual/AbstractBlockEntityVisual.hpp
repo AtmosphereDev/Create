@@ -30,7 +30,7 @@ protected:
     const Block& blockState;
 
 public:
-    AbstractBlockEntityVisual(const VisualizationContext& ctx, T* blockEntity, float partialTick) 
+    AbstractBlockEntityVisual(VisualizationContext& ctx, T* blockEntity, float partialTick) 
         : AbstractVisual(ctx, blockEntity->getLevel(), partialTick), 
         blockEntity(blockEntity), 
         blockState(blockEntity->getBlock()), 

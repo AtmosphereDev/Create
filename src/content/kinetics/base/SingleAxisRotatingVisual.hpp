@@ -12,26 +12,21 @@ protected:
     std::shared_ptr<RotatingInstance> rotatingModel;
 
 public:
-    SingleAxisRotatingVisual(const VisualizationContext& ctx, T* blockEntity, float partialTick, FacingID from, std::shared_ptr<Model> model) 
+    SingleAxisRotatingVisual(VisualizationContext& ctx, T* blockEntity, float partialTick, FacingID from, std::shared_ptr<Model> model) 
         : KineticBlockEntityVisual<T>(ctx, blockEntity, partialTick), rotatingModel(nullptr)
     {
-        AbstractVisual::instancerProvider().template instancer<RotatingInstance>(AllInstanceTypes::ROTATING, model, 0)
+        rotatingModel = AbstractVisual::instancerProvider().template instancer<RotatingInstance>(AllInstanceTypes::ROTATING, model, 0)
             ->createInstance();
 
-        //instancerProvider()
-
-        /*rotatingModel = this->instancerProvider().instancer<RotatingInstance>(AllInstanceTypes::ROTATING, model)
-            .createInstance();
-
         rotatingModel
-            .rotateToFace(from)
+            ->rotateToFace(from)
             .setup(blockEntity)
             .setPosition(this->getVisualPosition());
 
-        rotatingModel->setChanged();*/
+        rotatingModel->setChanged();
     }
 
-    SingleAxisRotatingVisual(const VisualizationContext& ctx, T* blockEntity, float partialTick, std::shared_ptr<Model> model) 
+    SingleAxisRotatingVisual(VisualizationContext& ctx, T* blockEntity, float partialTick, std::shared_ptr<Model> model) 
         : SingleAxisRotatingVisual(ctx, blockEntity, partialTick, FacingID::UP, model) {}
 
 protected:

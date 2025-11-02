@@ -1,6 +1,7 @@
 #pragma once
 #include <mc/src/common/world/level/block/actor/BlockActor.hpp>
 #include <mc/src/common/world/level/block/actor/BlockActorRendererId.hpp>
+#include <mc/src/common/world/level/BlockSource.hpp>
 
 class Dimension;
 
@@ -17,6 +18,12 @@ public:
 
     JavaBlockEntity(BlockActorType type, const BlockPos& pos, const std::string& id)
         : BlockActor(type, pos, id), level(nullptr) {}
+
+    virtual void onPlace(BlockSource& region) override {
+        level = region.mDimension;
+        mBlock = &region.getBlock(mPosition);
+        BlockActor::onPlace(region);
+    }
 
     void setChanged() {
         // no idea what this does, todo figure out

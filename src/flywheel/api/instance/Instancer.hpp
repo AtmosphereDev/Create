@@ -1,5 +1,6 @@
 #pragma once    
 #include <memory>
+#include <concepts>
 #include "flywheel/api/instance/Instance.hpp"
 
 class InstancerBase {
@@ -8,6 +9,7 @@ public:
 };
 
 template <typename I>
+requires std::is_base_of_v<Instance, I>
 class Instancer : public InstancerBase {
 public:
     /**

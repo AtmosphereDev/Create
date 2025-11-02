@@ -11,7 +11,12 @@ public:
     /**
 	 * @return The {@link InstancerProvider} that the visual can use to get instancers to render models.
 	 */
-    virtual InstancerProvider& instancerProvider() const = 0;
+    virtual InstancerProvider& instancerProvider() = 0;
+
+	/**
+	 * @return The {@link InstancerProvider} that the visual can use to get instancers to render models.
+	 */
+    virtual const InstancerProvider& instancerProvider() const = 0;
 
     /**
 	 * All models render as if this position is (0, 0, 0).
