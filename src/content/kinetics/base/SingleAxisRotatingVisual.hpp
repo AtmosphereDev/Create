@@ -12,7 +12,7 @@ public:
     SingleAxisRotatingVisual(const VisualizationContext& ctx, T* blockEntity, float partialTick, FacingID from, std::shared_ptr<Model> model) 
         : KineticBlockEntityVisual<T>(ctx, blockEntity, partialTick), rotatingModel(nullptr)
     {
-        rotatingModel = this->instancerProvider().instancer(model)
+        rotatingModel = this->instancerProvider().instancer(AllInstanceTypes::ROTATING, model)
             .createInstance()
             .rotateToFace(from)
             .setup(blockEntity)

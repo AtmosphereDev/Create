@@ -17,7 +17,7 @@ public:
 
     // public boolean hasShaftTowards(LevelReader world, BlockPos pos, BlockState state, Direction face);
 
-	virtual Facing::Axis getRotationAxis(const Block& state) = 0;
+	virtual Facing::Axis getRotationAxis(const Block& state) const = 0;
 
 	// public default SpeedLevel getMinimumRequiredSpeedLevel() {
 	// 	return SpeedLevel.NONE;

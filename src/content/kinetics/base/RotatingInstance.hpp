@@ -33,6 +33,9 @@ public:
 	 */
 	glm::quat rotation = glm::quat();
 
+    RotatingInstance(std::shared_ptr<InstanceTypeBase> type, std::shared_ptr<InstanceHandle> handle) 
+        : ColoredLitOverlayInstance(type, handle) {}
+
     RotatingInstance& setup(KineticBlockEntity* blockEntity) {
         const Block& blockState = blockEntity->getBlock();
         Facing::Axis axis = KineticBlockEntityVisual<KineticBlockEntity>::rotationAxis(blockState);

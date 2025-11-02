@@ -1,6 +1,7 @@
 #pragma once
 #include <concepts>
 #include "porting/JavaBlockEntity.hpp"
+#include "flywheel/lib/visual/AbstractVisual.hpp"
 
 /**
  * The layer between a {@link BlockEntity} and the Flywheel backend.

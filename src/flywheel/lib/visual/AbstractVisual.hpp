@@ -1,6 +1,6 @@
 #pragma once
-#include "api/visual/Visual.hpp"
-#include "api/visualization/VisualizationContext.hpp"
+#include "flywheel/api/visual/Visual.hpp"
+#include "flywheel/api/visualization/VisualizationContext.hpp"
 
 class VisualizationContext;
 class Dimension;
