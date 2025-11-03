@@ -2,11 +2,13 @@
 #include <amethyst/runtime/events/RegisterEvents.hpp>
 #include <mc/src/common/SharedPtr.hpp>
 
-class RotatedPillarKineticBlock;
+class ShaftBlock;
+class GearboxBlock;
 
 class AllBlocks {
 public:
-    static WeakPtr<RotatedPillarKineticBlock> SHAFT;
+    static WeakPtr<ShaftBlock> SHAFT;
+    static WeakPtr<GearboxBlock> GEARBOX;
 
     static void RegisterBlocks(RegisterBlocksEvent& ev);
     static void RegisterBlockItems(RegisterItemsEvent& ev);

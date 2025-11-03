@@ -14,6 +14,7 @@ std::vector<std::shared_ptr<PartialModel>> AllPartialModels::allModels;
 #include "content/kinetics/base/RotatedPillarKineticBlock.hpp"
 #include <mc/src-client/common/client/renderer/MinecraftGameplayGraphicsResources.hpp>
 #include <mc/src-client/common/client/renderer/Tessellator.hpp>	
+#include "porting/JavaBlockEntityRenderer.hpp"
 
 SafetyHookInline _BlockActorRenderDispatcher_initializeBlockEntityRenderers;
 
@@ -28,7 +29,8 @@ void BlockActorRenderDispatcher_initializeBlockEntityRenderers(
 	void* a8, 
 	void* a9
 ) {
-    self->mRenderers[(BlockActorRendererId)((int)BlockActorRendererId::Count + 1)] = std::make_unique<TestBlockActorRenderer>();
+	Log::Info("AllPartialModels::initializeBlockEntityRenderers!");
+    self->mRenderers[(BlockActorRendererId)((int)BlockActorRendererId::Count + 1)] = std::make_unique<JavaBlockEntityRenderer>();
 
 	for (const auto& model : AllPartialModels::getAllModels()) {
 		auto geometry = geometryGroup->getGeometry(model->identifier());

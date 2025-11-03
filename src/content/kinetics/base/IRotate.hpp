@@ -3,6 +3,7 @@
 #include <mc/src/common/world/Facing.hpp>
 #include <mc/src/common/world/level/block/Block.hpp>	
 #include <mc/src/common/world/level/block/BlockLegacy.hpp>
+#include "porting/JavaBlockEntity.hpp"
 
 class IRotate : public BlockLegacy {
 public:
@@ -16,7 +17,9 @@ public:
     };
 
 	IRotate(const std::string& name, short id, const Material& material)
-		: BlockLegacy(name, id, material) {}
+		: BlockLegacy(name, id, material) {
+			mBlockEntityType = JavaBlockEntity::TYPE;
+		}
 
     // public boolean hasShaftTowards(LevelReader world, BlockPos pos, BlockState state, Direction face);
 
