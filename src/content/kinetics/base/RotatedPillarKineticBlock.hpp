@@ -6,8 +6,8 @@
 #include <mc/src-client/common/client/renderer/blockActor/BlockActorRenderer.hpp>
 #include "content/kinetics/base/ShaftVisual.hpp"
 #include "flywheel/api/visualization/VisualizationContext.hpp" 
-// #include "flywheel/api/instance/InstancerProvider.hpp"
 #include "flywheel/backend/engine/InstancerProviderImpl.hpp"
+#include "content/kinetics/base/KineticBlockEntityRenderer.hpp"
 
 class TestVisualizationContext : public VisualizationContext {
 public:
@@ -31,13 +31,14 @@ class TestBlockActor : public KineticBlockEntity {
 public:
     static TestVisualizationContext globalVisualizationContext;
 
-    std::unique_ptr<ShaftVisual<TestBlockActor>> testVisuals;
+    // std::unique_ptr<ShaftVisual<TestBlockActor>> testVisuals;
 
     TestBlockActor(BlockActorType type, const BlockPos& pos, const std::string& id) 
-        : KineticBlockEntity(type, pos, id), testVisuals(nullptr)
+        : KineticBlockEntity(type, pos, id) /*, testVisuals(nullptr)*/
     {
         Log::Info("TestBlockActor created at position: ({}, {}, {}) with id: {}", pos.x, pos.y, pos.z, id);
         mRendererId = (BlockActorRendererId)((int)BlockActorRendererId::Count + 1);
+        setSpeed(16.0f);
     }
 
     virtual void onPlace(BlockSource& unk0) override {
@@ -48,25 +49,27 @@ public:
             return;
 		}
 
-        testVisuals = std::make_unique<ShaftVisual<TestBlockActor>>(globalVisualizationContext, this, 0.0f);
+        // testVisuals = std::make_unique<ShaftVisual<TestBlockActor>>(globalVisualizationContext, this, 0.0f);
         Log::Info("TestBlockActor::onPlace called at position: ({}, {}, {})", mPosition.x, mPosition.y, mPosition.z);
     }
 };
 
 class TestBlockActorRenderer : public BlockActorRenderer {
 public:
+    KineticBlockEntityRenderer kineticRenderer;
     TestBlockActorRenderer() : BlockActorRenderer() {};
 
     virtual void render(BaseActorRenderContext& ctx, BlockActorRenderData& data) override {
         TestBlockActor& actor = static_cast<TestBlockActor&>(data.entity);
-        Log::Info("{}", actor.mBlock == nullptr ? "mBlock is null" : "mBlock is valid");
+        // Log::Info("{}", actor.mBlock == nullptr ? "mBlock is null" : "mBlock is valid");
+        kineticRenderer.render(*this, ctx, data);
     }
 };
 
-class RotatedPillarKineticBlock : public BlockLegacy {
+class RotatedPillarKineticBlock : public KineticBlock {
 public:
     RotatedPillarKineticBlock(const std::string& name, short id, const Material& material)
-        : BlockLegacy(name, id, material) 
+        : KineticBlock(name, id, material) 
         {
             mBlockEntityType = JavaBlockEntity::TYPE;
         }
@@ -75,19 +78,19 @@ public:
 		return std::make_shared<TestBlockActor>(JavaBlockEntity::TYPE, pos, "bosh");
 	}
 
-    const Block& getPlacementBlock(const Actor& unk0, const BlockPos& unk1, FacingID unk2, const Vec3& unk3, int unk4) const override {
+    const Block& getPlacementBlock(const Actor& unk0, const BlockPos& unk1, FacingID face, const Vec3& unk3, int unk4) const override {
         const Block* renderBlock = &getRenderBlock();
 
-        Facing::Axis axis = renderBlock->getState<Facing::Axis>(VanillaStates::PillarAxis);
+        Facing::Axis axis = Facing::getAxis(face);
 
-        Log::Info("RotatedPillarKineticBlock::getPlacementBlock called with axis: {}", (int)axis);
-
-        renderBlock = renderBlock->setState<Facing::Axis>(VanillaStates::PillarAxis, Facing::Axis::Y);
-
-        axis = renderBlock->getState<Facing::Axis>(VanillaStates::PillarAxis);
-
-        Log::Info("RotatedPillarKineticBlock::getPlacementBlock after set with axis: {}", (int)axis);
+        renderBlock = renderBlock->setState<Facing::Axis>(VanillaStates::PillarAxis, axis);
 
         return *renderBlock;
+    }
+
+    // NOT IN HERE, MAKE SURE TO REMOVE!!
+
+    virtual Facing::Axis getRotationAxis(const Block& state) const {
+        return state.getState<Facing::Axis>(VanillaStates::PillarAxis);
     }
 };

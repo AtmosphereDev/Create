@@ -4,40 +4,48 @@
 #include <unordered_map>
 #include <mc/src-deps/core/resource/ResourceHelper.hpp>
 #include <mc/src-deps/minecraftrenderer/renderer/Mesh.hpp>
+#include <mc/src-client/common/client/model/Geometry.hpp>
+#include <mc/src-client/common/client/model/GeometryGroup.hpp>
 
 class PartialModel {
 public:
-    static inline bool populateOnInit = false;
-
-    static std::shared_ptr<PartialModel> of(const ResourceLocation& modelLocation) {
+    static std::shared_ptr<PartialModel> of(const HashedString& identifier) {
         std::scoped_lock lock(allMutex_);
-        auto key = modelLocation; // assumes ResourceLocation is hashable & comparable
+        auto key = identifier;
 
         if (auto existingWeak = all_[key].lock()) {
             return existingWeak;
         }
 
-        auto instance = std::shared_ptr<PartialModel>(new PartialModel(modelLocation));
+		auto instance = std::shared_ptr<PartialModel>(new PartialModel(identifier));
         all_[key] = instance;
         return instance;
     }
 
-    std::shared_ptr<mce::Mesh> get() const { return bakedModel_; }
-    const ResourceLocation& modelLocation() const { return modelLocation_; }
-
-private:
-    explicit PartialModel(const ResourceLocation& modelLocation)
-        : modelLocation_(modelLocation) {
-        if (populateOnInit) {
-            // bakedModel_ = FlwLibXplat::getInstance()
-            //     .getBakedModel(Minecraft::getInstance().getModelManager(), modelLocation_);
-        }
+    const HashedString& identifier() const {
+        return identifier_;
     }
 
-    ResourceLocation modelLocation_;
-    std::shared_ptr<mce::Mesh> bakedModel_;
+    bool isLoaded() const {
+        return geometryInfo_ != nullptr;
+    }
+
+    std::shared_ptr<GeometryInfo> getGeometryInfo() const {
+        return geometryInfo_;
+    }
+
+    void setGeometryInfo(std::shared_ptr<GeometryInfo> geometryInfo) {
+        geometryInfo_ = geometryInfo;
+    }
+
+private:
+    explicit PartialModel(const HashedString& identifier)
+        : identifier_(identifier), geometryInfo_(nullptr) {}
+
+    HashedString identifier_;
+    std::shared_ptr<GeometryInfo> geometryInfo_;
 
     // Static global weak cache
-    static inline std::unordered_map<ResourceLocation, std::weak_ptr<PartialModel>> all_;
+    static inline std::unordered_map<HashedString, std::weak_ptr<PartialModel>> all_;
     static inline std::mutex allMutex_;
 };

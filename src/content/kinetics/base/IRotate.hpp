@@ -15,6 +15,9 @@ public:
         }
     };
 
+	IRotate(const std::string& name, short id, const Material& material)
+		: BlockLegacy(name, id, material) {}
+
     // public boolean hasShaftTowards(LevelReader world, BlockPos pos, BlockState state, Direction face);
 
 	virtual Facing::Axis getRotationAxis(const Block& state) const = 0;

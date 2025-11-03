@@ -1,6 +1,8 @@
 #pragma once
 #include <amethyst/runtime/events/RegisterEvents.hpp>
-#include "content/kinetics/base/RotatedPillarKineticBlock.hpp"
+#include <mc/src/common/SharedPtr.hpp>
+
+class RotatedPillarKineticBlock;
 
 class AllBlocks {
 public:

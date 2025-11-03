@@ -7,6 +7,7 @@
 #include <mc/src/common/world/item/registry/ItemRegistry.hpp>
 #include <mc/src-client/common/client/renderer/block/BlockGraphics.hpp>
 #include <mc/src/common/world/level/block/VanillaStates.hpp>
+#include "content/kinetics/base/RotatedPillarKineticBlock.hpp"
 
 WeakPtr<RotatedPillarKineticBlock> AllBlocks::SHAFT;
 

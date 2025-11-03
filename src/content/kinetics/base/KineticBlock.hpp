@@ -3,5 +3,6 @@
 
 class KineticBlock : public IRotate {
 public:
-    
+    KineticBlock(const std::string& name, short id, const Material& material)
+        : IRotate(name, id, material) {}
 };

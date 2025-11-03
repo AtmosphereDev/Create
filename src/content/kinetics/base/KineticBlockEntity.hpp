@@ -238,10 +238,12 @@ public:
 		return getGeneratedSpeed() != 0;
 	}
 
-	float getSpeed() {
+	float getSpeed() const {
 		// if (overStressed || (level != nullptr && level->tickRateManager().isFrozen()))
 		// 	return 0;
 		// TODO: add back in tick rate manager freeze check
+
+		return 1.0f;
 
 		if (overStressed)
 			return 0;
@@ -249,7 +251,7 @@ public:
 		return getTheoreticalSpeed();
 	}
 
-	float getTheoreticalSpeed() {
+	float getTheoreticalSpeed() const {
 		return speed;
 	}
 
@@ -487,7 +489,7 @@ public:
 		return true;
 	}
 
-	int getRotationAngleOffset(Facing::Axis axis) {
+	int getRotationAngleOffset(Facing::Axis axis) const {
 		return 0;
 	}
 

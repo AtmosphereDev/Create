@@ -37,6 +37,10 @@ public:
         return mPosition;
     }
 
+    bool hasLevel() const {
+        return level != nullptr;
+    }
+
     Dimension& getLevel() {
         return *level;
     }

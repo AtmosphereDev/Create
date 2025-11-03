@@ -7,20 +7,20 @@
 template <typename T, typename U>
 class RendererReloadCache : public std::enable_shared_from_this<RendererReloadCache<T, U>> {
 public:
-    using Factory = std::function<U(const T&)>;
+    using Factory = std::function<U(Tessellator&, const T&)>;
 
     explicit RendererReloadCache(Factory factory)
         : factory_(std::move(factory)) {
         registerInstance();
     }
 
-    U get(const T& key) {
+    U get(Tessellator& tess, const T& key) {
         std::scoped_lock lock(mutex_);
         auto it = cache_.find(key);
         if (it != cache_.end())
             return it->second;
 
-        U value = factory_(key);
+        U value = factory_(tess, key);
         cache_.emplace(key, value);
         return value;
     }

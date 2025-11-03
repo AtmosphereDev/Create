@@ -7,9 +7,17 @@ public:
 
 private:
     static std::shared_ptr<PartialModel> block(const std::string& path) {
-        return PartialModel::of(path);
+        auto model = PartialModel::of(path);
+        allModels.push_back(model);
+        return model;
     }
+    
+    static std::vector<std::shared_ptr<PartialModel>> allModels;
 
 public:
+    static const std::vector<std::shared_ptr<PartialModel>>& getAllModels() {
+        return allModels;
+    }
+
     static void AddEventListeners();
 }; 
