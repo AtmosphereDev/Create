@@ -8,13 +8,22 @@
 #include <amethyst/runtime/ModContext.hpp>
 #include <mc/src/common/util/Timer.hpp>
 #include <mc/src/common/Minecraft.hpp>
+#include <mc/src-client/common/client/renderer/TextureGroup.hpp>
 
 const Block;
 class Model;
 
 class KineticBlockEntityRenderer : public SafeBlockEntityRenderer {
 public:
+    mce::TexturePtr mShaftTexture;
+    
+	KineticBlockEntityRenderer() : SafeBlockEntityRenderer() {}
+
     virtual void renderSafe(BlockActorRenderer& self, BaseActorRenderContext& ctx, BlockActorRenderData& data) const override;
+
+    virtual void loadTextures(std::shared_ptr<mce::TextureGroup> textures) override {
+        mShaftTexture = textures->getTexture("textures/entity/axis", false, std::nullopt, cg::TextureSetLayerType::Normal);
+    }
 
 protected:
     virtual const Block& getRenderedBlockState(const KineticBlockEntity& entity) const {

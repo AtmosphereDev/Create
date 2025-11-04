@@ -5,6 +5,17 @@
 
 class GearboxRenderer : public KineticBlockEntityRenderer {
 public:
+    mce::TexturePtr mGearboxTexture;
+    mce::TexturePtr mHalfShaftTexture;
+
+    GearboxRenderer() : KineticBlockEntityRenderer() {}
+
+    virtual void loadTextures(std::shared_ptr<mce::TextureGroup> textures) override {
+		KineticBlockEntityRenderer::loadTextures(textures);
+        mGearboxTexture = textures->getTexture("textures/entity/gearbox", false, std::nullopt, cg::TextureSetLayerType::Normal);
+        mHalfShaftTexture = textures->getTexture("textures/entity/axis", false, std::nullopt, cg::TextureSetLayerType::Normal);
+    }
+
     virtual void renderSafe(BlockActorRenderer& self, BaseActorRenderContext& ctx, BlockActorRenderData& data) const override {
         KineticBlockEntity& be = static_cast<KineticBlockEntity&>(data.entity);
         Facing::Axis boxAxis = getRotationAxisOf(be);
@@ -34,7 +45,7 @@ public:
             mat->translate(0, -0.5f, 0);
 
             for (const auto& mesh : shaftHalf->meshes) {
-                mesh.mesh.renderMesh(ctx.mScreenContext, self.getStaticEntityMaterial());
+                mesh.mesh.renderMesh(ctx.mScreenContext, self.getStaticEntityMaterial(), mHalfShaftTexture);
             }
 
             stack.pop();
@@ -44,7 +55,7 @@ public:
         worldSpace->translate(0, -0.5f, 0);
 
         for (const auto& mesh : gearboxModel->meshes) {
-            mesh.mesh.renderMesh(ctx.mScreenContext, self.getStaticEntityMaterial());
+            mesh.mesh.renderMesh(ctx.mScreenContext, self.getStaticEntityMaterial(), mGearboxTexture);
         }
 
         stack.pop(); // pop back to world space

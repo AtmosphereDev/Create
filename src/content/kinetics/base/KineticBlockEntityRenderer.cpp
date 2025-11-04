@@ -30,7 +30,7 @@ void KineticBlockEntityRenderer::renderSafe(BlockActorRenderer &self, BaseActorR
     mat->translate(0, -0.5f, 0); // re-align the vertical
 
     for (const auto& mesh : model->meshes) {
-        mesh.mesh.renderMesh(ctx.mScreenContext, self.getStaticEntityMaterial());
+        mesh.mesh.renderMesh(ctx.mScreenContext, self.getStaticEntityMaterial(), mShaftTexture);
     }
 
     stack.pop();
