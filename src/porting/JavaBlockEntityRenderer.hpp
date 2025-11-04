@@ -6,7 +6,7 @@
 #include "AllBlocks.hpp"
 
 #include "content/kinetics/base/ShaftRenderer.hpp"
-#include "content/kinetics/simpleRelays/ShaftBlock.hpp"
+#include "content/kinetics/gearbox/GearboxRenderer.hpp"
 
 class JavaBlockEntityRenderer : public BlockActorRenderer {
 public:
@@ -14,13 +14,11 @@ public:
 
     JavaBlockEntityRenderer() : BlockActorRenderer() {
         mRenderers["fx_create:shaft"] = std::make_unique<ShaftRenderer>();
-        mRenderers["fx_create:gearbox"] = std::make_unique<ShaftRenderer>();
+        mRenderers["fx_create:gearbox"] = std::make_unique<GearboxRenderer>();
     };
 
     virtual void render(BaseActorRenderContext& ctx, BlockActorRenderData& data) override {
         JavaBlockEntity& actor = static_cast<JavaBlockEntity&>(data.entity);
-
-        Log::Info("JavaBlockEntityRenderer rendering entity with id {}", actor.getBlock().mLegacyBlock->mNameInfo.mFullName.getString());
 
         auto it = mRenderers.find(actor.getBlock().mLegacyBlock->mNameInfo.mFullName);
         if (it != mRenderers.end()) {

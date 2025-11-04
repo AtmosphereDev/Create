@@ -4,6 +4,8 @@
 class AllPartialModels {
 public:
     static std::shared_ptr<PartialModel> SHAFT;
+    static std::shared_ptr<PartialModel> SHAFT_HALF;
+    static std::shared_ptr<PartialModel> GEARBOX;
 
 private:
     static std::shared_ptr<PartialModel> block(const std::string& path) {

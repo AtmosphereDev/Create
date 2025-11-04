@@ -2,7 +2,8 @@
 #include <amethyst/runtime/ModContext.hpp>
 
 std::shared_ptr<PartialModel> AllPartialModels::SHAFT = AllPartialModels::block("geometry.fx_create.shaft");
-
+std::shared_ptr<PartialModel> AllPartialModels::SHAFT_HALF = AllPartialModels::block("geometry.fx_create.shaft_half");
+std::shared_ptr<PartialModel> AllPartialModels::GEARBOX = AllPartialModels::block("geometry.fx_create.gearbox");
 
 // Model loading
 

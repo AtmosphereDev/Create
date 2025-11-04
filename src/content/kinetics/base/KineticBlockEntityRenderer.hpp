@@ -41,4 +41,8 @@ public:
     static float getAngleForBe(const KineticBlockEntity& be, const BlockPos& pos, Facing::Axis axis);
 
     static float getRotationOffsetForPosition(const KineticBlockEntity& be, const BlockPos& pos, Facing::Axis axis);
+
+    static float getTime();
+
+    static void rotateToFace(Matrix& mat, FacingID face);
 };

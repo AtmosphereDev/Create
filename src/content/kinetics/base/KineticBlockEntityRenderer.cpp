@@ -25,8 +25,8 @@ void KineticBlockEntityRenderer::renderSafe(BlockActorRenderer &self, BaseActorR
     auto mat = stack.push();
 
 	mat->translate(renderPos.x + 0.5f, renderPos.y + 0.5f, renderPos.z + 0.5f); // on X and Z to center on block, on Y to make model centered (for rotating around center)
-    standardKineticRotationTransform(entity, *mat);
-	applyModelRotation(entity, *mat);
+    standardKineticRotationTransform(entity, *mat); // rotate around axis
+	applyModelRotation(entity, *mat); // block rotation, i.e. facing negative Z axis would rotate it
     mat->translate(0, -0.5f, 0); // re-align the vertical
 
     for (const auto& mesh : model->meshes) {
@@ -80,7 +80,7 @@ void KineticBlockEntityRenderer::kineticRotationTransform(const KineticBlockEnti
 
 float KineticBlockEntityRenderer::getAngleForBe(const KineticBlockEntity &be, const BlockPos &pos, Facing::Axis axis)
 {
-    float time = Amethyst::GetClientCtx().mMinecraft->mSimTimer.mLastTimeSeconds * 1000.0f;
+    float time = getTime();
     float offset = getRotationOffsetForPosition(be, pos, axis);
     float angle = glm::mod(time * be.getSpeed() * 3.0f / 10.0f + offset, 360.0f) / 180.0f * glm::pi<float>();
     return angle;
@@ -89,4 +89,36 @@ float KineticBlockEntityRenderer::getAngleForBe(const KineticBlockEntity &be, co
 float KineticBlockEntityRenderer::getRotationOffsetForPosition(const KineticBlockEntity &be, const BlockPos &pos, Facing::Axis axis)
 {
     return KineticBlockEntityVisual<KineticBlockEntity>::rotationOffset(be.getBlock(), axis, pos) + be.getRotationAngleOffset(axis);
+}
+
+float KineticBlockEntityRenderer::getTime()
+{
+    return Amethyst::GetClientCtx().mMinecraft->mSimTimer.mLastTimeSeconds * 1000.0f;
+}
+
+void KineticBlockEntityRenderer::rotateToFace(Matrix &mat, FacingID dir)
+{
+    switch (dir) {
+        case Facing::Name::NORTH:
+            // default, no rotation needed
+            break;
+        case Facing::Name::SOUTH:
+            mat.rotateRad(glm::pi<float>(), 0, 1, 0); // 180° around Y
+            break;
+        case Facing::Name::EAST:
+            mat.rotateRad(glm::half_pi<float>(), 0, 1, 0); // +90° around Y
+            break;
+        case Facing::Name::WEST:
+            mat.rotateRad(-glm::half_pi<float>(), 0, 1, 0); // -90° around Y
+            break;
+        case Facing::Name::UP:
+            mat.rotateRad(-glm::half_pi<float>(), 1, 0, 0); // rotate -90° around X
+            break;
+        case Facing::Name::DOWN:
+            mat.rotateRad(glm::half_pi<float>(), 1, 0, 0); // rotate +90° around X
+            break;
+        default:
+            std::unreachable();
+            break;
+    }
 }

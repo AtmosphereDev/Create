@@ -1,0 +1,52 @@
+#pragma once
+#include "content/kinetics/base/KineticBlockEntityRenderer.hpp"
+#include "flywheel/api/model/Models.hpp"
+#include "AllPartialModels.hpp"
+
+class GearboxRenderer : public KineticBlockEntityRenderer {
+public:
+    virtual void renderSafe(BlockActorRenderer& self, BaseActorRenderContext& ctx, BlockActorRenderData& data) const override {
+        KineticBlockEntity& be = static_cast<KineticBlockEntity&>(data.entity);
+        Facing::Axis boxAxis = getRotationAxisOf(be);
+        float time = KineticBlockEntityRenderer::getTime();
+
+        Vec3 renderPos = Vec3(be.getBlockPos()) - ctx.mCameraTargetPosition;
+        MatrixStack& stack = ctx.mScreenContext.camera->worldMatrixStack;
+        auto worldSpace = stack.push(); // push into local space
+        worldSpace->translate(renderPos.x + 0.5f, renderPos.y + 0.5f, renderPos.z + 0.5f);
+
+        auto shaftHalf = Models::partial(ctx.mScreenContext.tessellator, AllPartialModels::SHAFT_HALF);
+
+        for (auto& dir : Facing::DIRECTIONS) {
+            Facing::Axis axis = Facing::getAxis(dir);
+            if (axis == boxAxis) continue;
+
+            auto mat = stack.push();
+            
+            float offset = getRotationOffsetForPosition(be, be.mPosition, axis);
+            float angle = glm::mod((time * be.getSpeed() * 3.0f / 10.0f), 360.0f);
+            
+            angle += offset;
+            angle = angle / 180.0f * glm::pi<float>();
+            
+            kineticRotationTransform(be, *mat, axis, angle);
+            rotateToFace(*mat, dir);
+            mat->translate(0, -0.5f, 0);
+
+            for (const auto& mesh : shaftHalf->meshes) {
+                mesh.mesh.renderMesh(ctx.mScreenContext, self.getStaticEntityMaterial());
+            }
+
+            stack.pop();
+        }
+
+        auto gearboxModel = Models::partial(ctx.mScreenContext.tessellator, AllPartialModels::GEARBOX);
+        worldSpace->translate(0, -0.5f, 0);
+
+        for (const auto& mesh : gearboxModel->meshes) {
+            mesh.mesh.renderMesh(ctx.mScreenContext, self.getStaticEntityMaterial());
+        }
+
+        stack.pop(); // pop back to world space
+    }
+};
