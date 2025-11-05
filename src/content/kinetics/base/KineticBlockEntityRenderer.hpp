@@ -21,6 +21,8 @@ public:
 
     virtual void renderSafe(BlockActorRenderer& self, BaseActorRenderContext& ctx, BlockActorRenderData& data) const override;
 
+    virtual void renderAdditional(BlockActorRenderer& self, BaseActorRenderContext& ctx, BlockActorRenderData& data) const {}
+
     virtual void loadTextures(std::shared_ptr<mce::TextureGroup> textures) override {
         mShaftTexture = textures->getTexture("textures/entity/axis", false, std::nullopt, cg::TextureSetLayerType::Normal);
     }

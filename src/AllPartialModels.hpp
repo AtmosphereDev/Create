@@ -6,6 +6,7 @@ public:
     static std::shared_ptr<PartialModel> SHAFT;
     static std::shared_ptr<PartialModel> SHAFT_HALF;
     static std::shared_ptr<PartialModel> GEARBOX;
+    static std::shared_ptr<PartialModel> CREATIVE_MOTOR;
 
 private:
     static std::shared_ptr<PartialModel> block(const std::string& path) {

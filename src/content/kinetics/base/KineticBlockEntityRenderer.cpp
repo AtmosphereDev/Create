@@ -25,6 +25,9 @@ void KineticBlockEntityRenderer::renderSafe(BlockActorRenderer &self, BaseActorR
     auto mat = stack.push();
 
 	mat->translate(renderPos.x + 0.5f, renderPos.y + 0.5f, renderPos.z + 0.5f); // on X and Z to center on block, on Y to make model centered (for rotating around center)
+
+    renderAdditional(self, ctx, data);
+
     standardKineticRotationTransform(entity, *mat); // rotate around axis
 	applyModelRotation(entity, *mat); // block rotation, i.e. facing negative Z axis would rotate it
     mat->translate(0, -0.5f, 0); // re-align the vertical
@@ -32,6 +35,7 @@ void KineticBlockEntityRenderer::renderSafe(BlockActorRenderer &self, BaseActorR
     for (const auto& mesh : model->meshes) {
         mesh.mesh.renderMesh(ctx.mScreenContext, self.getStaticEntityMaterial(), mShaftTexture);
     }
+
 
     stack.pop();
 }
