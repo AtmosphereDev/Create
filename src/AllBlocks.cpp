@@ -7,12 +7,14 @@
 #include <mc/src/common/world/item/registry/ItemRegistry.hpp>
 #include <mc/src-client/common/client/renderer/block/BlockGraphics.hpp>
 #include <mc/src/common/world/level/block/VanillaStates.hpp>
-#include "content/kinetics/base/RotatedPillarKineticBlock.hpp"
+
 #include "content/kinetics/gearbox/GearboxBlock.hpp"
 #include "content/kinetics/simpleRelays/ShaftBlock.hpp"
+#include "content/kinetics/motor/CreativeMotorBlock.hpp"
 
 WeakPtr<ShaftBlock> AllBlocks::SHAFT;
 WeakPtr<GearboxBlock> AllBlocks::GEARBOX;
+WeakPtr<CreativeMotorBlock> AllBlocks::CREATIVE_MOTOR;
 
 void AllBlocks::RegisterBlocks(RegisterBlocksEvent &ev)
 {
@@ -22,12 +24,21 @@ void AllBlocks::RegisterBlocks(RegisterBlocksEvent &ev)
 
     GEARBOX = BlockTypeRegistry::registerBlock<GearboxBlock>("fx_create:gearbox", ev.blockDefinitions.getNextBlockId(), material);
 	GEARBOX->addState(VanillaStates::PillarAxis);
+
+    CREATIVE_MOTOR = BlockTypeRegistry::registerBlock<CreativeMotorBlock>("fx_create:creative_motor", ev.blockDefinitions.getNextBlockId(), material);
+    CREATIVE_MOTOR->addState(VanillaStates::FacingDirection);
 }
 
 void AllBlocks::RegisterBlockItems(RegisterItemsEvent &ev)
 {
     ev.itemRegistry.registerItemShared<BlockItem>(SHAFT->mNameInfo.mFullName.getString(), ev.itemRegistry.getNextItemID(), SHAFT->mNameInfo.mFullName);
     ev.itemRegistry.registerItemShared<BlockItem>(GEARBOX->mNameInfo.mFullName.getString(), ev.itemRegistry.getNextItemID(), GEARBOX->mNameInfo.mFullName);
+    ev.itemRegistry.registerItemShared<BlockItem>(CREATIVE_MOTOR->mNameInfo.mFullName.getString(), ev.itemRegistry.getNextItemID(), CREATIVE_MOTOR->mNameInfo.mFullName);
+
+    auto& construction = ev.mCreativeItemRegistry.GetVanillaCategory(CreativeItemCategory::Construction);
+    construction.AddCreativeItem(SHAFT->getRenderBlock());
+    construction.AddCreativeItem(GEARBOX->getRenderBlock());
+    construction.AddCreativeItem(CREATIVE_MOTOR->getRenderBlock());
 }
 
 void AllBlocks::InitBlockGraphics(InitBlockGraphicsEvent &ev)
@@ -41,6 +52,7 @@ void AllBlocks::InitBlockGraphics(InitBlockGraphicsEvent &ev)
 
     createGraphics(SHAFT);
     createGraphics(GEARBOX);
+    createGraphics(CREATIVE_MOTOR);
 }
 
 void AllBlocks::AddEventListeners()

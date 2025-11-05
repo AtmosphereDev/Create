@@ -7,6 +7,7 @@
 
 #include "content/kinetics/base/ShaftRenderer.hpp"
 #include "content/kinetics/gearbox/GearboxRenderer.hpp"
+#include "content/kinetics/motor/CreativeMotorRenderer.hpp"
 
 class JavaBlockEntityRenderer : public BlockActorRenderer {
 public:
@@ -15,6 +16,7 @@ public:
     JavaBlockEntityRenderer() : BlockActorRenderer() {
         mRenderers["fx_create:shaft"] = std::make_unique<ShaftRenderer>();
         mRenderers["fx_create:gearbox"] = std::make_unique<GearboxRenderer>();
+        mRenderers["fx_create:creative_motor"] = std::make_unique<CreativeMotorRenderer>();
     };
 
     virtual void render(BaseActorRenderContext& ctx, BlockActorRenderData& data) override {
@@ -27,5 +29,11 @@ public:
         else {
             Log::Warning("No renderer found for JavaBlockEntity with id {}", actor.getBlock().mLegacyBlock->mNameInfo.mFullName.getString());
         }
+    }
+
+    virtual mce::Color _getOverlayColor(Actor& entity, float alpha) const override {
+        auto res = BaseActorRenderer::_getOverlayColor(entity, alpha);
+        Log::Info("Overlay color for JavaBlockEntity: r={}, g={}, b={}, a={}", res.r, res.g, res.b, res.a);
+        return res;
     }
 };

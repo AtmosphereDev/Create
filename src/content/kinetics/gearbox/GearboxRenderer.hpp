@@ -45,7 +45,8 @@ public:
             mat->translate(0, -0.5f, 0);
 
             for (const auto& mesh : shaftHalf->meshes) {
-                mesh.mesh.renderMesh(ctx.mScreenContext, self.getStaticEntityMaterial(), mHalfShaftTexture);
+                mesh.mesh.renderMesh(ctx.mScreenContext, self.getEntityMaterial(), mHalfShaftTexture);
+                Log::Info("Material {}", self.getEntityMaterial().isNull() ? "is null" : "is valid");
             }
 
             stack.pop();

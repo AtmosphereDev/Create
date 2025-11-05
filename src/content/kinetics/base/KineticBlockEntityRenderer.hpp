@@ -30,9 +30,9 @@ protected:
         return entity.getBlock();
     }
 
-    std::shared_ptr<Model> getModel(Tessellator& tess, const KineticBlockEntity& be, const Block& state) const;
+    virtual std::shared_ptr<Model> getModel(Tessellator& tess, const KineticBlockEntity& be, const Block& state) const;
 
-    void applyModelRotation(const KineticBlockEntity& be, Matrix& mat) const;
+    virtual void applyModelRotation(const KineticBlockEntity& be, Matrix& mat) const;
 
 public:
     static const Block& shaft(Facing::Axis axis);
