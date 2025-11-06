@@ -7,6 +7,7 @@
 #include "content/kinetics/RotationPropagator.hpp"
 #include <mc/src-deps/core/math/Math.hpp>
 #include <infrastructure/config/AllConfigs.hpp>
+#include <mc/src/common/nbt/NbtUtils.hpp>
 
 class KineticBlockEntity : public SmartBlockEntity {
 public:
@@ -169,9 +170,77 @@ public:
 		SmartBlockEntity::remove();
 	}
 
+	// equivallent of write in original code
 	virtual std::unique_ptr<BlockActorDataPacket> _getUpdatePacket(BlockSource& unk0) override {
-		Log::Info("KineticBlockEntity _getUpdatePacket called");
-		return nullptr;
+		CompoundTag compound;
+
+		compound.putFloat("Speed", speed);
+
+		// if (sequenceContext != null && (!clientPacket || syncSequenceContext()))
+		// 	compound.put("Sequence", sequenceContext.serializeNBT());
+
+		if (needsSpeedUpdate())
+			compound.putByte("NeedsSpeedUpdate", 1);
+
+		if (hasSource())
+			compound.put("Source", NbtUtils::writeBlockPos(source.value()));
+
+		if (hasNetwork()) {
+			CompoundTag networkTag;
+			networkTag.putInt64("Id", static_cast<int64_t>(network.value()));
+			networkTag.putFloat("Stress", stress);
+			networkTag.putFloat("Capacity", capacity);
+			networkTag.putInt("Size", networkSize);
+
+			if (lastStressApplied != 0)
+				networkTag.putFloat("AddedStress", lastStressApplied);
+
+			if (lastCapacityProvided != 0)
+				networkTag.putFloat("AddedCapacity", lastCapacityProvided);
+
+			compound.put("Network", std::move(networkTag));
+		}
+
+		return std::make_unique<BlockActorDataPacket>(mPosition, std::move(compound));
+	}
+
+	// equivallent of read in original code
+	virtual void _onUpdatePacket(const CompoundTag& compound, BlockSource& region) override {
+		bool overStressedBefore = overStressed;
+		clearKineticInformation();
+
+		if (wasMoved) {
+			return;
+		}
+
+		speed = compound.getFloat("Speed");
+		// sequenceContext = SequenceContext.fromNBT(compound.getCompound("Sequence"));
+
+		source = std::nullopt;
+		if (compound.contains("Source")) {
+			source = NbtUtils::readBlockPos(*compound.getCompound("Source"));
+		}
+
+		if (compound.contains("Network")) {
+			const CompoundTag& networkTag = *compound.getCompound("Network");
+			network = static_cast<uint64_t>(networkTag.getInt64("Id"));
+			stress = networkTag.getFloat("Stress");
+			capacity = networkTag.getFloat("Capacity");
+			networkSize = networkTag.getInt("Size");
+
+			lastStressApplied = 0;
+			lastCapacityProvided = 0;
+
+			if (networkTag.contains("LastStressApplied"))
+				lastStressApplied = networkTag.getFloat("LastStressApplied");
+
+			if (networkTag.contains("LastCapacityProvided"))
+				lastCapacityProvided = networkTag.getFloat("LastCapacityProvided");
+
+			overStressed = capacity < stress && IRotate::StressImpact::isEnabled();
+		}
+
+		Log::Info("KineticBlockEntity onUpdatePacket called, speed: {}, hasNetwork: {}, overStressed: {}", speed, hasNetwork(), overStressed);
 	}
 
 	bool needsSpeedUpdate() {

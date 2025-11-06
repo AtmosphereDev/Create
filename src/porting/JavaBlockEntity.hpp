@@ -26,9 +26,13 @@ public:
         }
 
     void setChanged() {
-        // i assume this is all the java impl does..
-        Log::Info("setChanged() called!");
+        // i assume this is all the java impl does too
         mChanged = true;
+    }
+
+    virtual void onChanged(BlockSource& region) override {
+        Log::Info("JavaBlockEntity::onChanged at {}", mPosition);
+        region.fireBlockChanged(mPosition, 0, *mBlock, *mBlock, 3, BlockChangedEventTarget::SelfBlock, nullptr, nullptr);
     }
 
     virtual void setRemoved() {
