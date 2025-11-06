@@ -16,7 +16,11 @@ protected:
 
 public:
     SmartBlockEntity(BlockActorType typeIn, const BlockPos& pos, const std::string& id)
-        : CachedRenderBBBlockEntity(typeIn, pos, id) {}
+        : CachedRenderBBBlockEntity(typeIn, pos, id), initialized(false) {
+            setLazyTickRate(10);
+
+            // original calls addBehaviours here, but that doesnt work in c++..
+        }
 
     virtual ~SmartBlockEntity() = default;
 
@@ -44,8 +48,14 @@ public:
 
     virtual void lazyTick() {}
 
-    virtual void tick() {
+    virtual void tick(BlockSource& source) override {
         if (!initialized) {
+            // Jank fix for JavaBlockEntity
+            if (!level) {
+                level = source.mDimension;
+                mBlock = &source.getBlock(mPosition);
+            }
+
             initialize();
             initialized = true;
         }
@@ -63,6 +73,14 @@ public:
     virtual void addBehaviours(std::vector<std::shared_ptr<BlockEntityBehaviour>>& behavioursList) = 0;
 
     virtual void initialize() {
+        // Original one does this in constructor, but that doesnt work in c++
+        std::vector<std::shared_ptr<BlockEntityBehaviour>> list;
+        addBehaviours(list);
+        //list.forEach(b -> behaviours.put(b.getType(), b));
+        for (auto& behaviour : list) {
+            Log::Info("Adding behaviour to SmartBlockEntity not impl!");
+        }
+
 		if (firstNbtRead) {
 			firstNbtRead = false;
 			// NeoForge.EVENT_BUS.post(new BlockEntityBehaviourEvent(this, behaviours)); 

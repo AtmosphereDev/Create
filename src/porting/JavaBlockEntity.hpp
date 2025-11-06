@@ -2,6 +2,8 @@
 #include <mc/src/common/world/level/block/actor/BlockActor.hpp>
 #include <mc/src/common/world/level/block/actor/BlockActorRendererId.hpp>
 #include <mc/src/common/world/level/BlockSource.hpp>
+#include <mc/src/common/world/level/chunk/LevelChunk.hpp>
+#include <mc/src/common/world/level/dimension/Dimension.hpp>
 
 class Dimension;
 
@@ -25,6 +27,13 @@ public:
         level = region.mDimension;
         mBlock = &region.getBlock(mPosition);
         BlockActor::onPlace(region);
+    }
+
+    virtual void fixupOnLoad(LevelChunk& unk0) override {
+		Log::Info("JavaBlockEntity::fixupOnLoad called");
+        level = unk0.mDimension;
+		mBlock = &level->mBlockSource->getBlock(mPosition);
+		BlockActor::fixupOnLoad(unk0);
     }
 
     void setChanged() {

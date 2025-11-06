@@ -30,10 +30,4 @@ public:
             Log::Warning("No renderer found for JavaBlockEntity with id {}", actor.getBlock().mLegacyBlock->mNameInfo.mFullName.getString());
         }
     }
-
-    virtual mce::Color _getOverlayColor(Actor& entity, float alpha) const override {
-        auto res = BaseActorRenderer::_getOverlayColor(entity, alpha);
-        Log::Info("Overlay color for JavaBlockEntity: r={}, g={}, b={}, a={}", res.r, res.g, res.b, res.a);
-        return res;
-    }
 };

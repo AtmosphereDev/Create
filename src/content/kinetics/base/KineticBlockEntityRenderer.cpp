@@ -97,7 +97,7 @@ float KineticBlockEntityRenderer::getRotationOffsetForPosition(const KineticBloc
 
 float KineticBlockEntityRenderer::getTime()
 {
-    return Amethyst::GetClientCtx().mMinecraft->mSimTimer.mLastTimeSeconds * 1000.0f;
+    return Amethyst::GetClientCtx().mMinecraft->mSimTimer.mLastTimeSeconds * 10000.0f;
 }
 
 void KineticBlockEntityRenderer::rotateToFace(Matrix &mat, FacingID dir)

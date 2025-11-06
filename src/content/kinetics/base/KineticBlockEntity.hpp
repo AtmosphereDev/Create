@@ -49,11 +49,17 @@ public:
 		SmartBlockEntity::initialize();
 	}
 
-    virtual void tick() override {
+    virtual void tick(BlockSource& source) override {
+		// Small fix for JavaBlockEntity, kinda janky
+		if (!level) {
+			level = source.mDimension;
+			mBlock = &source.getBlock(mPosition);
+		}
+
         if (!level->mLevel->isClientSide() && needsSpeedUpdate())
 			attachKinetics();
 
-		SmartBlockEntity::tick();
+		SmartBlockEntity::tick(source);
 		// effects.tick();
 
 		preventSpeedUpdate = 0;
@@ -243,8 +249,6 @@ public:
 		// 	return 0;
 		// TODO: add back in tick rate manager freeze check
 
-		return 1.0f;
-
 		if (overStressed)
 			return 0;
 
@@ -263,7 +267,7 @@ public:
 		return source != std::nullopt;
 	}
 
-	void setSource(const BlockPos& source) {
+	virtual void setSource(const BlockPos& source) {
 		this->source = source;
 		if (level == nullptr || level->isClientSide())
 			return;
@@ -283,7 +287,7 @@ public:
 		// sequenceContext = sourceBE.sequenceContext;
 	}
 
-	void removeSource() {
+	virtual void removeSource() {
 		float prevSpeed = getSpeed();
 
 		speed = 0;
@@ -316,7 +320,7 @@ public:
 	KineticNetwork* getOrCreateNetwork();
 
 	bool hasNetwork() {
-		return network != 0;
+		return network != std::nullopt;
 	}
 
 	void attachKinetics() {

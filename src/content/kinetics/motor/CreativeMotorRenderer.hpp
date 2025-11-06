@@ -21,8 +21,6 @@ public:
         auto& matrixStack = ctx.mScreenContext.camera->worldMatrixStack;
         auto mat = matrixStack.push();
 
-        Log::Info("test");
-
         applyModelRotation(be, *mat);
         mat->translate(0, -0.5f, 0); // re-align the vertical
 

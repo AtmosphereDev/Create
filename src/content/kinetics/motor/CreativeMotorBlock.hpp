@@ -1,5 +1,6 @@
 #pragma once
 #include "content/kinetics/base/DirectionalKineticBlock.hpp"
+#include "content/kinetics/motor/CreativeMotorBlockEntity.hpp"
 
 class CreativeMotorBlock : public DirectionalKineticBlock {
 public:
@@ -7,7 +8,7 @@ public:
         : DirectionalKineticBlock(name, id, material) {}
 
     virtual std::shared_ptr<BlockActor> newBlockEntity(const BlockPos& pos, const Block& block) const override {
-		return std::make_shared<KineticBlockEntity>(JavaBlockEntity::TYPE, pos, "");
+		return std::make_shared<CreativeMotorBlockEntity>(JavaBlockEntity::TYPE, pos, "");
 	}
 
     virtual Facing::Axis getRotationAxis(const Block& state) const override {
@@ -15,13 +16,13 @@ public:
         return Facing::getAxis(dir);
     }
 
+    virtual bool hasShaftTowards(Dimension& world, const BlockPos& pos, const Block& state, FacingID face) override {
+        return face == state.getState<FacingID>(VanillaStates::FacingDirection); 
+    }
+
     const Block& getPlacementBlock(const Actor& unk0, const BlockPos& unk1, FacingID face, const Vec3& unk3, int unk4) const override {
         const Block* renderBlock = &getRenderBlock();
-
-        // Facing::Axis axis = Facing::getAxis(face);
-
         renderBlock = renderBlock->setState<FacingID>(VanillaStates::FacingDirection, face);
-
         return *renderBlock;
     }
 };

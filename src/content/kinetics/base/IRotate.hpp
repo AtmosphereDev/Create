@@ -16,12 +16,26 @@ public:
         }
     };
 
+	struct SpeedLevel {
+		enum Type { NONE, SLOW, MEDIUM, FAST };
+
+		Type type;
+		SpeedLevel(Type type) : type(type) {}
+
+		static SpeedLevel of(float speed);
+
+		bool operator==(const SpeedLevel& other) const { return type == other.type; }
+    	bool operator!=(const SpeedLevel& other) const { return type != other.type; }
+		bool operator==(Type other) const { return type == other; }
+    	bool operator!=(Type other) const { return type != other; }
+	};
+
 	IRotate(const std::string& name, short id, const Material& material)
 		: BlockLegacy(name, id, material) {
 			mBlockEntityType = JavaBlockEntity::TYPE;
 		}
 
-    // public boolean hasShaftTowards(LevelReader world, BlockPos pos, BlockState state, Direction face);
+    virtual bool hasShaftTowards(Dimension& world, const BlockPos& pos, const Block& state, FacingID face) = 0;
 
 	virtual Facing::Axis getRotationAxis(const Block& state) const = 0;
 

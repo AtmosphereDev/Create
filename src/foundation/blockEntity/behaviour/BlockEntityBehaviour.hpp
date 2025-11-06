@@ -3,6 +3,8 @@
 
 class SmartBlockEntity;
 class Level;
+class Block;
+class Dimension;
 
 class BlockEntityBehaviour {
 protected:
@@ -14,7 +16,7 @@ public:
     explicit BlockEntityBehaviour(SmartBlockEntity* be) : blockEntity(be) {}
     virtual ~BlockEntityBehaviour() = default;
 
-    virtual BehaviourType<BlockEntityBehaviour>* getType() const = 0;
+    // virtual BehaviourType<BlockEntityBehaviour>* getType() const = 0;
 
     virtual void initialize() {}
 
@@ -40,21 +42,21 @@ public:
 	// 	write(nbt, registries, false);
 	// }
 
-	// public boolean isSafeNBT() {
-	// 	return false;
-	// }
+	bool isSafeNBT() {
+		return false;
+	}
 
 	// public ItemRequirement getRequiredItems() {
 	// 	return ItemRequirement.NONE;
 	// }
 
-    // public void onBlockChanged(BlockState oldState) {
+    void onBlockChanged(const Block& oldState) {
 
-	// }
+	}
 
-	// public void onNeighborChanged(BlockPos neighborPos) {
+	void onNeighborChanged(const BlockPos& neighborPos) {
 
-	// }
+	}
 
     /**
 	 * Block destroyed or Chunk unloaded. Usually invalidates capabilities
@@ -77,5 +79,5 @@ public:
 
     BlockPos getPos() const;
 
-    Level* getWorld() const;
+    Dimension* getWorld() const;
 };

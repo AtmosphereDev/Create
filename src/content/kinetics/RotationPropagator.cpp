@@ -138,7 +138,7 @@ std::vector<KineticBlockEntity *> RotationPropagator::getConnectedNeighbours(Kin
 }
 
 std::vector<BlockPos> RotationPropagator::getPotentialNeighbourLocations(KineticBlockEntity &be)
- {
+{
     std::vector<BlockPos> neighbours;
     BlockPos blockPos = be.getBlockPos();
     Dimension& level = be.getLevel();

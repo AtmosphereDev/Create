@@ -9,4 +9,8 @@ public:
     virtual Facing::Axis getRotationAxis(const Block& state) const override {
         return state.getState<Facing::Axis>(VanillaStates::PillarAxis);
     }
+
+    virtual bool hasShaftTowards(Dimension& world, const BlockPos& pos, const Block& state, FacingID face) override {
+        return Facing::getAxis(face) == state.getState<Facing::Axis>(VanillaStates::PillarAxis); 
+    }
 };
