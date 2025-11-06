@@ -156,7 +156,6 @@ std::vector<BlockPos> RotationPropagator::getPotentialNeighbourLocations(Kinetic
     if (!IRotate::isIRotate(block))
         return neighbours;
 
-    IRotate& rotate = *(IRotate*)nullptr; // TODO: Get IRotate implementation from blocklegacy
-
-    return be.addPropagationLocations(rotate, block, neighbours);
+    IRotate* rotate = static_cast<IRotate*>(block.mLegacyBlock.get());
+    return be.addPropagationLocations(*rotate, block, neighbours);
 }

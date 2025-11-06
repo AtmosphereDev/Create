@@ -16,7 +16,7 @@ public:
     explicit BlockEntityBehaviour(SmartBlockEntity* be) : blockEntity(be) {}
     virtual ~BlockEntityBehaviour() = default;
 
-    // virtual BehaviourType<BlockEntityBehaviour>* getType() const = 0;
+    virtual const BehaviourType& getType() const = 0;
 
     virtual void initialize() {}
 

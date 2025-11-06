@@ -1,4 +1,6 @@
 #pragma once
+#include <amethyst/runtime/ModContext.hpp>
+#include <amethyst/runtime/utility/InlineHook.hpp>
 #include <mc/src/common/world/level/block/actor/BlockActor.hpp>
 #include <mc/src/common/world/level/block/actor/BlockActorRendererId.hpp>
 #include <mc/src/common/world/level/BlockSource.hpp>
@@ -23,21 +25,10 @@ public:
             mRendererId = (BlockActorRendererId)((int)BlockActorRendererId::Count + 1);
         }
 
-    virtual void onPlace(BlockSource& region) override {
-        level = region.mDimension;
-        mBlock = &region.getBlock(mPosition);
-        BlockActor::onPlace(region);
-    }
-
-    virtual void fixupOnLoad(LevelChunk& unk0) override {
-		Log::Info("JavaBlockEntity::fixupOnLoad called");
-        level = unk0.mDimension;
-		mBlock = &level->mBlockSource->getBlock(mPosition);
-		BlockActor::fixupOnLoad(unk0);
-    }
-
     void setChanged() {
-        // no idea what this does, todo figure out
+        // i assume this is all the java impl does..
+        Log::Info("setChanged() called!");
+        mChanged = true;
     }
 
     virtual void setRemoved() {
@@ -63,4 +54,31 @@ public:
     const Block& getBlock() const {
         return *mBlock;
     }
+
+    virtual void afterConstructed() {
+        // Called directly after a block entity is spawned
+    }
+
+    virtual bool save(CompoundTag& unk0) const override {
+        Log::Info("JavaBlockEntity::save at {}", mPosition);
+        unk0.putByte("test", 0);
+        return true;
+    }
+
+    virtual void load(Level& unk0, const CompoundTag& unk1, DataLoadHelper& unk2) override {
+        Log::Info("JavaBlockEntity::load {} at {}", unk1.getByte("test"), mPosition);
+    }
+
+    void _initializeAfterBlockEntityConstructed(LevelChunk& lc) {
+        Log::Info("_initializeAfterBlockEntityConstructed");
+        level = lc.mDimension;
+		mBlock = &level->mBlockSource->getBlock(mPosition);
+		afterConstructed();
+    }
+
+    static bool IsJavaBlockEntity(BlockActor& actor) {
+        return actor.mType == TYPE;
+	}
 };
+
+void JavaBlockEntityHooks();

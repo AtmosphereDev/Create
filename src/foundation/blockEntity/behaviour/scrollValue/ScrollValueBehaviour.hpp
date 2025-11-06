@@ -6,6 +6,8 @@ class ScrollValueBehaviour : public BlockEntityBehaviour {
 public:
     int value;
 
+	static const BehaviourType TYPE;
+
     ScrollValueBehaviour(std::string label, SmartBlockEntity* be, std::shared_ptr<ValueBoxTransform> slot) 
         : BlockEntityBehaviour(be)
     {
@@ -22,5 +24,9 @@ public:
 
     int getValue() {
 		return value;
+	}
+
+	virtual const BehaviourType& getType() const override {
+		return TYPE;
 	}
 };

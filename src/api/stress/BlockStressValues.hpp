@@ -17,13 +17,13 @@ public:
 	//  */
 	// public static final SimpleRegistry<Block, GeneratedRpm> RPM = SimpleRegistry.create();
 
-	static double getImpact(Block& block) {
+	static double getImpact(const Block& block) {
 		return 0;
 		// DoubleSupplier supplier = IMPACTS.get(block);
 		// return supplier == null ? 0 : supplier.getAsDouble();
 	}
 
-	static double getCapacity(Block& block) {
+	static double getCapacity(const Block& block) {
         return 0;
 		// DoubleSupplier supplier = CAPACITIES.get(block);
 		// return supplier == null ? 0 : supplier.getAsDouble();

@@ -6,6 +6,7 @@
 #include "content/kinetics/base/IRotate.hpp"
 #include "content/kinetics/RotationPropagator.hpp"
 #include <mc/src-deps/core/math/Math.hpp>
+#include <infrastructure/config/AllConfigs.hpp>
 
 class KineticBlockEntity : public SmartBlockEntity {
 public:
@@ -31,7 +32,8 @@ public:
     // SequenceContext sequenceContext;
 
     KineticBlockEntity(BlockActorType typeIn, const BlockPos& pos, const std::string& id)
-		: SmartBlockEntity(typeIn, pos, id) 
+		: SmartBlockEntity(typeIn, pos, id), speed(0), capacity(0), stress(0), overStressed(false), wasMoved(false), flickerTally(0),
+		  networkSize(0), validationCountdown(0), lastStressApplied(0), lastCapacityProvided(0)
 	{
 		// effects = new KineticEffectHandler(this);
 		updateSpeed = true;
@@ -50,10 +52,10 @@ public:
 	}
 
     virtual void tick(BlockSource& source) override {
-		// Small fix for JavaBlockEntity, kinda janky
-		if (!level) {
-			level = source.mDimension;
-			mBlock = &source.getBlock(mPosition);
+		//Assert(level != nullptr, "Level should not be null in KineticBlockEntity tick");
+		if (!level) { 
+			Log::Error("KineticBlockEntity tick called with null level at {}", mPosition);
+			return;
 		}
 
         if (!level->mLevel->isClientSide() && needsSpeedUpdate())
@@ -70,7 +72,8 @@ public:
 		}
 
 		if (validationCountdown-- <= 0) {
-			// validationCountdown = AllConfigs.server().kinetics.kineticValidationFrequency.get(); TODO
+			 validationCountdown = AllConfigs::server().kinetics.kineticValidationFrequency.get();
+			
 			validateKinetics();
 		}
 
@@ -84,31 +87,30 @@ public:
     }
 
 	void validateKinetics() {
-	// 	if (hasSource()) {
-	// 		if (!hasNetwork()) {
-	// 			removeSource();
-	// 			return;
-	// 		}
+		if (hasSource()) {
+			if (!hasNetwork()) {
+				removeSource();
+				return;
+			}
 
-	// 		if (!level.isLoaded(source))
-	// 			return;
+			if (!level->mBlockSource->areChunksFullyLoaded(source.value(), 1)) 
+				return;
 
-	// 		BlockEntity blockEntity = level.getBlockEntity(source);
-	// 		KineticBlockEntity sourceBE =
-	// 			blockEntity instanceof KineticBlockEntity ? (KineticBlockEntity) blockEntity : null;
-	// 		if (sourceBE == null || sourceBE.speed == 0) {
-	// 			removeSource();
-	// 			detachKinetics();
-	// 			return;
-	// 		}
+			const BlockActor* blockEntity = level->mBlockSource->getBlockEntity(source.value());
+			if (!blockEntity || !KineticBlockEntity::isKineticBlockEntity(*blockEntity) || static_cast<const KineticBlockEntity&>(*blockEntity).speed == 0) {
+				removeSource();
+				detachKinetics();
+				return;
+			}
 
-	// 		return;
-	// 	}
+			return;
+		}
 
-	// 	if (speed != 0) {
-	// 		if (getGeneratedSpeed() == 0)
-	// 			speed = 0;
-	// 	}
+		if (speed != 0) {
+			if (getGeneratedSpeed() == 0) {
+				speed = 0;
+			}
+		}
 	}
 
 	void updateFromNetwork(float maxStress, float currentStress, int networkSize) {
@@ -131,9 +133,8 @@ public:
 	// 	return new KineticsChangeEvent(speed, capacity, stress, overStressed);
 	// }
 
-	Block& getStressConfigKey() {
-		// return getBlockState().getBlock();
-		AssertFail("Not implemented");
+	const Block& getStressConfigKey() {
+		return getBlock();
 	}
 
 	float calculateStressApplied() {
@@ -150,10 +151,12 @@ public:
 
 	void onSpeedChanged(float previousSpeed) {
 		bool fromOrToZero = (previousSpeed == 0) != (getSpeed() == 0);
+		Log::Info("KineticBlockEntity onSpeedChanged called, fromOrToZero: {}, previousSpeed: {}, newSpeed: {}", fromOrToZero, previousSpeed, getSpeed());
 
 		bool directionSwap = !fromOrToZero && mce::Math::signum(previousSpeed) != mce::Math::signum(getSpeed());
 		if (fromOrToZero || directionSwap)
 			flickerTally = getFlickerScore() + 5;
+
 		setChanged();
 	}
 
@@ -166,75 +169,14 @@ public:
 		SmartBlockEntity::remove();
 	}
 
-	// 	protected void write(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
-	// 	compound.putFloat("Speed", speed);
-	// 	if (sequenceContext != null && (!clientPacket || syncSequenceContext()))
-	// 		compound.put("Sequence", sequenceContext.serializeNBT());
-
-	// 	if (needsSpeedUpdate())
-	// 		compound.putBoolean("NeedsSpeedUpdate", true);
-
-	// 	if (hasSource())
-	// 		compound.put("Source", NbtUtils.writeBlockPos(source));
-
-	// 	if (hasNetwork()) {
-	// 		CompoundTag networkTag = new CompoundTag();
-	// 		networkTag.putLong("Id", this.network);
-	// 		networkTag.putFloat("Stress", stress);
-	// 		networkTag.putFloat("Capacity", capacity);
-	// 		networkTag.putInt("Size", networkSize);
-
-	// 		if (lastStressApplied != 0)
-	// 			networkTag.putFloat("AddedStress", lastStressApplied);
-	// 		if (lastCapacityProvided != 0)
-	// 			networkTag.putFloat("AddedCapacity", lastCapacityProvided);
-
-	// 		compound.put("Network", networkTag);
-	// 	}
-
-	// 	super.write(compound, registries, clientPacket);
-	// }
+	virtual std::unique_ptr<BlockActorDataPacket> _getUpdatePacket(BlockSource& unk0) override {
+		Log::Info("KineticBlockEntity _getUpdatePacket called");
+		return nullptr;
+	}
 
 	bool needsSpeedUpdate() {
 		return updateSpeed;
 	}
-
-	// void read(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
-	// 	boolean overStressedBefore = overStressed;
-	// 	clearKineticInformation();
-
-	// 	// DO NOT READ kinetic information when placed after movement
-	// 	if (wasMoved) {
-	// 		super.read(compound, registries, clientPacket);
-	// 		return;
-	// 	}
-
-	// 	speed = compound.getFloat("Speed");
-	// 	sequenceContext = SequenceContext.fromNBT(compound.getCompound("Sequence"));
-
-	// 	source = null;
-	// 	if (compound.contains("Source"))
-	// 		source = NBTHelper.readBlockPos(compound, "Source");
-
-	// 	if (compound.contains("Network")) {
-	// 		CompoundTag networkTag = compound.getCompound("Network");
-	// 		network = networkTag.getLong("Id");
-	// 		stress = networkTag.getFloat("Stress");
-	// 		capacity = networkTag.getFloat("Capacity");
-	// 		networkSize = networkTag.getInt("Size");
-	// 		lastStressApplied = networkTag.getFloat("AddedStress");
-	// 		lastCapacityProvided = networkTag.getFloat("AddedCapacity");
-	// 		overStressed = capacity < stress && StressImpact.isEnabled();
-	// 	}
-
-	// 	super.read(compound, registries, clientPacket);
-
-	// 	if (clientPacket && overStressedBefore != overStressed && speed != 0)
-	// 		effects.triggerOverStressedEffect();
-
-	// 	if (clientPacket)
-	// 		CatnipServices.PLATFORM.executeOnClientOnly(() -> () -> VisualizationHelper.queueUpdate(this));
-	// }
 
 	virtual float getGeneratedSpeed() {
 		return 0;
@@ -260,6 +202,7 @@ public:
 	}
 
 	void setSpeed(float speed) {
+		Log::Info("KineticBlockEntity setSpeed called with speed {}", speed);
 		this->speed = speed;
 	}
 
@@ -330,6 +273,7 @@ public:
 
 	void detachKinetics() {
 	// 	RotationPropagator.handleRemoved(level, worldPosition, this);
+		// RotationPropagator::handleRemoved(level, mPosition, this);
 	}
 
 	// boolean isSpeedRequirementFulfilled() {

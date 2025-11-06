@@ -52,15 +52,17 @@ protected:
                 IRotate::SpeedLevel levelBefore = IRotate::SpeedLevel::of(this->speed);
                 IRotate::SpeedLevel levelAfter = IRotate::SpeedLevel::of(speed);
                 if (levelBefore != levelAfter) {
-                    // effects.queueRotationIndicators();
+                    // effects.queueRotationIndicators(); seems to just be particles stuff
                 }
             }
+
+            applyNewSpeed(prevSpeed, speed);
         }
 
         if (hasNetwork() && speed != 0) {
             KineticNetwork* network = getOrCreateNetwork();
             notifyStressCapacityChange(calculateAddedStressCapacity());
-            network->updateStressFor(this, calculateStressApplied()); // original line re-calls getOrCreateNetwork, seems like programmer oversight
+            getOrCreateNetwork()->updateStressFor(this, calculateStressApplied());
             network->updateStress();
         }
 

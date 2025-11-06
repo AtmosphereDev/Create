@@ -11,7 +11,7 @@ private:
 protected:
     int lazyTickRate;
     int lazyTickCounter;
-    std::unordered_map<void*, std::shared_ptr<BlockEntityBehaviour>> behaviours;
+    std::unordered_map<BehaviourType, std::shared_ptr<BlockEntityBehaviour>> behaviours;
     bool virtualMode;
 
 public:
@@ -24,13 +24,24 @@ public:
 
     virtual ~SmartBlockEntity() = default;
 
+    virtual void afterConstructed() override {
+        CachedRenderBBBlockEntity::afterConstructed();
+        std::vector<std::shared_ptr<BlockEntityBehaviour>> list;
+
+        addBehaviours(list);
+
+        for (auto& behaviour : list) {
+			addBehaviour(behaviour->getType(), behaviour);
+        }
+    }
+
     template <typename T>
-    void addBehaviour(BehaviourType<T>* type, std::shared_ptr<T> behaviour) {
+    void addBehaviour(const BehaviourType& type, std::shared_ptr<T> behaviour) {
         behaviours[type] = behaviour;
     }
 
     template <typename T>
-    std::shared_ptr<T> getBehaviour(BehaviourType<T>* type) {
+    std::shared_ptr<T> getBehaviour(const BehaviourType& type) {
         auto it = behaviours.find(type);
         if (it == behaviours.end()) return nullptr;
         return std::dynamic_pointer_cast<T>(it->second);
@@ -50,12 +61,6 @@ public:
 
     virtual void tick(BlockSource& source) override {
         if (!initialized) {
-            // Jank fix for JavaBlockEntity
-            if (!level) {
-                level = source.mDimension;
-                mBlock = &source.getBlock(mPosition);
-            }
-
             initialize();
             initialized = true;
         }
@@ -68,19 +73,13 @@ public:
         forEachBehaviour([](const std::shared_ptr<BlockEntityBehaviour>& b) { 
             b->tick(); 
         });
+
+        CachedRenderBBBlockEntity::tick(source);
     }
 
     virtual void addBehaviours(std::vector<std::shared_ptr<BlockEntityBehaviour>>& behavioursList) = 0;
 
     virtual void initialize() {
-        // Original one does this in constructor, but that doesnt work in c++
-        std::vector<std::shared_ptr<BlockEntityBehaviour>> list;
-        addBehaviours(list);
-        //list.forEach(b -> behaviours.put(b.getType(), b));
-        for (auto& behaviour : list) {
-            Log::Info("Adding behaviour to SmartBlockEntity not impl!");
-        }
-
 		if (firstNbtRead) {
 			firstNbtRead = false;
 			// NeoForge.EVENT_BUS.post(new BlockEntityBehaviourEvent(this, behaviours)); 

@@ -33,6 +33,7 @@ public:
 	IRotate(const std::string& name, short id, const Material& material)
 		: BlockLegacy(name, id, material) {
 			mBlockEntityType = JavaBlockEntity::TYPE;
+			mTags.push_back(HashedString("IRotate"));
 		}
 
     virtual bool hasShaftTowards(Dimension& world, const BlockPos& pos, const Block& state, FacingID face) = 0;
@@ -53,6 +54,6 @@ public:
 
 	static bool isIRotate(const Block& block) {
 		// Idk a better way to do this rn
-		return std::find(block.mTags.begin(), block.mTags.end(), HashedString("IRotate")) != block.mTags.end();
+		return std::find(block.mLegacyBlock->mTags.begin(), block.mLegacyBlock->mTags.end(), HashedString("IRotate")) != block.mLegacyBlock->mTags.end();
 	} 
 };

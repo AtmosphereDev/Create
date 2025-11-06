@@ -61,4 +61,7 @@ void AllBlocks::AddEventListeners()
     bus.AddListener<RegisterBlocksEvent>(&AllBlocks::RegisterBlocks);
     bus.AddListener<RegisterItemsEvent>(&AllBlocks::RegisterBlockItems);
     bus.AddListener<InitBlockGraphicsEvent>(&AllBlocks::InitBlockGraphics);
+    
+    // Misc hooks just for porting
+    JavaBlockEntityHooks();
 }
