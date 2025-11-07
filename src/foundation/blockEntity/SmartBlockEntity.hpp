@@ -18,8 +18,6 @@ public:
     SmartBlockEntity(BlockActorType typeIn, const BlockPos& pos, const std::string& id)
         : CachedRenderBBBlockEntity(typeIn, pos, id), initialized(false) {
             setLazyTickRate(10);
-
-            // original calls addBehaviours here, but that doesnt work in c++..
         }
 
     virtual ~SmartBlockEntity() = default;
@@ -92,8 +90,14 @@ public:
 		lazyTick();
 	}
 
-    virtual void setRemoved() override {
-        CachedRenderBBBlockEntity::setRemoved();
+    // weirdly the original code has no load function?
+    virtual void onChunkUnloaded(LevelChunk& unk0) override {
+        CachedRenderBBBlockEntity::onChunkUnloaded(unk0);
+        chunkUnloaded = true;
+    }
+
+    virtual void onRemoved(BlockSource& region) override {
+        CachedRenderBBBlockEntity::onRemoved(region);
         if (!chunkUnloaded)
             remove();
 
@@ -134,4 +138,13 @@ public:
 	}
 
     bool isChunkUnloaded() const { return chunkUnloaded; }
+
+    virtual bool _isSmartBlockEntity() const final {
+        return true;
+    }
+
+    static bool IsSmartBlockEntity(const BlockActor& actor) {
+        if (!JavaBlockEntity::IsJavaBlockEntity(actor)) return false;
+        return static_cast<const JavaBlockEntity&>(actor)._isSmartBlockEntity();
+    }
 };

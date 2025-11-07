@@ -162,6 +162,9 @@ public:
 	}
 
 	virtual void remove() override {
+		// patchwork fix temporarily for level not existing on loaded block actors
+		if (!level) return;
+
 		if (!level->mLevel->isClientSide()) {
 			if (hasNetwork())
 				getOrCreateNetwork()->remove(this);
@@ -518,4 +521,16 @@ public:
 	static bool isKineticBlockEntity(const BlockActor& be) {
 		return be.getType() == KineticBlockEntity::TYPE;
 	} 
+
+	static KineticBlockEntity* asKineticBlockEntity(BlockActor* be) {
+		if (be == nullptr || !isKineticBlockEntity(*be))
+			return nullptr;
+		return static_cast<KineticBlockEntity*>(be);
+	}
+
+	static const KineticBlockEntity* asKineticBlockEntity(const BlockActor* be) {
+		if (be == nullptr || !isKineticBlockEntity(*be))
+			return nullptr;
+		return static_cast<const KineticBlockEntity*>(be);
+	}
 };

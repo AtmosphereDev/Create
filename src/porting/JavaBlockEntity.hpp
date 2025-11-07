@@ -35,10 +35,6 @@ public:
         region.fireBlockChanged(mPosition, 0, *mBlock, *mBlock, 3, BlockChangedEventTarget::SelfBlock, nullptr, nullptr);
     }
 
-    virtual void setRemoved() {
-        // no idea what this does, todo figure out
-    }
-
     const BlockPos& getBlockPos() const {
         return mPosition;
     }
@@ -80,9 +76,13 @@ public:
 		afterConstructed();
     }
 
-    static bool IsJavaBlockEntity(BlockActor& actor) {
+    static bool IsJavaBlockEntity(const BlockActor& actor) {
         return actor.mType == TYPE;
 	}
+
+    virtual bool _isSmartBlockEntity() const {
+        return false;
+    }
 };
 
 void JavaBlockEntityHooks();
