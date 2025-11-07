@@ -36,7 +36,7 @@ public:
 			mTags.push_back(HashedString("IRotate"));
 		}
 
-    virtual bool hasShaftTowards(Dimension& world, const BlockPos& pos, const Block& state, FacingID face) = 0;
+    virtual bool hasShaftTowards(const Dimension& world, const BlockPos& pos, const Block& state, FacingID face) const = 0;
 
 	virtual Facing::Axis getRotationAxis(const Block& state) const = 0;
 
@@ -56,4 +56,21 @@ public:
 		// Idk a better way to do this rn
 		return std::find(block.mLegacyBlock->mTags.begin(), block.mLegacyBlock->mTags.end(), HashedString("IRotate")) != block.mLegacyBlock->mTags.end();
 	} 
+
+	static bool isIRotate(const BlockLegacy& block) {
+		// Idk a better way to do this rn
+		return std::find(block.mTags.begin(), block.mTags.end(), HashedString("IRotate")) != block.mTags.end();
+	} 
+
+	static const IRotate* asIRotate(const BlockLegacy& block) {
+		if (!isIRotate(block))
+			return nullptr;
+		return static_cast<const IRotate*>(&block);
+	}
+
+	static const IRotate* asIRotate(const BlockLegacy* block) {
+		if (block == nullptr || !isIRotate(*block))
+			return nullptr;
+		return static_cast<const IRotate*>(block);
+	}
 };

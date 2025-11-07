@@ -8,7 +8,7 @@ public:
 
     virtual void onRemove(BlockSource& blockSource, const BlockPos& pos) const override;
 
-    virtual bool hasShaftTowards(Dimension& world, const BlockPos& pos, const Block& state, FacingID face) override {
+    virtual bool hasShaftTowards(const Dimension& world, const BlockPos& pos, const Block& state, FacingID face) const override {
         return false;
     }
 

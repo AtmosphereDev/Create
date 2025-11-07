@@ -20,7 +20,7 @@ public:
         return state.getState<Facing::Axis>(VanillaStates::PillarAxis);
     }
 
-    virtual bool hasShaftTowards(Dimension& world, const BlockPos& pos, const Block& state, FacingID face) override {
+    virtual bool hasShaftTowards(const Dimension& world, const BlockPos& pos, const Block& state, FacingID face) const override {
         return Facing::getAxis(face) != state.getState<Facing::Axis>(VanillaStates::PillarAxis); 
     }
 };

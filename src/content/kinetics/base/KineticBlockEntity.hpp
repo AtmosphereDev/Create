@@ -443,10 +443,10 @@ public:
 	 * @return factor of rotation speed from this BE to other. 0 if no rotation is
 	 * transferred, or the standard rules apply (integrated shafts/cogs)
 	 */
-	// float propagateRotationTo(KineticBlockEntity target, BlockState stateFrom, BlockState stateTo, BlockPos diff,
-	// 								 boolean connectedViaAxes, boolean connectedViaCogs) {
-	// 	return 0;
-	// }
+	float propagateRotationTo(KineticBlockEntity& target, const Block& stateFrom, const Block& stateTo, const BlockPos& diff,
+									 bool connectedViaAxes, bool connectedViaCogs) {
+		return 0;
+	}
 
 	/**
 	 * Specify additional locations the rotation propagator should look for

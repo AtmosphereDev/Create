@@ -3,6 +3,99 @@
 #include "infrastructure/config/AllConfigs.hpp"
 #include "content/kinetics/base/KineticBlockEntity.hpp"
 
+float RotationPropagator::getRotationSpeedModifier(KineticBlockEntity& from, KineticBlockEntity& to)
+{
+    const Block& stateFrom = from.getBlock();
+    const Block& stateTo = to.getBlock();
+
+    const IRotate* definitionFrom = IRotate::asIRotate(stateFrom.mLegacyBlock.get());
+    const IRotate* definitionTo = IRotate::asIRotate(stateTo.mLegacyBlock.get());
+
+    if (definitionFrom == nullptr || definitionTo == nullptr)
+        return 0.0f;
+
+    BlockPos diff = to.getBlockPos() - from.getBlockPos();
+    FacingID direction = Facing::getNearest(diff);
+    const Dimension& world = from.getLevel();
+
+    bool alignedAxis = true;
+    for (const Facing::Axis& axis : Facing::AXES) {
+        if (axis != Facing::getAxis(direction)) {
+            if (Facing::choose(axis, diff.x, diff.y, diff.z) != 0) {
+                alignedAxis = false;
+                break;
+            }
+        }
+    }
+
+    bool connectedByAxis = alignedAxis && definitionFrom->hasShaftTowards(world, from.getBlockPos(), stateFrom, direction)
+        && definitionTo->hasShaftTowards(world, to.getBlockPos(), stateTo, Facing::getOpposite(direction));
+
+    // bool connectedByGears = ICogWheel.isSmallCog(stateFrom) && ICogWheel.isSmallCog(stateTo);
+    bool connectedByGears = false; // TODO cogs
+
+    float custom = from.propagateRotationTo(to, stateFrom, stateTo, diff, connectedByAxis, connectedByGears);
+    if (custom != 0.0f) return custom;
+    
+    // Axis <-> Axis
+    if (connectedByAxis) {
+        float axisModifier = getAxisModifier(to, Facing::getOpposite(direction));
+        if (axisModifier != 0) {
+            axisModifier = 1 / axisModifier;
+        }
+
+        return getAxisModifier(from, direction) * axisModifier;
+    }
+
+    // Attached encased belts
+    // if (fromBlock instanceof ChainDriveBlock && toBlock instanceof ChainDriveBlock) {
+    //     boolean connected = ChainDriveBlock.areBlocksConnected(stateFrom, stateTo, direction);
+    //     return connected ? ChainDriveBlock.getRotationSpeedModifier(from, to) : 0;
+    // }
+
+    // Large Gear <-> Large Gear
+    if (isLargeToLargeGear(stateFrom, stateTo, diff)) {
+        // todo
+        return -1.0f;
+    }
+
+    // Gear <-> Large Gear
+    // if (ICogWheel.isLargeCog(stateFrom) && ICogWheel.isSmallCog(stateTo))
+    //     if (isLargeToSmallCog(stateFrom, stateTo, definitionTo, diff))
+    //         return -2f;
+    // if (ICogWheel.isLargeCog(stateTo) && ICogWheel.isSmallCog(stateFrom))
+    //     if (isLargeToSmallCog(stateTo, stateFrom, definitionFrom, diff))
+    //         return -.5f;
+
+    // Gear <-> Gear
+    // if (connectedByGears) {
+    //     if (diff.distManhattan(BlockPos.ZERO) != 1)
+    //         return 0;
+    //     if (ICogWheel.isLargeCog(stateTo))
+    //         return 0;
+    //     if (direction.getAxis() == definitionFrom.getRotationAxis(stateFrom))
+    //         return 0;
+    //     if (definitionFrom.getRotationAxis(stateFrom) == definitionTo.getRotationAxis(stateTo))
+    //         return -1;
+    // }
+
+    return 0.0f;
+}
+
+float RotationPropagator::getConveyedSpeed(KineticBlockEntity &from, KineticBlockEntity &to)
+{
+    // Rotation Speed Controller <-> Large Gear
+    // if (isLargeCogToSpeedController(stateFrom, stateTo, to.getBlockPos()
+    //     .subtract(from.getBlockPos())))
+    //     return SpeedControllerBlockEntity.getConveyedSpeed(from, to, true);
+    // if (isLargeCogToSpeedController(stateTo, stateFrom, from.getBlockPos()
+    //     .subtract(to.getBlockPos())))
+    //     return SpeedControllerBlockEntity.getConveyedSpeed(to, from, false);
+
+    float rotationSpeedModifier = getRotationSpeedModifier(from, to);
+    return from.getTheoreticalSpeed() * rotationSpeedModifier;
+}
+
 void RotationPropagator::propagateNewSource(KineticBlockEntity &currentTE)
 {
     BlockPos pos = currentTE.getBlockPos();

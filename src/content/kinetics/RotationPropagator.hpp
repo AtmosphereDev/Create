@@ -4,110 +4,18 @@
 #include <mc/src/common/world/Facing.hpp>
 
 class KineticBlockEntity;
+class IRotate;
 
 class RotationPropagator {
 public:
-    static int MAX_FLICKER_SCORE;
+    static const int MAX_FLICKER_SCORE = 128;
 
-    static float getRotationSpeedModifier(KineticBlockEntity& from, KineticBlockEntity& to) {
-        return 0.0f; // TODO
+    static float getRotationSpeedModifier(KineticBlockEntity& from, KineticBlockEntity& to);
 
-		// final BlockState stateFrom = from.getBlockState();
-		// final BlockState stateTo = to.getBlockState();
+    static float getConveyedSpeed(KineticBlockEntity& from, KineticBlockEntity& to);
 
-		// Block fromBlock = stateFrom.getBlock();
-		// Block toBlock = stateTo.getBlock();
-		// if (!(fromBlock instanceof IRotate definitionFrom && toBlock instanceof IRotate definitionTo))
-		// 	return 0;
-
-		// final BlockPos diff = to.getBlockPos()
-		// 	.subtract(from.getBlockPos());
-		// final Direction direction = Direction.getNearest(diff.getX(), diff.getY(), diff.getZ());
-		// final Level world = from.getLevel();
-
-		// boolean alignedAxes = true;
-		// for (Axis axis : Axis.values())
-		// 	if (axis != direction.getAxis())
-		// 		if (axis.choose(diff.getX(), diff.getY(), diff.getZ()) != 0)
-		// 			alignedAxes = false;
-
-		// boolean connectedByAxis =
-		// 	alignedAxes && definitionFrom.hasShaftTowards(world, from.getBlockPos(), stateFrom, direction)
-		// 		&& definitionTo.hasShaftTowards(world, to.getBlockPos(), stateTo, direction.getOpposite());
-
-		// boolean connectedByGears = ICogWheel.isSmallCog(stateFrom)
-		// 	&& ICogWheel.isSmallCog(stateTo);
-
-		// float custom = from.propagateRotationTo(to, stateFrom, stateTo, diff, connectedByAxis, connectedByGears);
-		// if (custom != 0)
-		// 	return custom;
-
-		// // Axis <-> Axis
-		// if (connectedByAxis) {
-		// 	float axisModifier = getAxisModifier(to, direction.getOpposite());
-		// 	if (axisModifier != 0)
-		// 		axisModifier = 1 / axisModifier;
-		// 	return getAxisModifier(from, direction) * axisModifier;
-		// }
-
-		// // Attached Encased Belts
-		// if (fromBlock instanceof ChainDriveBlock && toBlock instanceof ChainDriveBlock) {
-		// 	boolean connected = ChainDriveBlock.areBlocksConnected(stateFrom, stateTo, direction);
-		// 	return connected ? ChainDriveBlock.getRotationSpeedModifier(from, to) : 0;
-		// }
-
-		// // Large Gear <-> Large Gear
-		// if (isLargeToLargeGear(stateFrom, stateTo, diff)) {
-		// 	Axis sourceAxis = stateFrom.getValue(AXIS);
-		// 	Axis targetAxis = stateTo.getValue(AXIS);
-		// 	int sourceAxisDiff = sourceAxis.choose(diff.getX(), diff.getY(), diff.getZ());
-		// 	int targetAxisDiff = targetAxis.choose(diff.getX(), diff.getY(), diff.getZ());
-
-		// 	return sourceAxisDiff > 0 ^ targetAxisDiff > 0 ? -1 : 1;
-		// }
-
-		// // Gear <-> Large Gear
-		// if (ICogWheel.isLargeCog(stateFrom) && ICogWheel.isSmallCog(stateTo))
-		// 	if (isLargeToSmallCog(stateFrom, stateTo, definitionTo, diff))
-		// 		return -2f;
-		// if (ICogWheel.isLargeCog(stateTo) && ICogWheel.isSmallCog(stateFrom))
-		// 	if (isLargeToSmallCog(stateTo, stateFrom, definitionFrom, diff))
-		// 		return -.5f;
-
-		// // Gear <-> Gear
-		// if (connectedByGears) {
-		// 	if (diff.distManhattan(BlockPos.ZERO) != 1)
-		// 		return 0;
-		// 	if (ICogWheel.isLargeCog(stateTo))
-		// 		return 0;
-		// 	if (direction.getAxis() == definitionFrom.getRotationAxis(stateFrom))
-		// 		return 0;
-		// 	if (definitionFrom.getRotationAxis(stateFrom) == definitionTo.getRotationAxis(stateTo))
-		// 		return -1;
-		// }
-        //
-		// return 0;
-	}
-
-    static float getConveyedSpeed(KineticBlockEntity& from, KineticBlockEntity& to) {
-        return 0.0f; // TODO
-
-		// final BlockState stateFrom = from.getBlockState();
-		// final BlockState stateTo = to.getBlockState();
-
-		// // Rotation Speed Controller <-> Large Gear
-		// if (isLargeCogToSpeedController(stateFrom, stateTo, to.getBlockPos()
-		// 	.subtract(from.getBlockPos())))
-		// 	return SpeedControllerBlockEntity.getConveyedSpeed(from, to, true);
-		// if (isLargeCogToSpeedController(stateTo, stateFrom, from.getBlockPos()
-		// 	.subtract(to.getBlockPos())))
-		// 	return SpeedControllerBlockEntity.getConveyedSpeed(to, from, false);
-
-		// float rotationSpeedModifier = getRotationSpeedModifier(from, to);
-		// return from.getTheoreticalSpeed() * rotationSpeedModifier;
-	}
-
-    // static bool isLargeToLargeGear(BlockState from, BlockState to, BlockPos diff) {
+    static bool isLargeToLargeGear(const Block& from, const Block& to, const BlockPos& diff) {
+		return false;
 		// if (!ICogWheel.isLargeCog(from) || !ICogWheel.isLargeCog(to))
 		// 	return false;
 		// Axis fromAxis = from.getValue(AXIS);
@@ -124,9 +32,11 @@ public:
 		// 		return false;
 		// }
 		// return true;
-	// }
+	}
 
-    // static float getAxisModifier(KineticBlockEntity be, Direction direction) {
+    static float getAxisModifier(KineticBlockEntity& be, FacingID direction) {
+		return 1.0f; // TODO
+
 	// 	if (!(be.hasSource() || be.isSource()) || !(be instanceof DirectionalShaftHalvesBlockEntity))
 	// 		return 1;
 	// 	Direction source = ((DirectionalShaftHalvesBlockEntity) be).getSourceFacing();
@@ -139,9 +49,10 @@ public:
 	// 		return ((SplitShaftBlockEntity) be).getRotationSpeedModifier(direction);
 
 	// 	return 1;
-	// }
+	}
 
-    // private static boolean isLargeToSmallCog(BlockState from, BlockState to, IRotate defTo, BlockPos diff) {
+	static bool isLargeToSmallCog(const Block& from, const Block& to, IRotate& defTo, const BlockPos& diff) {
+		return false;
 	// 	Axis axisFrom = from.getValue(AXIS);
 	// 	if (axisFrom != defTo.getRotationAxis(to))
 	// 		return false;
@@ -154,7 +65,7 @@ public:
 	// 			return false;
 	// 	}
 	// 	return true;
-	// }
+	}
 
 	static bool isLargeCogToSpeedController(const Block& from, const Block& to, const BlockPos& diff) {
 		return false;
@@ -200,7 +111,7 @@ public:
 	//  * @param pos
 	//  * @param removedBE
 	//  */
-	// public static void handleRemoved(Level worldIn, BlockPos pos, KineticBlockEntity removedBE) {
+	static void handleRemoved(const Dimension& worldIn, const BlockPos& pos, KineticBlockEntity& removedBE) {
 	// 	if (worldIn.isClientSide)
 	// 		return;
 	// 	if (removedBE == null)
@@ -222,7 +133,7 @@ public:
 	// 		propagateMissingSource(neighbourBE);
 	// 	}
 
-	// }
+	}
 
 	// /**
 	//  * Clear the entire subnetwork depending on the given entity and find a new
@@ -230,7 +141,7 @@ public:
 	//  *
 	//  * @param updateTE
 	//  */
-	// private static void propagateMissingSource(KineticBlockEntity updateTE) {
+	static void propagateMissingSource(KineticBlockEntity& updateTE) {
 	// 	final Level world = updateTE.getLevel();
 
 	// 	List<KineticBlockEntity> potentialNewSources = new LinkedList<>();
@@ -272,7 +183,7 @@ public:
 	// 			return;
 	// 		}
 	// 	}
-	// }
+	}
 
 	static KineticBlockEntity* findConnectedNeighbour(KineticBlockEntity& currentTE, const BlockPos& neighbourPos);
 

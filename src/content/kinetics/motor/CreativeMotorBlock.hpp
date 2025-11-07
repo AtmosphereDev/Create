@@ -16,7 +16,7 @@ public:
         return Facing::getAxis(dir);
     }
 
-    virtual bool hasShaftTowards(Dimension& world, const BlockPos& pos, const Block& state, FacingID face) override {
+    virtual bool hasShaftTowards(const Dimension& world, const BlockPos& pos, const Block& state, FacingID face) const override {
         return face == state.getState<FacingID>(VanillaStates::FacingDirection); 
     }
 
