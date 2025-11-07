@@ -5,6 +5,7 @@ class SmartBlockEntity;
 class Level;
 class Block;
 class Dimension;
+class CompoundTag;
 
 class BlockEntityBehaviour {
 protected:
@@ -27,22 +28,22 @@ public:
         }
     }
 
-    // public void read(CompoundTag nbt, HolderLookup.Provider registries, boolean clientPacket) {
+    virtual void read(const CompoundTag& nbt, bool clientPacket) {
 
-	// }
+	}
 
-	// public void write(CompoundTag nbt, HolderLookup.Provider registries, boolean clientPacket) {
+	virtual void write(CompoundTag& nbt, bool clientPacket) {
 
-	// }
+	}
 
     /**
      * Called when isSafeNBT == true. Defaults to write()
      */
-	// public void writeSafe(CompoundTag nbt, HolderLookup.Provider registries) {
-	// 	write(nbt, registries, false);
-	// }
+	void writeSafe(CompoundTag& nbt) {
+		write(nbt, false);
+	}
 
-	bool isSafeNBT() {
+	virtual bool isSafeNBT() {
 		return false;
 	}
 
@@ -50,24 +51,24 @@ public:
 	// 	return ItemRequirement.NONE;
 	// }
 
-    void onBlockChanged(const Block& oldState) {
+    virtual void onBlockChanged(const Block& oldState) {
 
 	}
 
-	void onNeighborChanged(const BlockPos& neighborPos) {
+	virtual void onNeighborChanged(const BlockPos& neighborPos) {
 
 	}
 
     /**
 	 * Block destroyed or Chunk unloaded. Usually invalidates capabilities
 	 */
-	void unload() {
+	virtual void unload() {
 	}
 
 	/**
 	 * Block destroyed or removed. Requires block to call ITE::onRemove
 	 */
-	void destroy() {
+	virtual void destroy() {
 	}
 
     void setLazyTickRate(int slowTickRate) {

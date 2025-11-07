@@ -1,7 +1,7 @@
 #pragma once
 #include "content/kinetics/base/GeneratingKineticBlockEntity.hpp"
 #include <mc/src/common/world/level/block/VanillaStates.hpp>
-#include "foundation/blockEntity/behaviour/scrollValue/ScrollValueBehaviour.hpp"
+#include "content/kinetics/motor/KineticScrollValueBehaviour.hpp"
 
 class CreativeMotorBlockEntity : public GeneratingKineticBlockEntity {
 public:
@@ -20,20 +20,17 @@ public:
         GeneratingKineticBlockEntity::addBehaviours(behavioursList);
         int max = MAX_SPEED;
 
-        generatedSpeed = std::make_shared<ScrollValueBehaviour>(
+        generatedSpeed = std::make_shared<KineticScrollValueBehaviour>(
             "kinetics.creative_motor.rotation_speed", this, std::make_shared<MotorValueBox>()
         );
 
-		// generatedSpeed = new KineticScrollValueBehaviour(CreateLang.translateDirect("kinetics.creative_motor.rotation_speed"),
-		// 	this, new MotorValueBox());
-
-		// generatedSpeed.between(-max, max);
+		generatedSpeed->between(-max, max);
 		generatedSpeed->value = DEFAULT_SPEED;
+        generatedSpeed->withCallback([this](int newValue) {
+            Log::Info("Creative motor speed changed to {}", newValue);
+            this->updateGeneratedRotation();
+        });
         behavioursList.push_back(generatedSpeed);
-
-		// generatedSpeed.withCallback(i -> this.updateGeneratedRotation());
-		// behaviours.add(generatedSpeed);
-		// behaviours.add(computerBehaviour = ComputerCraftProxy.behaviour(this));
     }
 
     virtual void initialize() override {
@@ -52,8 +49,39 @@ public:
         return convertToDirection(generatedSpeed->getValue(), getBlock().getState<FacingID>(VanillaStates::FacingDirection));
     }
 
-    class MotorValueBox : public ValueBoxTransform {
+    class MotorValueBox : public SidedValueBoxTransform {
+    protected:
+        virtual Vec3 getSouthLocation() const override {
+            return Vec3::voxelSpace(8, 8, 12.5f);
+        }
+
     public:
-        
+        virtual std::optional<Vec3> getLocalOffset(const BlockSource& region, const BlockPos& pos, const Block& state) const override {
+            FacingID face = state.getState<FacingID>(VanillaStates::FacingDirection);
+
+            return (
+                SidedValueBoxTransform::getLocalOffset(region, pos, state).value() + Vec3::atLowerCornerOf(Facing::normal(face))
+            ) * Vec3(-1.0f / 16.0f, -1.0f / 16.0f, -1.0f / 16.0f); // wtf even is this
+        }
+
+        virtual void rotate(const BlockSource& region, const BlockPos& pos, const Block& state, MatrixStack& ms) const override {
+            SidedValueBoxTransform::rotate(region, pos, state, ms);
+            FacingID face = state.getState<FacingID>(VanillaStates::FacingDirection);
+
+            if (Facing::getAxis(face) == Facing::Axis::Y) return;
+            if (getSide() != FacingID::UP) return;
+
+            auto& mat = ms.getTop();
+            mat.rotateZDegrees(Facing::getYAngle(face) + 180.0f);
+        }
+
+    protected:
+        bool isSideActive(const Block& state, FacingID direction) const {
+            FacingID facing = state.getState<FacingID>(VanillaStates::FacingDirection);
+            if (Facing::getAxis(facing) != Facing::Axis::Y && direction == FacingID::DOWN) 
+                return false;
+
+            return Facing::getAxis(direction) != Facing::getAxis(facing);
+        }
     };
 };
