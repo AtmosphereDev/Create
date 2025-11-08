@@ -90,12 +90,12 @@ class SidedValueBoxTransform : public ValueBoxTransform {
 protected:
     FacingID direction = FacingID::NORTH;
 
+public:
     SidedValueBoxTransform& fromSide(FacingID dir) {
         direction = dir;
         return *this;
     }
 
-public:
     virtual std::optional<Vec3> getLocalOffset(const BlockSource& region, const BlockPos& pos, const Block& state) const override {
         Vec3 location = getSouthLocation();
         location.rotateCentered(Facing::getYAngle(getSide()), Facing::Axis::Y);
@@ -123,7 +123,6 @@ public:
         return isSideActive(state, getSide()) && ValueBoxTransform::testHit(region, pos, state, localHit);
     }
 
-protected:
     bool isSideActive(const Block& state, FacingID side) const {
         return true;
     }

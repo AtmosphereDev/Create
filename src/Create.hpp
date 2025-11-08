@@ -2,6 +2,7 @@
 #include "content/kinetics/TorquePropagator.hpp"
 #include "AllBlocks.hpp"
 #include "AllPartialModels.hpp"
+#include "foundation/blockEntity/behaviour/ValueSettingsInputHandler.hpp"
 
 class Create {
 public:
@@ -10,5 +11,8 @@ public:
     static void Initialize() {
         AllBlocks::AddEventListeners();
         AllPartialModels::AddEventListeners();
+
+        // Misc event handlers
+        ValueSettingsInputHandler::RegisterEvents();
     }
 };

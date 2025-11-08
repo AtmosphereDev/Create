@@ -51,6 +51,10 @@ public:
         }
     }
 
+    const std::unordered_map<BehaviourType, std::shared_ptr<BlockEntityBehaviour>>& getAllBehaviours() const {
+        return behaviours;
+    }
+
     void setLazyTickRate(int rate) {
         lazyTickRate = lazyTickCounter = rate;
     }
@@ -146,5 +150,15 @@ public:
     static bool IsSmartBlockEntity(const BlockActor& actor) {
         if (!JavaBlockEntity::IsJavaBlockEntity(actor)) return false;
         return static_cast<const JavaBlockEntity&>(actor)._isSmartBlockEntity();
+    }
+
+    static const SmartBlockEntity* AsSmartBlockEntity(const BlockActor* actor) {
+        if (!actor || !IsSmartBlockEntity(*actor)) return nullptr;
+        return static_cast<const SmartBlockEntity*>(actor);
+    }
+
+    static SmartBlockEntity* AsSmartBlockEntity(BlockActor* actor) {
+        if (!actor || !IsSmartBlockEntity(*actor)) return nullptr;
+        return static_cast<SmartBlockEntity*>(actor);
     }
 };
