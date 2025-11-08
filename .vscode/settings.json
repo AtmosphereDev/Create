@@ -100,5 +100,8 @@
         "pointers": "cpp",
         "multi_span": "cpp",
         "gsl_assert": "cpp"
-    }
+    },
+    "deno.enable": true,
+    "deno.enablePaths": ["data/packs/", ".github/workflows/"],
+    "deno.config": "./data/packs/data/generated/deno.json",
 }

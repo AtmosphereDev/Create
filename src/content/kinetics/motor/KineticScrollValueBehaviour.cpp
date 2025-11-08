@@ -4,6 +4,7 @@
 ValueSettingsBoard KineticScrollValueBehaviour::createBoard(const Player &player, const HitResult &hit)
 {
     std::vector<std::string> rows = std::vector<std::string>();
+    rows.push_back("\xE2\x9F\xB3"); // left turning arrow
     rows.push_back("\xE2\x9F\xB2"); // right turning arrow
 
     ValueSettingsFormatter formatter = ValueSettingsFormatter([this](const ValueSettingsBehaviour::ValueSettings& v) {

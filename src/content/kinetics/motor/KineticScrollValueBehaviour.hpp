@@ -24,7 +24,7 @@ public:
 
     std::string formatSettings(const ValueSettingsBehaviour::ValueSettings& settings) {
         std::string symbol = settings.row == 0 ? "\xE2\x9F\xB2" : "\xE2\x9F\xB3"; // right turning arrow / left turning arrow
-        return std::string(symbol) + std::to_string(std::abs(settings.value));
+        return std::to_string(std::abs(settings.value)) + symbol;
     }
 
     virtual std::string getClipboardKey() const override {

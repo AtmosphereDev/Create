@@ -1,6 +1,5 @@
 #pragma once
 #include "foundation/blockEntity/behaviour/BehaviourType.hpp"
-#include "foundation/blockEntity/SmartBlockEntity.hpp"
 
 class SmartBlockEntity;
 class Level;
@@ -8,6 +7,7 @@ class Block;
 class Dimension;
 class CompoundTag;
 class BlockActor;
+class BlockSource;
 
 class BlockEntityBehaviour {
 protected:
@@ -85,14 +85,10 @@ public:
     Dimension* getWorld() const;
 
     template <typename T>
-    static std::shared_ptr<T> get(const BlockSource& region, const BlockPos& pos, const BehaviourType& type) {
-        return get(region.getBlockEntity(pos), type);
-    }
+    static std::shared_ptr<T> get(const BlockSource& region, const BlockPos& pos, const BehaviourType& type);
 
     template <typename T>
-    static std::shared_ptr<T> get(BlockActor* be, const BehaviourType& type) {
-        SmartBlockEntity* sbe = SmartBlockEntity::AsSmartBlockEntity(be);
-        if (!sbe) return nullptr;
-        return sbe->getBehaviour<T>(type);
-    }
+    static std::shared_ptr<T> get(BlockActor* be, const BehaviourType& type);
 };
+
+#include "BlockEntityBehaviour.inl"

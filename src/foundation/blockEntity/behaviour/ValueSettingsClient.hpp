@@ -18,8 +18,8 @@ public:
     int hoverTicks;
     int hoverWarmup;
 
-    ValueSettingsClient() {
-        mc = Amethyst::GetClientCtx().mClientInstance;
+	ValueSettingsClient() : hoverTicks(0), hoverWarmup(0) {
+        
     }
 
     void cancelIfWarmupAlreadyStarted(BeforeBlockUseEvent& event) {
@@ -28,15 +28,11 @@ public:
         }
     }
 
-    void startInteractionWith(const BlockPos& pos, const BehaviourType& type, FacingID direction) {
-        interactHeldTicks = 0;
-        interactHeldPos = pos;
-        interactHeldBehaviour = &type;
-        interactHeldFace = direction;
-    }
+    void startInteractionWith(const BlockPos& pos, const BehaviourType& type, FacingID direction);
 
     void cancelInteraction() {
         interactHeldTicks = -1;
+        Log::Info("CancelInteraction called!");
     }
 
     void tick();

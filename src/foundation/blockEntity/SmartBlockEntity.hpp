@@ -1,7 +1,9 @@
 #pragma once
 #include <amethyst/Imports.hpp>
-#include "foundation/blockEntity/behaviour/BlockEntityBehaviour.hpp"
 #include "foundation/blockEntity/CachedRenderBBBlockEntity.hpp"
+#include "foundation/blockEntity/behaviour/BehaviourType.hpp"
+
+class BlockEntityBehaviour;
 
 class SmartBlockEntity : public CachedRenderBBBlockEntity {
 private:
@@ -22,28 +24,13 @@ public:
 
     virtual ~SmartBlockEntity() = default;
 
-    virtual void afterConstructed() override {
-        CachedRenderBBBlockEntity::afterConstructed();
-        std::vector<std::shared_ptr<BlockEntityBehaviour>> list;
-
-        addBehaviours(list);
-
-        for (auto& behaviour : list) {
-			addBehaviour(behaviour->getType(), behaviour);
-        }
-    }
+    virtual void afterConstructed() override;
 
     template <typename T>
-    void addBehaviour(const BehaviourType& type, std::shared_ptr<T> behaviour) {
-        behaviours[type] = behaviour;
-    }
+    void addBehaviour(const BehaviourType& type, std::shared_ptr<T> behaviour);
 
     template <typename T>
-    std::shared_ptr<T> getBehaviour(const BehaviourType& type) {
-        auto it = behaviours.find(type);
-        if (it == behaviours.end()) return nullptr;
-        return std::dynamic_pointer_cast<T>(it->second);
-    }
+    std::shared_ptr<T> getBehaviour(const BehaviourType& type);
 
     void forEachBehaviour(const std::function<void(std::shared_ptr<BlockEntityBehaviour>)>& func) {
         for (auto& [_, behaviour] : behaviours) {
@@ -61,38 +48,11 @@ public:
 
     virtual void lazyTick() {}
 
-    virtual void tick(BlockSource& source) override {
-        if (!initialized) {
-            initialize();
-            initialized = true;
-        }
-
-        if (--lazyTickCounter <= 0) {
-            lazyTickCounter = lazyTickRate;
-            lazyTick();
-        }
-
-        forEachBehaviour([](const std::shared_ptr<BlockEntityBehaviour>& b) { 
-            b->tick(); 
-        });
-
-        CachedRenderBBBlockEntity::tick(source);
-    }
+    virtual void tick(BlockSource& source) override;
 
     virtual void addBehaviours(std::vector<std::shared_ptr<BlockEntityBehaviour>>& behavioursList) = 0;
 
-    virtual void initialize() {
-		if (firstNbtRead) {
-			firstNbtRead = false;
-			// NeoForge.EVENT_BUS.post(new BlockEntityBehaviourEvent(this, behaviours)); 
-            // TODO: ^
-		}
-
-		forEachBehaviour([](const std::shared_ptr<BlockEntityBehaviour>& b) { 
-            b->initialize(); 
-        });
-		lazyTick();
-	}
+    virtual void initialize();
 
     // weirdly the original code has no load function?
     virtual void onChunkUnloaded(LevelChunk& unk0) override {
@@ -111,11 +71,7 @@ public:
     /**
 	 * Block destroyed or Chunk unloaded. Usually invalidates capabilities
 	 */
-	void invalidate() {
-        forEachBehaviour([](const std::shared_ptr<BlockEntityBehaviour>& b) { 
-            b->unload(); 
-        });
-	}
+	void invalidate();
 
     /**
 	 * Block destroyed or picked up by a contraption. Usually detaches kinetics
@@ -125,11 +81,7 @@ public:
     /**
 	 * Block destroyed or replaced. Requires Block to call IBE::onRemove
 	 */
-	void destroy() {
-        forEachBehaviour([](const std::shared_ptr<BlockEntityBehaviour>& b) { 
-            b->destroy(); 
-        });
-	}
+	void destroy();
 
     void onChunkUnloaded() { chunkUnloaded = true; }
 
@@ -162,3 +114,5 @@ public:
         return static_cast<SmartBlockEntity*>(actor);
     }
 };
+
+#include "SmartBlockEntity.inl"

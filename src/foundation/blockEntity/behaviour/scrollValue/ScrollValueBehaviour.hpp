@@ -106,6 +106,7 @@ public:
 	}
 
 	virtual bool testHit(const Vec3& hit) {
+		return true; // temp
 		const Block& state = blockEntity->getBlock();
 		Vec3 localHit = hit - Vec3::atLowerCornerOf(blockEntity->getBlockPos());
 		return slotPositioning->testHit(*blockEntity->getLevel().mBlockSource, blockEntity->getBlockPos(), state, localHit);

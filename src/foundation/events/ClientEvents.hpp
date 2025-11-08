@@ -1,8 +1,34 @@
 #pragma once
+#include <amethyst/runtime/events/GameEvents.hpp>
+#include <mc/src/common/world/level/Level.hpp>
+#include "CreateClient.hpp"
 
 class ClientEvents {
 public:
-    static void onTick() {
-        // todo add a tick event to amethyst
+    static void onBeforeTick(BeforeTickEvent& ev) {
+        if (!ev.mLevel.isClientSide) return;
+        onTick(ev.mLevel, true);
+    }
+
+    static void onAfterTick(AfterTickEvent& ev) {
+        if (!ev.mLevel.isClientSide) return;
+        onTick(ev.mLevel, false);
+    }
+
+    static void onTick(Level& level, bool isPreEvent) {
+        if (isPreEvent) {
+            // LinkedControllerClientHandler.tick();
+			// ControlsHandler.tick();
+			// AirCurrent.Client.tickClientPlayerSounds();
+			// return;
+        }
+
+        CreateClient::VALUE_SETTINGS_HANDLER.tick();
+    }
+
+    static void AddEventListeners() {
+        auto& bus = Amethyst::GetEventBus();
+        bus.AddListener<BeforeTickEvent>(&onBeforeTick);
+        bus.AddListener<AfterTickEvent>(&onAfterTick);
     }
 };
