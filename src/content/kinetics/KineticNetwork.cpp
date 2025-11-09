@@ -148,12 +148,18 @@ float KineticNetwork::calculateStress()
 
 float KineticNetwork::getActualCapacityOf(KineticBlockEntity *be)
 {
-    return sources[be] * getStressMultiplierForSpeed(be->getGeneratedSpeed());
+    auto it = sources.find(be);
+    if (it == sources.end())
+        return 0.0f;
+    return it->second * getStressMultiplierForSpeed(be->getGeneratedSpeed());
 }
 
 float KineticNetwork::getActualStressOf(KineticBlockEntity *be)
 {
-    return members[be] * getStressMultiplierForSpeed(be->getTheoreticalSpeed());
+    auto it = members.find(be);
+    if (it == members.end())
+        return 0.0f;
+    return it->second * getStressMultiplierForSpeed(be->getTheoreticalSpeed());
 }
 
 float KineticNetwork::getStressMultiplierForSpeed(float speed)

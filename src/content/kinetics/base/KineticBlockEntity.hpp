@@ -34,7 +34,7 @@ public:
 
     KineticBlockEntity(BlockActorType typeIn, const BlockPos& pos, const std::string& id)
 		: SmartBlockEntity(typeIn, pos, id), speed(0), capacity(0), stress(0), overStressed(false), wasMoved(false), flickerTally(0),
-		  networkSize(0), validationCountdown(0), lastStressApplied(0), lastCapacityProvided(0)
+		networkSize(0), validationCountdown(0), lastStressApplied(0), lastCapacityProvided(0), networkDirty(false), preventSpeedUpdate(0)
 	{
 		// effects = new KineticEffectHandler(this);
 		updateSpeed = true;

@@ -4,6 +4,7 @@
 
 void KineticBlock::onRemove(BlockSource &blockSource, const BlockPos &pos) const
 {
+	Log::Info("KineticBlock::onRemove called at {}", pos);
     IBE::onRemove(*this, blockSource, pos);
 }
 
