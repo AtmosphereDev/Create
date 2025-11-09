@@ -6,6 +6,8 @@
 #include "foundation/events/ClientEvents.hpp"
 #include "porting/ClientInputs.hpp"
 #include "foundation/blockEntity/behaviour/ValueSettingsScreen.hpp"
+#include "foundation/blockEntity/behaviour/ValueSettingsClient.hpp"
+#include "AllPackets.hpp"
 
 class Create {
 public:
@@ -19,6 +21,10 @@ public:
 
         // Misc implementation event handlers
         ValueSettingsScreen::AddEventListeners();
+        ValueSettingsClient::AddEventListeners();
         ValueSettingsInputHandler::RegisterEvents();
+
+        // Misc other things
+        AllPackets::RegisterPackets();
     }
 };

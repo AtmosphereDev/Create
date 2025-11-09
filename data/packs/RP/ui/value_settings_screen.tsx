@@ -19,7 +19,7 @@ screen.addControl("value_settings_screen",
             requires: "$desktop_screen",
             $screen_content: "value_settings_screen.main_content",
             $screen_bg_content: "common.screen_background",
-            $screen_background_alpha: 0.3
+            $screen_background_alpha: 0.4
         }
     ]}
     force_render_below

@@ -2,6 +2,7 @@
 #include <amethyst/runtime/events/GameEvents.hpp>
 #include <mc/src/common/world/level/Level.hpp>
 #include "CreateClient.hpp"
+#include "foundation/blockEntity/behaviour/scrollValue/ScrollValueRenderer.hpp"
 
 class ClientEvents {
 public:
@@ -23,7 +24,9 @@ public:
 			// return;
         }
 
+        ScrollValueRenderer::tick();
         CreateClient::VALUE_SETTINGS_HANDLER.tick();
+
     }
 
     static void AddEventListeners() {

@@ -10,6 +10,10 @@
 #include "catnip/gui/UIRenderHelper.hpp"
 #include "foundation/gui/AllGuiTextures.hpp"
 #include <mc/src-client/common/client/gui/gui/GuiData.hpp>
+#include "foundation/blockEntity/behaviour/ValueSettingsPacket.hpp"
+#include <mc/src/common/network/LoopbackPacketSender.hpp>
+#include "AllSoundEvents.hpp"
+#include <mc/src-client/common/client/player/LocalPlayer.hpp>
 
 class ValueSettingsScreen : public ClientInstanceScreenController {
 public:
@@ -92,6 +96,9 @@ public:
     }
 
     virtual ui::DirtyFlag tick() override {
+        ticksOpen++;    
+        if (soundCoolDown > 0) soundCoolDown--;
+
         if (!ClientInputs::useKeyDown) {
             Log::Info("ValueSettingsScreen: Use key released, closing screen.");
             saveAndClose();
@@ -150,11 +157,11 @@ public:
         // ctx.flushImages(mce::Color::WHITE, 1.0f, "ui_flush");
 
         // Skipping this check for now, seems to make it worse here?
-        // if (fadeInWidth > fattestLabel) {
+        if (fadeInWidth > fattestLabel) {
         int textX = x - 11 - fatTipOffset + bgWidth / 2;
-        ctx.drawText(font, title, textX - titleWidth / 2, y - 14, 0xddddddff, alpha);
-        ctx.drawText(font, tip, textX - tipWidth / 2, y + windowHeight + additionalHeight - 27, 0xaaaaaaff, alpha);
-        // }
+            ctx.drawText(font, title, textX - titleWidth / 2, y - 14, 0xddddddff, alpha);
+            ctx.drawText(font, tip, textX - tipWidth / 2, y + windowHeight + additionalHeight - 27, 0xaaaaaaff, alpha);
+        }
         // else {
         //     Log::Info("Skipping title/tip render, fadeInWidth {} <= fattestLabel {}", fadeInWidth, fattestLabel);
         // }
@@ -206,18 +213,28 @@ public:
         //}
 
 		ValueSettingsBehaviour::ValueSettings closest = getClosestCoordinate(ClientInputs::mouseX / guiScale, ClientInputs::mouseY / guiScale);
-        /*if (!closest.equals(lastHovered)) {
-            onHover.accept(closest);
+        if (closest != lastHovered) {
+            onHover(closest);
             if (soundCoolDown == 0) {
-                float pitch = (closest.value()) / (float)(board.maxValue());
-                pitch = Mth.lerp(pitch, 1.15f, 1.5f);
-                minecraft.getSoundManager()
-                    .play(SimpleSoundInstance.forUI(AllSoundEvents.SCROLL_VALUE.getMainEvent(), pitch, 0.25F));
-                ScrollValueHandler.wrenchCog.bump(3, -(closest.value() - lastHovered.value()) * 10);
+                // float pitch = (closest.value()) / (float)(board.maxValue());
+                // pitch = Mth.lerp(pitch, 1.15f, 1.5f);
+                // minecraft.getSoundManager()
+                //     .play(SimpleSoundInstance.forUI(AllSoundEvents.SCROLL_VALUE.getMainEvent(), pitch, 0.25F));
+                // ScrollValueHandler.wrenchCog.bump(3, -(closest.value() - lastHovered.value()) * 10);
+
+                float pitch = (closest.value)/(float)(board.maxValue);
+                Log::Info("Start pitch {} {}", closest.value, board.maxValue);
+                pitch = std::lerp(1.15f, 1.5f, pitch);
+
+                LocalPlayer& localPlayer = *client.getLocalPlayer();
+
+                AllSoundEvents::SCROLL_VALUE.play(*localPlayer.getLevel(), *localPlayer.getPosition(), 0.25f, pitch); 
+                Log::Info("Playing scroll sound with pitch {}", pitch);
+
                 soundCoolDown = 1;
             }
         }
-        lastHovered = closest;*/
+        lastHovered = closest;
 
 		Vec2 coordinate = getCoordinateOfValue(closest.row, closest.value);
 		std::string cursorText = board.formatter.format(closest);
@@ -317,7 +334,19 @@ public:
     }
 
     void saveAndClose() {
-        Log::Info("ValueSettingsScreen: saveAndClose called.");
+        const ClientInstance& ci = *Amethyst::GetClientCtx().mClientInstance;
+        float guiScale = ci.mGuiData->mGuiScale;
+        ValueSettingsBehaviour::ValueSettings current = getClosestCoordinate(ClientInputs::mouseX / guiScale, ClientInputs::mouseY / guiScale);
+
+        auto& networking = Amethyst::GetNetworkManager();
+
+        // FIXME: value settings may be face-sensitive on future components
+        // ^ this was in original src
+        networking.SendToServer(
+            *ci.mPacketSender.get(),
+            std::make_unique<ValueSettingsPacket>(pos, current.row, current.value, FacingID::NORTH, false, netId)
+        );
+
         this->tryExit();
     }
 

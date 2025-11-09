@@ -22,6 +22,14 @@ public:
         std::string format() const {
             return std::to_string(value);
         }
+
+        bool operator==(const ValueSettings& other) const {
+            return row == other.row && value == other.value;
+        }
+
+        bool operator!=(const ValueSettings& other) const {
+            return !(*this == other);
+        }
     };
 
     virtual bool testHit(const Vec3& hit) = 0;

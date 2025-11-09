@@ -7,6 +7,7 @@
 #include <mc/src-client/common/client/gui/screens/SceneCreationUtils.hpp>
 #include <mc/src-client/common/client/gui/screens/UIScene.hpp>
 #include "ValueSettingsScreen.hpp"
+#include "CreateClient.hpp"
 
 void ValueSettingsClient::startInteractionWith(const BlockPos &pos, const BehaviourType &type, FacingID direction)
  {
@@ -103,4 +104,19 @@ void ValueSettingsClient::tick()
 	Log::Info("Value Settings Screen opened.");
 
     interactHeldTicks = -1;
+}
+
+void ValueSettingsClient::AddEventListeners()
+{
+    Amethyst::GetClientCtx().mCustomUIRendererRegistry->registerRenderer(
+        "value_settings_screen_tip_renderer",
+        []() -> std::shared_ptr<MinecraftUICustomRenderer> {
+            return std::make_shared<ValueSettingsClientRenderer>();
+        }
+    );
+}
+
+void ValueSettingsClientRenderer::render(MinecraftUIRenderContext &ctx, IClientInstance &client, UIControl &owner, int32_t pass, RectangleArea &renderAABB)
+{
+    CreateClient::VALUE_SETTINGS_HANDLER.render(ctx, (ClientInstance&)client, owner, pass, renderAABB, this->mPropagatedAlpha);
 }
