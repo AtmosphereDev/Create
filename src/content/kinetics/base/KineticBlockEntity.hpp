@@ -118,7 +118,7 @@ public:
 		networkDirty = false;
 		capacity = maxStress;
 		stress = currentStress;
-		networkSize = networkSize;
+		this->networkSize = networkSize;
 		bool overStressed = maxStress < currentStress && IRotate::StressImpact::isEnabled();
 		setChanged();
 
@@ -234,11 +234,11 @@ public:
 			lastStressApplied = 0;
 			lastCapacityProvided = 0;
 
-			if (networkTag.contains("LastStressApplied"))
-				lastStressApplied = networkTag.getFloat("LastStressApplied");
+			if (networkTag.contains("AddedStress"))
+				lastStressApplied = networkTag.getFloat("AddedStress");
 
-			if (networkTag.contains("LastCapacityProvided"))
-				lastCapacityProvided = networkTag.getFloat("LastCapacityProvided");
+			if (networkTag.contains("AddedCapacity"))
+				lastCapacityProvided = networkTag.getFloat("AddedCapacity");
 
 			overStressed = capacity < stress && IRotate::StressImpact::isEnabled();
 		}
@@ -259,11 +259,7 @@ public:
 	}
 
 	float getSpeed() const {
-		// if (overStressed || (level != nullptr && level->tickRateManager().isFrozen()))
-		// 	return 0;
-		// TODO: add back in tick rate manager freeze check
-
-		if (overStressed)
+		if (overStressed) // || (level != nullptr && level->tickRateManager().isFrozen()
 			return 0;
 
 		return getTheoreticalSpeed();
@@ -274,7 +270,6 @@ public:
 	}
 
 	void setSpeed(float speed) {
-		Log::Info("KineticBlockEntity setSpeed called with speed {}", speed);
 		this->speed = speed;
 	}
 
@@ -344,8 +339,7 @@ public:
 	}
 
 	void detachKinetics() {
-	// 	RotationPropagator.handleRemoved(level, worldPosition, this);
-		// RotationPropagator::handleRemoved(level, mPosition, this);
+		RotationPropagator::handleRemoved(*level, mPosition, *this);
 	}
 
 	// boolean isSpeedRequirementFulfilled() {
@@ -394,7 +388,7 @@ public:
 	void clearKineticInformation() {
 		speed = 0;
 		source = std::nullopt;
-		network = 0;
+		network = std::nullopt;
 		overStressed = false;
 		stress = 0;
 		capacity = 0;
@@ -426,9 +420,7 @@ public:
 		return overStressed;
 	}
 
-	// Custom propagation
-
-		/**
+	/**
 	 * Specify ratio of transferred rotation from this kinetic component to a
 	 * specific other.
 	 *

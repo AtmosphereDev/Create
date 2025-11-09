@@ -223,14 +223,11 @@ public:
                 // ScrollValueHandler.wrenchCog.bump(3, -(closest.value() - lastHovered.value()) * 10);
 
                 float pitch = (closest.value)/(float)(board.maxValue);
-                Log::Info("Start pitch {} {}", closest.value, board.maxValue);
                 pitch = std::lerp(1.15f, 1.5f, pitch);
 
                 LocalPlayer& localPlayer = *client.getLocalPlayer();
 
                 AllSoundEvents::SCROLL_VALUE.play(*localPlayer.getLevel(), *localPlayer.getPosition(), 0.25f, pitch); 
-                Log::Info("Playing scroll sound with pitch {}", pitch);
-
                 soundCoolDown = 1;
             }
         }

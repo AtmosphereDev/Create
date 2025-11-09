@@ -46,8 +46,8 @@ public:
 	// }
 
 	void sendData() {
-		// if (level instanceof ServerLevel serverLevel)
-		// 	serverLevel.getChunkSource().blockChanged(getBlockPos());
+		if (level->isClientSide()) return;
+		level->mBlockSource->fireBlockChanged(mPosition, 0, getBlock(), getBlock(), 3, BlockChangedEventTarget::SelfBlock, nullptr, nullptr);
 	}
 
 	void notifyUpdate() {

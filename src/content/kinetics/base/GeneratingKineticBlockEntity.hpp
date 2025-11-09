@@ -47,6 +47,8 @@ protected:
 
         if (level == nullptr || level->isClientSide()) return;
 
+		Log::Info("GeneratingKineticBlockEntity::updateGeneratedRotation called at {} with speed {}, previous speed {}", mPosition, speed, prevSpeed);
+
         if (prevSpeed != speed) {
             if (!hasSource()) {
                 IRotate::SpeedLevel levelBefore = IRotate::SpeedLevel::of(this->speed);
