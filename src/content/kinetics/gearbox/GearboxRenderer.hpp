@@ -24,7 +24,7 @@ public:
         Vec3 renderPos = Vec3(be.getBlockPos()) - ctx.mCameraTargetPosition;
         MatrixStack& stack = ctx.mScreenContext.camera->worldMatrixStack;
         auto worldSpace = stack.push(); // push into local space
-        worldSpace->translate(renderPos.x + 0.5f, renderPos.y + 0.5f, renderPos.z + 0.5f);
+        worldSpace->translate(0.0f, 0.5f, 0.0f);
 
         auto shaftHalf = Models::partial(ctx.mScreenContext.tessellator, AllPartialModels::SHAFT_HALF);
 
@@ -42,7 +42,7 @@ public:
             
             kineticRotationTransform(be, *mat, axis, angle);
             rotateToFace(*mat, dir);
-            mat->translate(0, -0.5f, 0);
+            mat->translate(renderPos.x + 0.5f, renderPos.y - 0.5f, renderPos.z + 0.5f);
 
             for (const auto& mesh : shaftHalf->meshes) {
                 mesh.mesh.renderMesh(ctx.mScreenContext, self.getEntityMaterial(), mHalfShaftTexture);
@@ -52,7 +52,7 @@ public:
         }
 
         auto gearboxModel = Models::partial(ctx.mScreenContext.tessellator, AllPartialModels::GEARBOX);
-        worldSpace->translate(0, -0.5f, 0);
+        worldSpace->translate(renderPos.x + 0.5f, renderPos.y - 0.5f, renderPos.z + 0.5f); // move to block position
 
         for (const auto& mesh : gearboxModel->meshes) {
             mesh.mesh.renderMesh(ctx.mScreenContext, self.getStaticEntityMaterial(), mGearboxTexture);

@@ -5,8 +5,8 @@ class Dimension;
 
 class SynchedBlockEntity : public JavaBlockEntity {
 public:
-	SynchedBlockEntity(BlockActorType typeIn, const BlockPos& pos, const std::string& id)
-		: JavaBlockEntity(typeIn, pos, id) {}
+	SynchedBlockEntity(const BlockPos& pos, const std::string& id)
+		: JavaBlockEntity(pos, id) {}
 	
 
 	// public SyncedBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {

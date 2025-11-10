@@ -11,8 +11,8 @@ public:
     std::shared_ptr<ScrollValueBehaviour> generatedSpeed;
 	// AbstractComputerBehaviour computerBehaviour; // this is purely for computer craft integration
 
-    CreativeMotorBlockEntity(BlockActorType typeIn, const BlockPos& pos, const std::string& id)
-        : GeneratingKineticBlockEntity(typeIn, pos, id) {
+    CreativeMotorBlockEntity(const BlockPos& pos, const std::string& id)
+        : GeneratingKineticBlockEntity(pos, id) {
             Log::Info("Creative motor block entity created!!");
         }
 

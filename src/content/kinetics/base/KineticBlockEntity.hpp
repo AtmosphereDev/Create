@@ -32,8 +32,8 @@ public:
 
     // SequenceContext sequenceContext;
 
-    KineticBlockEntity(BlockActorType typeIn, const BlockPos& pos, const std::string& id)
-		: SmartBlockEntity(typeIn, pos, id), speed(0), capacity(0), stress(0), overStressed(false), wasMoved(false), flickerTally(0),
+    KineticBlockEntity(const BlockPos& pos, const std::string& id)
+		: SmartBlockEntity(pos, id), speed(0), capacity(0), stress(0), overStressed(false), wasMoved(false), flickerTally(0),
 		networkSize(0), validationCountdown(0), lastStressApplied(0), lastCapacityProvided(0), networkDirty(false), preventSpeedUpdate(0)
 	{
 		// effects = new KineticEffectHandler(this);
@@ -213,6 +213,8 @@ public:
 		clearKineticInformation();
 
 		if (wasMoved) {
+			SmartBlockEntity::_onUpdatePacket(compound, region);
+			Log::Info("_onUpdatePacket ignored since wasMoved was true");
 			return;
 		}
 
@@ -334,11 +336,13 @@ public:
 	}
 
 	void attachKinetics() {
+		Log::Info("KineticBlockEntity attachKinetics called at {}", mPosition);
 		updateSpeed = false;
 		RotationPropagator::handleAdded(*level, mPosition, *this);
 	}
 
 	void detachKinetics() {
+		Log::Info("KineticBlockEntity detachKinetics called at {}", mPosition);
 		RotationPropagator::handleRemoved(*level, mPosition, *this);
 	}
 
@@ -450,7 +454,7 @@ public:
 	 * @param neighbours
 	 * @return
 	 */
-	std::vector<BlockPos> addPropagationLocations(IRotate& block, const Block& state, std::vector<BlockPos> neighbours) {
+	virtual std::vector<BlockPos> addPropagationLocations(IRotate& block, const Block& state, std::vector<BlockPos> neighbours) {
 		if (!canPropagateDiagonally(block, state))
 			return neighbours;
 

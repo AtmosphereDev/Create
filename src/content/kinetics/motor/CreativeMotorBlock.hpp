@@ -8,7 +8,7 @@ public:
         : DirectionalKineticBlock(name, id, material) {}
 
     virtual std::shared_ptr<BlockActor> newBlockEntity(const BlockPos& pos, const Block& block) const override {
-		return std::make_shared<CreativeMotorBlockEntity>(JavaBlockEntity::TYPE, pos, "");
+		return std::make_shared<CreativeMotorBlockEntity>(pos, "CreativeMotorBlock");
 	}
 
     virtual Facing::Axis getRotationAxis(const Block& state) const override {

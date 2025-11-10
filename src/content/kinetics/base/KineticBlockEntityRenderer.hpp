@@ -9,6 +9,7 @@
 #include <mc/src/common/util/Timer.hpp>
 #include <mc/src/common/Minecraft.hpp>
 #include <mc/src-client/common/client/renderer/TextureGroup.hpp>
+#include "flywheel/api/model/Model.hpp"
 
 const Block;
 class Model;
@@ -36,6 +37,22 @@ protected:
 
     virtual void applyModelRotation(const KineticBlockEntity& be, Matrix& mat) const;
 
+    void renderRotatingBuffer(BlockActorRenderer& self, const KineticBlockEntity& be, BaseActorRenderContext& ctx, std::shared_ptr<Model> mesh, const mce::TexturePtr& texture) const {
+        Vec3 renderPos = Vec3(be.getBlockPos()) - ctx.mCameraTargetPosition;
+        auto mat = ctx.mScreenContext.camera->worldMatrixStack.push();
+        
+        mat->translate(0.0f, -0.5f, 0.0f); // center model
+        applyModelRotation(be, *mat);
+        standardKineticRotationTransform(be, *mat);
+        mat->translate(renderPos.x + 0.5f, renderPos.y + 0.5f, renderPos.z + 0.5f); // uncenter model around 0,0,0
+
+        for (const auto& mesh : mesh->meshes) {
+            mesh.mesh.renderMesh(ctx.mScreenContext, self.getStaticEntityMaterial(), texture);
+        }
+
+        mat.stack->pop();
+    }
+
 public:
     static const Block& shaft(Facing::Axis axis);
 
@@ -55,5 +72,7 @@ public:
 
     static float getTime();
 
-    static void rotateToFace(Matrix& mat, FacingID face);
+    static void rotateVerticalToFace(Matrix& mat, FacingID face);
+
+    static void rotateToFace(Matrix& mat, FacingID axis);
 };

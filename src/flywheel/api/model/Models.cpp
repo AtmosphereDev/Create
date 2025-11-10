@@ -17,11 +17,12 @@ RendererReloadCache<std::shared_ptr<PartialModel>, std::shared_ptr<Model>> Model
 
         tess.begin(mce::PrimitiveMode::QuadList, 0);
 
-		for (auto& node : geometry->mPtr->mNodes) {
-			for (auto& box : node.second.mBoxes) {
-				box.Tessellate(tess, geometry->mPtr->mTextureDimensions.x, geometry->mPtr->mTextureDimensions.y);
-			}
-		}
+        geometry->mPtr->Tessellate(tess);
+		// for (auto& node : geometry->mPtr->mNodes) {
+		// 	for (auto& box : node.second.mBoxes) {
+		// 		box.Tessellate(tess, geometry->mPtr->mTextureDimensions.x, geometry->mPtr->mTextureDimensions.y);
+		// 	}
+		// }
 
 		configuredMesh.mesh = std::move(tess.end(0, partial->identifier().getString(), 0));
         model->meshes.push_back(configuredMesh);

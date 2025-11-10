@@ -19,25 +19,10 @@ void KineticBlockEntityRenderer::renderSafe(BlockActorRenderer &self, BaseActorR
     const Block& block = getRenderedBlockState(entity);
 
     auto model = getModel(ctx.mScreenContext.tessellator, entity, block);
+    renderRotatingBuffer(self, entity, ctx, model, mShaftTexture);
 
-    Vec3 renderPos = Vec3(entity.getBlockPos()) - ctx.mCameraTargetPosition;
-    MatrixStack& stack = ctx.mScreenContext.camera->worldMatrixStack;
-    auto mat = stack.push();
-
-	mat->translate(renderPos.x + 0.5f, renderPos.y + 0.5f, renderPos.z + 0.5f); // on X and Z to center on block, on Y to make model centered (for rotating around center)
-
+    // little util for blocks that have non-rotating parts, i.e. creative motor casing
     renderAdditional(self, ctx, data);
-
-    standardKineticRotationTransform(entity, *mat); // rotate around axis
-	applyModelRotation(entity, *mat); // block rotation, i.e. facing negative Z axis would rotate it
-    mat->translate(0, -0.5f, 0); // re-align the vertical
-
-    for (const auto& mesh : model->meshes) {
-        mesh.mesh.renderMesh(ctx.mScreenContext, self.getStaticEntityMaterial(), mShaftTexture);
-    }
-
-
-    stack.pop();
 }
 
 const Block &KineticBlockEntityRenderer::shaft(Facing::Axis axis)
@@ -54,20 +39,8 @@ std::shared_ptr<Model> KineticBlockEntityRenderer::getModel(Tessellator &tess, c
 void KineticBlockEntityRenderer::applyModelRotation(const KineticBlockEntity &be, Matrix &mat) const
 {
     Facing::Axis axis = getRotationAxisOf(be);
-    switch (axis)
-    {
-        case Facing::Axis::X:
-            mat.rotateRad(glm::half_pi<float>(), 0.0f, 0.0f, 1.0f);
-            break;
-
-        case Facing::Axis::Z:
-            mat.rotateRad(glm::half_pi<float>(), 1.0f, 0.0f, 0.0f);
-            break;
-
-        case Facing::Axis::Y:
-        default:
-            break;
-    }
+    FacingID face = Facing::fromDirectionAndAxis(Facing::AxisDirection::POSITIVE, axis);
+    rotateVerticalToFace(mat, face);
 }
 
 void KineticBlockEntityRenderer::standardKineticRotationTransform(const KineticBlockEntity &be, Matrix& mat)
@@ -100,26 +73,53 @@ float KineticBlockEntityRenderer::getTime()
     return Amethyst::GetClientCtx().mMinecraft->mSimTimer.mLastTimeSeconds * 20.0f; // to ticks to match java
 }
 
+void KineticBlockEntityRenderer::rotateVerticalToFace(Matrix &mat, FacingID dir)
+{
+    switch (dir) {
+        case Facing::Name::UP:
+            // no rotation, identity
+            break;
+        case Facing::Name::DOWN:
+            mat.rotateRad(glm::pi<float>(), 1, 0, 0); // flip upside-down around X
+            break;
+        case Facing::Name::NORTH:
+            mat.rotateRad(glm::half_pi<float>(), 1, 0, 0); // rotate -90° X to lay flat on Z-
+            break;
+        case Facing::Name::SOUTH:
+            mat.rotateRad(-glm::half_pi<float>(), 1, 0, 0); // rotate +90° X to lay flat on Z+
+            break;
+        case Facing::Name::EAST:
+            mat.rotateRad(glm::half_pi<float>(), 0, 0, 1); // rotate +90° Z to lay flat on X+
+            break;
+        case Facing::Name::WEST:
+            mat.rotateRad(-glm::half_pi<float>(), 0, 0, 1); // rotate -90° Z to lay flat on X-
+            break;
+        default:
+            std::unreachable();
+            break;
+    }
+}
+
 void KineticBlockEntityRenderer::rotateToFace(Matrix &mat, FacingID dir)
 {
     switch (dir) {
         case Facing::Name::NORTH:
-            // default, no rotation needed
+            mat.rotateRad(glm::pi<float>(), 0, 1, 0); // flip 180° around Y
             break;
         case Facing::Name::SOUTH:
-            mat.rotateRad(glm::pi<float>(), 0, 1, 0); // 180° around Y
+            // was 180°, now identity
             break;
         case Facing::Name::EAST:
-            mat.rotateRad(glm::half_pi<float>(), 0, 1, 0); // +90° around Y
+            mat.rotateRad(glm::half_pi<float>(), 0, 1, 0); // flip +90° Y
             break;
         case Facing::Name::WEST:
-            mat.rotateRad(-glm::half_pi<float>(), 0, 1, 0); // -90° around Y
+            mat.rotateRad(-glm::half_pi<float>(), 0, 1, 0); // flip -90° Y
             break;
         case Facing::Name::UP:
-            mat.rotateRad(-glm::half_pi<float>(), 1, 0, 0); // rotate -90° around X
+            mat.rotateRad(-glm::half_pi<float>(), 1, 0, 0); // keep same
             break;
         case Facing::Name::DOWN:
-            mat.rotateRad(glm::half_pi<float>(), 1, 0, 0); // rotate +90° around X
+            mat.rotateRad(glm::half_pi<float>(), 1, 0, 0); // keep same
             break;
         default:
             std::unreachable();

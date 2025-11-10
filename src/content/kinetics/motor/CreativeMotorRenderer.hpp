@@ -18,11 +18,13 @@ public:
         auto model = Models::partial(ctx.mScreenContext.tessellator, AllPartialModels::CREATIVE_MOTOR);
         KineticBlockEntity& be = static_cast<KineticBlockEntity&>(data.entity);
         
+        Vec3 renderPos = Vec3(be.getBlockPos()) - ctx.mCameraTargetPosition;
         auto& matrixStack = ctx.mScreenContext.camera->worldMatrixStack;
         auto mat = matrixStack.push();
 
+        mat->translate(0.0f, -0.5f, 0.0f); // center model
         applyModelRotation(be, *mat);
-        mat->translate(0, -0.5f, 0); // re-align the vertical
+        mat->translate(renderPos.x + 0.5f, renderPos.y + 0.5f, renderPos.z + 0.5f); // uncenter model around 0,0,0
 
         for (const auto& mesh : model->meshes) {
             mesh.mesh.renderMesh(ctx.mScreenContext, self.getStaticEntityMaterial(), mCreativeMotorTexture);

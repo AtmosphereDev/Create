@@ -5,8 +5,8 @@ class GeneratingKineticBlockEntity : public KineticBlockEntity {
 public:
     bool reActivateSource;
 
-    GeneratingKineticBlockEntity(BlockActorType typeIn, const BlockPos& pos, const std::string& id)
-		: KineticBlockEntity(typeIn, pos, id), reActivateSource(false) {}
+    GeneratingKineticBlockEntity(const BlockPos& pos, const std::string& id)
+		: KineticBlockEntity(pos, id), reActivateSource(false) {}
 
 protected:
     void notifyStressCapacityChange(float capacity) {
@@ -34,6 +34,11 @@ protected:
 
     virtual void tick(BlockSource& source) override {
         KineticBlockEntity::tick(source);
+
+        if (level == nullptr) {
+			Log::Warning("GeneratingKineticBlockEntity tick called with null level at {}", mPosition);
+			return;
+        }
 
         if (reActivateSource) {
             updateGeneratedRotation();

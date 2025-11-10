@@ -20,8 +20,8 @@ public:
     // Java actually uses level to mean a specific dimension
 	Dimension* level; // Not actually in here, but its in the java BlockEntity class, maybe would be good to make a kinda middleman?
 
-    JavaBlockEntity(BlockActorType type, const BlockPos& pos, const std::string& id)
-        : BlockActor(type, pos, id), level(nullptr) {
+    JavaBlockEntity(const BlockPos& pos, const std::string& id)
+        : BlockActor(JavaBlockEntity::TYPE, pos, id), level(nullptr) {
             mRendererId = (BlockActorRendererId)((int)BlockActorRendererId::Count + 1);
         }
 

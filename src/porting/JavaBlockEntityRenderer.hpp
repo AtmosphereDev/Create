@@ -8,6 +8,8 @@
 #include "content/kinetics/base/ShaftRenderer.hpp"
 #include "content/kinetics/gearbox/GearboxRenderer.hpp"
 #include "content/kinetics/motor/CreativeMotorRenderer.hpp"
+#include "content/kinetics/simpleRelays/encased/EncasedCogRenderer.hpp"
+#include "content/kinetics/simpleRelays/BracketedKineticBlockEntityRenderer.hpp"
 
 class JavaBlockEntityRenderer : public BlockActorRenderer {
 public:
@@ -17,6 +19,8 @@ public:
         mRenderers["fx_create:shaft"] = std::make_unique<ShaftRenderer>();
         mRenderers["fx_create:gearbox"] = std::make_unique<GearboxRenderer>();
         mRenderers["fx_create:creative_motor"] = std::make_unique<CreativeMotorRenderer>();
+        mRenderers["fx_create:cogwheel"] = std::make_unique<BracketedKineticBlockEntityRenderer>();
+        mRenderers["fx_create:large_cogwheel"] = std::make_unique<BracketedKineticBlockEntityRenderer>();
     };
 
     virtual void render(BaseActorRenderContext& ctx, BlockActorRenderData& data) override {

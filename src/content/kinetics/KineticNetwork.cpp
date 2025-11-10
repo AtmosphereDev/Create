@@ -118,7 +118,8 @@ void KineticNetwork::updateNetwork()
 
 float KineticNetwork::calculateCapacity()
 {
-    float presentCapacity = 0;
+	return 100000.0f;
+    /*float presentCapacity = 0;
     for (auto it = sources.begin(); it != sources.end(); ) {
         KineticBlockEntity* be = it->first;
         if (be->level->mBlockSource->getBlockEntity(be->getBlockPos()) != be) {
@@ -128,7 +129,7 @@ float KineticNetwork::calculateCapacity()
         presentCapacity += getActualCapacityOf(be);
         ++it;
     }
-    return presentCapacity + unloadedCapacity;
+    return presentCapacity + unloadedCapacity;*/
 }
 
 float KineticNetwork::calculateStress()

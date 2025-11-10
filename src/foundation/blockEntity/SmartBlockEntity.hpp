@@ -17,8 +17,8 @@ protected:
     bool virtualMode;
 
 public:
-    SmartBlockEntity(BlockActorType typeIn, const BlockPos& pos, const std::string& id)
-        : CachedRenderBBBlockEntity(typeIn, pos, id), initialized(false), firstNbtRead(false), chunkUnloaded(false), lazyTickRate(0), lazyTickCounter(0), virtualMode(false) {
+    SmartBlockEntity(const BlockPos& pos, const std::string& id)
+        : CachedRenderBBBlockEntity(pos, id), initialized(false), firstNbtRead(false), chunkUnloaded(false), lazyTickRate(0), lazyTickCounter(0), virtualMode(false) {
             setLazyTickRate(10);
         }
 

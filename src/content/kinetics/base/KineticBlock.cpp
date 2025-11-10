@@ -15,11 +15,14 @@ void KineticBlock::neighborChanged(BlockSource& region, const BlockPos& pos, con
     KineticBlockEntity* kbe = KineticBlockEntity::asKineticBlockEntity(region.getBlockEntity(pos));
     if (!kbe) return;
 
-    if (kbe->preventSpeedUpdate > 0) return;
+    if (kbe->preventSpeedUpdate > 0) {
+        Log::Info("KineticBlock::neighborChanged skipping speed update at {} due to preventSpeedUpdate {}", pos, kbe->preventSpeedUpdate);
+        return;
+    }
 
     // Remove previous information when block is added
     kbe->warnOfMovement();
     kbe->clearKineticInformation();
     kbe->updateSpeed = true;
-    Log::Info("KineticBlock::neighborChanged called at {}", pos);
+    Log::Info("KineticBlock::neighborChanged called at {}", pos);\
 }

@@ -5,6 +5,9 @@ std::shared_ptr<PartialModel> AllPartialModels::SHAFT = AllPartialModels::block(
 std::shared_ptr<PartialModel> AllPartialModels::SHAFT_HALF = AllPartialModels::block("geometry.fx_create.shaft_half");
 std::shared_ptr<PartialModel> AllPartialModels::GEARBOX = AllPartialModels::block("geometry.fx_create.gearbox");
 std::shared_ptr<PartialModel> AllPartialModels::CREATIVE_MOTOR = AllPartialModels::block("geometry.fx_create.creative_motor");
+std::shared_ptr<PartialModel> AllPartialModels::SHAFTLESS_LARGE_COGWHEEL = AllPartialModels::block("geometry.fx_create.large_cogwheel_shaftless");
+std::shared_ptr<PartialModel> AllPartialModels::SHAFTLESS_COGWHEEL = AllPartialModels::block("geometry.fx_create.cogwheel_shaftless");
+std::shared_ptr<PartialModel> AllPartialModels::COGWHEEL_SHAFT = AllPartialModels::block("geometry.fx_create.cogwheel_shaft");
 
 // Model loading
 

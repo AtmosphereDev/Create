@@ -7,6 +7,6 @@ public:
         : AbstractSimpleShaftBlock(name, id, material) {}
 
     virtual std::shared_ptr<BlockActor> newBlockEntity(const BlockPos& pos, const Block& block) const override {
-		return std::make_shared<KineticBlockEntity>(JavaBlockEntity::TYPE, pos, "bosh");
+		return std::make_shared<KineticBlockEntity>(pos, "ShaftBlock");
 	}
 };

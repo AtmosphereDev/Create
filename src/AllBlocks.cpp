@@ -9,12 +9,15 @@
 #include <mc/src/common/world/level/block/VanillaStates.hpp>
 
 #include "content/kinetics/gearbox/GearboxBlock.hpp"
-#include "content/kinetics/simpleRelays/ShaftBlock.hpp"
 #include "content/kinetics/motor/CreativeMotorBlock.hpp"
+#include "content/kinetics/simpleRelays/ShaftBlock.hpp"
+#include "content/kinetics/simpleRelays/CogWheelBlock.hpp"
 
 WeakPtr<ShaftBlock> AllBlocks::SHAFT;
 WeakPtr<GearboxBlock> AllBlocks::GEARBOX;
 WeakPtr<CreativeMotorBlock> AllBlocks::CREATIVE_MOTOR;
+WeakPtr<CogWheelBlock> AllBlocks::COGWHEEL;
+WeakPtr<CogWheelBlock> AllBlocks::LARGE_COGWHEEL;
 
 void AllBlocks::RegisterBlocks(RegisterBlocksEvent &ev)
 {
@@ -27,6 +30,12 @@ void AllBlocks::RegisterBlocks(RegisterBlocksEvent &ev)
 
     CREATIVE_MOTOR = BlockTypeRegistry::registerBlock<CreativeMotorBlock>("fx_create:creative_motor", ev.blockDefinitions.getNextBlockId(), material);
     CREATIVE_MOTOR->addState(VanillaStates::FacingDirection);
+
+    COGWHEEL = BlockTypeRegistry::registerBlock<CogWheelBlock>("fx_create:cogwheel", ev.blockDefinitions.getNextBlockId(), material, false);
+    COGWHEEL->addState(VanillaStates::PillarAxis);
+
+    LARGE_COGWHEEL = BlockTypeRegistry::registerBlock<CogWheelBlock>("fx_create:large_cogwheel", ev.blockDefinitions.getNextBlockId(), material, true);
+    LARGE_COGWHEEL->addState(VanillaStates::PillarAxis);
 }
 
 void AllBlocks::RegisterBlockItems(RegisterItemsEvent &ev)
@@ -34,11 +43,15 @@ void AllBlocks::RegisterBlockItems(RegisterItemsEvent &ev)
     ev.itemRegistry.registerItemShared<BlockItem>(SHAFT->mNameInfo.mFullName.getString(), ev.itemRegistry.getNextItemID(), SHAFT->mNameInfo.mFullName);
     ev.itemRegistry.registerItemShared<BlockItem>(GEARBOX->mNameInfo.mFullName.getString(), ev.itemRegistry.getNextItemID(), GEARBOX->mNameInfo.mFullName);
     ev.itemRegistry.registerItemShared<BlockItem>(CREATIVE_MOTOR->mNameInfo.mFullName.getString(), ev.itemRegistry.getNextItemID(), CREATIVE_MOTOR->mNameInfo.mFullName);
+    ev.itemRegistry.registerItemShared<BlockItem>(COGWHEEL->mNameInfo.mFullName.getString(), ev.itemRegistry.getNextItemID(), COGWHEEL->mNameInfo.mFullName);
+    ev.itemRegistry.registerItemShared<BlockItem>(LARGE_COGWHEEL->mNameInfo.mFullName.getString(), ev.itemRegistry.getNextItemID(), LARGE_COGWHEEL->mNameInfo.mFullName);
 
     auto& construction = ev.mCreativeItemRegistry.GetVanillaCategory(CreativeItemCategory::Construction);
     construction.AddCreativeItem(SHAFT->getRenderBlock());
     construction.AddCreativeItem(GEARBOX->getRenderBlock());
     construction.AddCreativeItem(CREATIVE_MOTOR->getRenderBlock());
+    construction.AddCreativeItem(COGWHEEL->getRenderBlock());
+    construction.AddCreativeItem(LARGE_COGWHEEL->getRenderBlock());
 }
 
 void AllBlocks::InitBlockGraphics(InitBlockGraphicsEvent &ev)
@@ -53,6 +66,8 @@ void AllBlocks::InitBlockGraphics(InitBlockGraphicsEvent &ev)
     createGraphics(SHAFT);
     createGraphics(GEARBOX);
     createGraphics(CREATIVE_MOTOR);
+    createGraphics(COGWHEEL);
+    createGraphics(LARGE_COGWHEEL);
 }
 
 void AllBlocks::AddEventListeners()
