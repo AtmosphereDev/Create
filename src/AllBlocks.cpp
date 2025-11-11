@@ -21,7 +21,7 @@ WeakPtr<CogWheelBlock> AllBlocks::LARGE_COGWHEEL;
 
 void AllBlocks::RegisterBlocks(RegisterBlocksEvent &ev)
 {
-    Material& material = Material::getMaterial(MaterialType::Solid);
+    Material& material = Material::getMaterial(MaterialType::NonSolid);
     SHAFT = BlockTypeRegistry::registerBlock<ShaftBlock>("fx_create:shaft", ev.blockDefinitions.getNextBlockId(), material);
     SHAFT->addState(VanillaStates::PillarAxis);
 

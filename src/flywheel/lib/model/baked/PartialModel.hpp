@@ -9,7 +9,7 @@
 
 class PartialModel {
 public:
-    static std::shared_ptr<PartialModel> of(const HashedString& identifier) {
+    static std::shared_ptr<PartialModel> of(const HashedString& identifier, const HashedString& texture) {
         std::scoped_lock lock(allMutex_);
         auto key = identifier;
 
@@ -17,7 +17,7 @@ public:
             return existingWeak;
         }
 
-		auto instance = std::shared_ptr<PartialModel>(new PartialModel(identifier));
+		auto instance = std::shared_ptr<PartialModel>(new PartialModel(identifier, texture));
         all_[key] = instance;
         return instance;
     }
@@ -38,11 +38,16 @@ public:
         geometryInfo_ = geometryInfo;
     }
 
-private:
-    explicit PartialModel(const HashedString& identifier)
-        : identifier_(identifier), geometryInfo_(nullptr) {}
+    const HashedString& getTexture() const {
+        return texture_;
+    }
 
+private:
+    explicit PartialModel(const HashedString& identifier, const HashedString& texture)
+        : identifier_(identifier), texture_(texture), geometryInfo_(nullptr) {}
+    
     HashedString identifier_;
+    HashedString texture_;
     std::shared_ptr<GeometryInfo> geometryInfo_;
 
     // Static global weak cache

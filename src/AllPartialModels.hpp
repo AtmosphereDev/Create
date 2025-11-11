@@ -10,10 +10,11 @@ public:
     static std::shared_ptr<PartialModel> SHAFTLESS_LARGE_COGWHEEL;
     static std::shared_ptr<PartialModel> SHAFTLESS_COGWHEEL;
     static std::shared_ptr<PartialModel> COGWHEEL_SHAFT;
+    static std::shared_ptr<PartialModel> COGWHEEL;
 
 private:
-    static std::shared_ptr<PartialModel> block(const std::string& path) {
-        auto model = PartialModel::of(path);
+    static std::shared_ptr<PartialModel> block(const std::string& path, const std::string& texture) {
+        auto model = PartialModel::of(path, texture);
         allModels.push_back(model);
         return model;
     }

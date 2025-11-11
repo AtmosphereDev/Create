@@ -2,6 +2,7 @@
 #include "content/kinetics/base/KineticBlockEntityRenderer.hpp"
 #include "content/kinetics/simpleRelays/SimpleKineticBlockEntity.hpp"
 #include "content/kinetics/base/KineticBlockEntityVisual.hpp"
+#include "content/kinetics/simpleRelays/CogWheelBlock.hpp"
 
 class BracketedKineticBlockEntityRenderer : public KineticBlockEntityRenderer {
 public:
@@ -13,35 +14,42 @@ public:
     }
 
     virtual void renderSafe(BlockActorRenderer& self, BaseActorRenderContext& ctx, BlockActorRenderData& data) const override {
-        // todo handle non large cogwheels
-        // if (!AllBlocks.LARGE_COGWHEEL.has(be.getBlockState())) {
-		// 	super.renderSafe(be, partialTicks, ms, buffer, light, overlay);
-		// 	return;
-		// }
-
+        // Non large cogwheels just pass through to base        
         const SimpleKineticBlockEntity& be = static_cast<const SimpleKineticBlockEntity&>(data.entity);
-        Vec3 renderPos = Vec3(be.getBlockPos()) - ctx.mCameraTargetPosition;
-        MatrixStack& stack = ctx.mScreenContext.camera->worldMatrixStack;
-        auto worldSpace = stack.push(); // push into local space
-        worldSpace->translate(0, 0.5f, 0);
+        if (AllBlocks::LARGE_COGWHEEL != be.getBlock().mLegacyBlock) {
+            KineticBlockEntityRenderer::renderSafe(self, ctx, data);
+            return;
+        }
 
         Facing::Axis axis = getRotationAxisOf(be);
         FacingID facing = Facing::fromDirectionAndAxis(Facing::AxisDirection::POSITIVE, axis);
-
+        
         renderRotatingBuffer(self, be, ctx, Models::partial(ctx.mScreenContext.tessellator, AllPartialModels::SHAFTLESS_LARGE_COGWHEEL), mLargeCogwheelTexture);
-
+        
+        Vec3 renderPos = Vec3(be.getBlockPos()) - ctx.mCameraTargetPosition;
+        MatrixStack& stack = ctx.mScreenContext.camera->worldMatrixStack;
+        auto mat = stack.push(); // push into local space
+        
         float angle = getAngleForLargeCogShaft(be, axis);
         auto model = Models::partial(ctx.mScreenContext.tessellator, AllPartialModels::COGWHEEL_SHAFT);
-        applyModelRotation(be, *worldSpace);
-        kineticRotationTransform(be, *worldSpace, axis, angle);
-        worldSpace->translate(renderPos.x + 0.5f, renderPos.y - 0.5f, renderPos.z + 0.5f); // uncenter model around 0,0,0
+        mat->translate(0, -0.5f, 0);
+        applyModelRotation(be, *mat);
+        kineticRotationTransform(be, *mat, axis, angle);
+        mat->translate(renderPos.x + 0.5f, renderPos.y + 0.5f, renderPos.z + 0.5f); // uncenter model around 0,0,0
         
-        for (const auto& mesh : model->meshes) {
-            mesh.mesh.renderMesh(ctx.mScreenContext, self.getStaticEntityMaterial(), mShaftTexture);
-        }
+        model->render(ctx, self.getStaticEntityMaterial());
 
-        worldSpace.stack->pop();
+        mat.stack->pop();
     };
+
+    virtual std::shared_ptr<Model> getModel(Tessellator& tess, const KineticBlockEntity& be, const Block& state) const override {
+        // called when passing through to base when not rendering large cogwheels
+        if (AllBlocks::COGWHEEL == state.mLegacyBlock) {
+            return Models::partial(tess, AllPartialModels::COGWHEEL);
+        }
+        
+        return Models::partial(tess, AllPartialModels::SHAFT);
+    }
 
     static float getAngleForLargeCogShaft(const SimpleKineticBlockEntity& be, Facing::Axis axis) {
         const BlockPos& pos = be.getBlockPos();

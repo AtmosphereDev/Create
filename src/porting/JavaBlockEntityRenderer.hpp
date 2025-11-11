@@ -16,9 +16,9 @@ public:
     std::unordered_map<HashedString, std::unique_ptr<SafeBlockEntityRenderer>> mRenderers;
 
     JavaBlockEntityRenderer() : BlockActorRenderer() {
-        mRenderers["fx_create:shaft"] = std::make_unique<ShaftRenderer>();
         mRenderers["fx_create:gearbox"] = std::make_unique<GearboxRenderer>();
         mRenderers["fx_create:creative_motor"] = std::make_unique<CreativeMotorRenderer>();
+        mRenderers["fx_create:shaft"] = std::make_unique<BracketedKineticBlockEntityRenderer>();
         mRenderers["fx_create:cogwheel"] = std::make_unique<BracketedKineticBlockEntityRenderer>();
         mRenderers["fx_create:large_cogwheel"] = std::make_unique<BracketedKineticBlockEntityRenderer>();
     };

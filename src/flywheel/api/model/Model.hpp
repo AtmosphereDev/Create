@@ -1,12 +1,14 @@
 #pragma once
 #include "flywheel/api/material/Material.hpp"
 #include <mc/src-deps/minecraftrenderer/renderer/Mesh.hpp>
+#include <mc/src-client/common/client/renderer/BaseActorRenderContext.hpp>
+#include <mc/src-client/common/client/renderer/screen/ScreenContext.hpp>
 
 class Model {
 public:
     struct ConfiguredMesh {
-        flywheel::Material material;
         mce::Mesh mesh;
+		mce::TexturePtr texture;
     };
 
     /**
@@ -28,4 +30,10 @@ public:
 	 * @return A vec4 view.
 	 */
 	// Vector4fc boundingSphere();
+
+	void render(BaseActorRenderContext& ctx, const mce::MaterialPtr& material) {
+		for (const auto& mesh : meshes) {
+			mesh.mesh.renderMesh(ctx.mScreenContext, material, mesh.texture);
+		}
+	}
 };

@@ -46,9 +46,7 @@ protected:
         standardKineticRotationTransform(be, *mat);
         mat->translate(renderPos.x + 0.5f, renderPos.y + 0.5f, renderPos.z + 0.5f); // uncenter model around 0,0,0
 
-        for (const auto& mesh : mesh->meshes) {
-            mesh.mesh.renderMesh(ctx.mScreenContext, self.getStaticEntityMaterial(), texture);
-        }
+        mesh->render(ctx, self.getStaticEntityMaterial());
 
         mat.stack->pop();
     }
