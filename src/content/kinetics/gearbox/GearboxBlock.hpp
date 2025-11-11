@@ -1,5 +1,6 @@
 #pragma once
 #include "content/kinetics/base/RotatedPillarKineticBlock.hpp"
+#include "content/kinetics/gearbox/GearboxBlockEntity.hpp"
 
 class GearboxBlock : public RotatedPillarKineticBlock {
 public:
@@ -13,7 +14,7 @@ public:
     }
 
     virtual std::shared_ptr<BlockActor> newBlockEntity(const BlockPos& pos, const Block& block) const override {
-		return std::make_shared<KineticBlockEntity>(pos, "GearboxBlock");
+		return std::make_shared<GearboxBlockEntity>(pos, "GearboxBlock");
 	}
 
     virtual Facing::Axis getRotationAxis(const Block& state) const override {

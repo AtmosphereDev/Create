@@ -21,7 +21,7 @@ public:
         return neighbours;
     }
 
-    virtual bool isNoisy() const {
+    virtual bool isNoisy() const override {
         return false;
     }
 };

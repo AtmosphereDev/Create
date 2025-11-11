@@ -501,7 +501,7 @@ public:
 	// 		CatnipServices.PLATFORM.executeOnClientOnly(() -> () -> VisualizationHelper.queueUpdate(this));
 	// }
 
-	bool isNoisy() {
+	virtual bool isNoisy() const {
 		return true;
 	}
 

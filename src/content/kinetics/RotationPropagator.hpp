@@ -16,22 +16,7 @@ public:
 
     static bool isLargeToLargeGear(const Block& from, const Block& to, const BlockPos& diff);
 
-    static float getAxisModifier(KineticBlockEntity& be, FacingID direction) {
-		return 1.0f; // TODO
-
-	// 	if (!(be.hasSource() || be.isSource()) || !(be instanceof DirectionalShaftHalvesBlockEntity))
-	// 		return 1;
-	// 	Direction source = ((DirectionalShaftHalvesBlockEntity) be).getSourceFacing();
-
-	// 	if (be instanceof GearboxBlockEntity)
-	// 		return direction.getAxis() == source.getAxis() ? direction == source ? 1 : -1
-	// 			: direction.getAxisDirection() == source.getAxisDirection() ? -1 : 1;
-
-	// 	if (be instanceof SplitShaftBlockEntity)
-	// 		return ((SplitShaftBlockEntity) be).getRotationSpeedModifier(direction);
-
-	// 	return 1;
-	}
+    static float getAxisModifier(KineticBlockEntity& be, FacingID direction);
 
 	static bool isLargeToSmallCog(const Block& from, const Block& to, const IRotate& defTo, const BlockPos& diff);
 

@@ -29,19 +29,30 @@ public:
         
         auto shaftHalf = Models::partial(ctx.mScreenContext.tessellator, AllPartialModels::SHAFT_HALF);
 
-        for (auto& dir : Facing::DIRECTIONS) {
-            Facing::Axis axis = Facing::getAxis(dir);
+        for (auto& direction : Facing::DIRECTIONS) {
+            Facing::Axis axis = Facing::getAxis(direction);
             if (axis == boxAxis) continue;
 
             auto mat = stack.push();
             
             float offset = getRotationOffsetForPosition(be, be.mPosition, axis);
             float angle = glm::mod((time * be.getSpeed() * 3.0f / 10.0f), 360.0f);
+
+            if (be.getSpeed() != 0 && be.hasSource()) {
+                BlockPos source = be.source.value() - be.mPosition;
+                FacingID sourceFacing = Facing::getNearest(source);
+                if (Facing::getAxis(sourceFacing) == Facing::getAxis(direction)) {
+                    angle *= sourceFacing == direction ? 1 : -1;
+                }
+                else if (Facing::getAxisDirection(sourceFacing) == Facing::getAxisDirection(direction)) {
+                    angle *= -1;
+                }
+            }
             
             angle += offset;
             angle = angle / 180.0f * glm::pi<float>();
             
-            rotateToFace(*mat, dir);
+            rotateToFace(*mat, direction);
             kineticRotationTransform(be, *mat, axis, angle);
             mat->translate(renderPos.x + 0.5f, renderPos.y + 0.5f, renderPos.z + 0.5f);
 

@@ -4,6 +4,8 @@
 #include "content/kinetics/base/KineticBlockEntity.hpp"
 #include "content/kinetics/simpleRelays/ICogWheel.hpp"
 #include <mc/src/common/world/level/block/VanillaStates.hpp>
+#include "content/kinetics/base/DirectionalShaftHalvesBlockEntity.hpp"
+#include "content/kinetics/gearbox/GearboxBlockEntity.hpp"
 
 float RotationPropagator::getRotationSpeedModifier(KineticBlockEntity& from, KineticBlockEntity& to)
 {
@@ -121,6 +123,26 @@ bool RotationPropagator::isLargeToLargeGear(const Block &from, const Block &to, 
         }
     }
     return true;
+}
+
+float RotationPropagator::getAxisModifier(KineticBlockEntity &be, FacingID direction)
+{
+    DirectionalShaftHalvesBlockEntity* halvesEntity = dynamic_cast<DirectionalShaftHalvesBlockEntity*>(&be);
+    if (!(be.hasSource() || be.isSource()) || !halvesEntity) {
+        return 1;
+    }
+
+    FacingID source = halvesEntity->getSourceFacing();
+    GearboxBlockEntity* gearboxEntity = dynamic_cast<GearboxBlockEntity*>(&be);
+    if (gearboxEntity) {
+        return Facing::getAxis(direction) == Facing::getAxis(source) ? direction == source ? 1 : -1
+            : Facing::getAxisDirection(direction) == Facing::getAxisDirection(source) ? -1 : 1;
+    }
+
+    // if (be instanceof SplitShaftBlockEntity)
+    // 	return ((SplitShaftBlockEntity) be).getRotationSpeedModifier(direction);
+
+    return 1;
 }
 
 bool RotationPropagator::isLargeToSmallCog(const Block &from, const Block &to, const IRotate &defTo, const BlockPos &diff)
