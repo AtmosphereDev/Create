@@ -8,15 +8,15 @@ public:
     bool isLarge;
 
     CogWheelBlock(const std::string& name, short id, const Material& material, bool large)
-        : AbstractSimpleShaftBlock(name, id, material) {
+        : AbstractSimpleShaftBlock(name, id, material), isLarge(large) {
             mTags.push_back(HashedString("ICogWheel"));
         }
 
-    virtual bool isLargeCog() override {
+    virtual bool isLargeCog() const override {
         return isLarge;
     }
 
-    virtual bool isSmallCog() override {
+    virtual bool isSmallCog() const override {
         return !isLarge;
     }
 

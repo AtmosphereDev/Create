@@ -14,25 +14,7 @@ public:
 
     static float getConveyedSpeed(KineticBlockEntity& from, KineticBlockEntity& to);
 
-    static bool isLargeToLargeGear(const Block& from, const Block& to, const BlockPos& diff) {
-		return false;
-		// if (!ICogWheel.isLargeCog(from) || !ICogWheel.isLargeCog(to))
-		// 	return false;
-		// Axis fromAxis = from.getValue(AXIS);
-		// Axis toAxis = to.getValue(AXIS);
-		// if (fromAxis == toAxis)
-		// 	return false;
-		// for (Axis axis : Axis.values()) {
-		// 	int axisDiff = axis.choose(diff.getX(), diff.getY(), diff.getZ());
-		// 	if (axis == fromAxis || axis == toAxis) {
-		// 		if (axisDiff == 0)
-		// 			return false;
-
-		// 	} else if (axisDiff != 0)
-		// 		return false;
-		// }
-		// return true;
-	}
+    static bool isLargeToLargeGear(const Block& from, const Block& to, const BlockPos& diff);
 
     static float getAxisModifier(KineticBlockEntity& be, FacingID direction) {
 		return 1.0f; // TODO
@@ -51,21 +33,7 @@ public:
 	// 	return 1;
 	}
 
-	static bool isLargeToSmallCog(const Block& from, const Block& to, IRotate& defTo, const BlockPos& diff) {
-		return false;
-	// 	Axis axisFrom = from.getValue(AXIS);
-	// 	if (axisFrom != defTo.getRotationAxis(to))
-	// 		return false;
-	// 	if (axisFrom.choose(diff.getX(), diff.getY(), diff.getZ()) != 0)
-	// 		return false;
-	// 	for (Axis axis : Axis.values()) {
-	// 		if (axis == axisFrom)
-	// 			continue;
-	// 		if (Math.abs(axis.choose(diff.getX(), diff.getY(), diff.getZ())) != 1)
-	// 			return false;
-	// 	}
-	// 	return true;
-	}
+	static bool isLargeToSmallCog(const Block& from, const Block& to, const IRotate& defTo, const BlockPos& diff);
 
 	static bool isLargeCogToSpeedController(const Block& from, const Block& to, const BlockPos& diff) {
 		return false;

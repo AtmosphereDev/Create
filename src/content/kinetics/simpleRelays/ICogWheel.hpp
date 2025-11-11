@@ -8,29 +8,37 @@ public:
 	} 
 
     static bool isSmallCog(const Block& block) {
-        //return isICogWheel(block) && ((ICogWheel*)block.mLegacyBlock.get())->isSmallCog();
-        return true;
+        const ICogWheel* cogWheel = asICogWheel(block.mLegacyBlock.get());
+        if (!cogWheel) return false;
+        return cogWheel->isSmallCog();
     }
 
     static bool isLargeCog(const Block& block) {
-        
-        return false;
-        //return isICogWheel(block) && ((ICogWheel*)block.mLegacyBlock.get())->isLargeCog();
+        const ICogWheel* cogWheel = asICogWheel(block.mLegacyBlock.get());
+        if (!cogWheel) return false;
+        return cogWheel->isLargeCog();
+    }
+
+    static const ICogWheel* asICogWheel(const BlockLegacy* blockLegacy) {
+        if (std::find(blockLegacy->mTags.begin(), blockLegacy->mTags.end(), HashedString("ICogWheel")) != blockLegacy->mTags.end()) {
+            return dynamic_cast<const ICogWheel*>(blockLegacy);
+        }
+        return nullptr;
     }
 
     static bool isDedicatedCogWheel(const Block& block) {
         return isICogWheel(block) && ((ICogWheel*)block.mLegacyBlock.get())->isDedicatedCogWheel();
     }
 
-    virtual bool isLargeCog() {
+    virtual bool isLargeCog() const {
         return false;
     }
 
-    virtual bool isSmallCog() {
+    virtual bool isSmallCog() const {
         return !isLargeCog();
     }
 
-    virtual bool isDedicatedCogWheel() {
+    virtual bool isDedicatedCogWheel() const {
         return false;
     }
 };

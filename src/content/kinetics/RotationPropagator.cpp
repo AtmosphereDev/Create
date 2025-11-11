@@ -2,6 +2,8 @@
 #include <mc/src-deps/core/math/Math.hpp>
 #include "infrastructure/config/AllConfigs.hpp"
 #include "content/kinetics/base/KineticBlockEntity.hpp"
+#include "content/kinetics/simpleRelays/ICogWheel.hpp"
+#include <mc/src/common/world/level/block/VanillaStates.hpp>
 
 float RotationPropagator::getRotationSpeedModifier(KineticBlockEntity& from, KineticBlockEntity& to)
 {
@@ -31,8 +33,7 @@ float RotationPropagator::getRotationSpeedModifier(KineticBlockEntity& from, Kin
     bool connectedByAxis = alignedAxis && definitionFrom->hasShaftTowards(world, from.getBlockPos(), stateFrom, direction)
         && definitionTo->hasShaftTowards(world, to.getBlockPos(), stateTo, Facing::getOpposite(direction));
 
-    // bool connectedByGears = ICogWheel.isSmallCog(stateFrom) && ICogWheel.isSmallCog(stateTo);
-    bool connectedByGears = false; // TODO cogs
+    bool connectedByGears = ICogWheel::isSmallCog(stateFrom) && ICogWheel::isSmallCog(stateTo);
 
     float custom = from.propagateRotationTo(to, stateFrom, stateTo, diff, connectedByAxis, connectedByGears);
     if (custom != 0.0f) return custom;
@@ -55,29 +56,32 @@ float RotationPropagator::getRotationSpeedModifier(KineticBlockEntity& from, Kin
 
     // Large Gear <-> Large Gear
     if (isLargeToLargeGear(stateFrom, stateTo, diff)) {
-        // todo
-        return -1.0f;
+        Facing::Axis sourceAxis = stateFrom.getState<Facing::Axis>(VanillaStates::PillarAxis);
+        Facing::Axis targetAxis = stateTo.getState<Facing::Axis>(VanillaStates::PillarAxis);
+        int sourceAxisDiff = Facing::choose(sourceAxis, diff.x, diff.y, diff.z);
+        int targetAxisDiff = Facing::choose(targetAxis, diff.x, diff.y, diff.z);
+        return sourceAxisDiff > 0 ^ targetAxisDiff > 0 ? -1.0f : 1.0f;
     }
 
     // Gear <-> Large Gear
-    // if (ICogWheel.isLargeCog(stateFrom) && ICogWheel.isSmallCog(stateTo))
-    //     if (isLargeToSmallCog(stateFrom, stateTo, definitionTo, diff))
-    //         return -2f;
-    // if (ICogWheel.isLargeCog(stateTo) && ICogWheel.isSmallCog(stateFrom))
-    //     if (isLargeToSmallCog(stateTo, stateFrom, definitionFrom, diff))
-    //         return -.5f;
+    if (ICogWheel::isLargeCog(stateFrom) && ICogWheel::isSmallCog(stateTo))
+        if (isLargeToSmallCog(stateFrom, stateTo, *definitionTo, diff))
+            return -2.0f;
+    if (ICogWheel::isLargeCog(stateTo) && ICogWheel::isSmallCog(stateFrom))
+        if (isLargeToSmallCog(stateTo, stateFrom, *definitionFrom, diff))
+            return -0.5f;
 
     // Gear <-> Gear
-    // if (connectedByGears) {
-    //     if (diff.distManhattan(BlockPos.ZERO) != 1)
-    //         return 0;
-    //     if (ICogWheel.isLargeCog(stateTo))
-    //         return 0;
-    //     if (direction.getAxis() == definitionFrom.getRotationAxis(stateFrom))
-    //         return 0;
-    //     if (definitionFrom.getRotationAxis(stateFrom) == definitionTo.getRotationAxis(stateTo))
-    //         return -1;
-    // }
+    if (connectedByGears) {
+        if (diff.distManhattan(BlockPos::ZERO) != 1)
+            return 0;
+        if (ICogWheel::isLargeCog(stateTo))
+            return 0;
+        if (Facing::getAxis(direction) == definitionFrom->getRotationAxis(stateFrom))
+            return 0;
+        if (definitionFrom->getRotationAxis(stateFrom) == definitionTo->getRotationAxis(stateTo))
+            return -1;
+    }
 
     return 0.0f;
 }
@@ -94,6 +98,45 @@ float RotationPropagator::getConveyedSpeed(KineticBlockEntity &from, KineticBloc
 
     float rotationSpeedModifier = getRotationSpeedModifier(from, to);
     return from.getTheoreticalSpeed() * rotationSpeedModifier;
+}
+
+bool RotationPropagator::isLargeToLargeGear(const Block &from, const Block &to, const BlockPos &diff)
+{
+    if (!ICogWheel::isLargeCog(from) || !ICogWheel::isLargeCog(to))
+        return false;
+
+    Facing::Axis fromAxis = from.getState<Facing::Axis>(VanillaStates::PillarAxis);
+    Facing::Axis toAxis = to.getState<Facing::Axis>(VanillaStates::PillarAxis);
+    if (fromAxis == toAxis)
+        return false;
+
+    for (const auto& axis : Facing::AXES) {
+        int axisDiff = Facing::choose(axis, diff.x, diff.y, diff.z);
+        if (axis == fromAxis || axis == toAxis) {
+            if (axisDiff == 0) 
+                return false;
+        }
+        else if (axisDiff != 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool RotationPropagator::isLargeToSmallCog(const Block &from, const Block &to, const IRotate &defTo, const BlockPos &diff)
+{
+    Facing::Axis axisFrom = from.getState<Facing::Axis>(VanillaStates::PillarAxis);
+    if (axisFrom != defTo.getRotationAxis(to))
+        return false;
+    if (Facing::choose(axisFrom, diff.x, diff.y, diff.z) != 0)
+        return false;
+    for (const auto& axis : Facing::AXES) {
+        if (axis == axisFrom)
+            continue;
+        if (std::abs(Facing::choose(axis, diff.x, diff.y, diff.z)) != 1)
+            return false;
+    }
+    return true;
 }
 
 void RotationPropagator::propagateNewSource(KineticBlockEntity &currentTE)
