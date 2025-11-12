@@ -7,6 +7,7 @@ class ShaftBlock;
 class GearboxBlock;
 class CreativeMotorBlock;
 class CogWheelBlock;
+class BeltBlock;
 
 class AllBlocks {
 public:
@@ -15,6 +16,7 @@ public:
     static WeakPtr<CreativeMotorBlock> CREATIVE_MOTOR;
     static WeakPtr<CogWheelBlock> COGWHEEL;
     static WeakPtr<CogWheelBlock> LARGE_COGWHEEL;
+    static WeakPtr<BeltBlock> BELT;
 
     static void RegisterBlocks(RegisterBlocksEvent& ev);
     static void RegisterBlockItems(RegisterItemsEvent& ev);
