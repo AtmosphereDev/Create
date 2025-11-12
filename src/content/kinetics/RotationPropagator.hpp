@@ -57,86 +57,22 @@ public:
 	 */
 	static void propagateNewSource(KineticBlockEntity& currentTE);
 
-	// /**
-	//  * Remove the given entity from the network.
-	//  *
-	//  * @param worldIn
-	//  * @param pos
-	//  * @param removedBE
-	//  */
-	static void handleRemoved(const Dimension& worldIn, const BlockPos& pos, KineticBlockEntity& removedBE) {
-	// 	if (worldIn.isClientSide)
-	// 		return;
-	// 	if (removedBE == null)
-	// 		return;
-	// 	if (removedBE.getTheoreticalSpeed() == 0)
-	// 		return;
+	/**
+	 * Remove the given entity from the network.
+	 *
+	 * @param worldIn
+	 * @param pos
+	 * @param removedBE
+	 */
+	static void handleRemoved(const Dimension& worldIn, const BlockPos& pos, KineticBlockEntity* removedBE);
 
-	// 	for (BlockPos neighbourPos : getPotentialNeighbourLocations(removedBE)) {
-	// 		BlockState neighbourState = worldIn.getBlockState(neighbourPos);
-	// 		if (!(neighbourState.getBlock() instanceof IRotate))
-	// 			continue;
-	// 		BlockEntity blockEntity = worldIn.getBlockEntity(neighbourPos);
-	// 		if (!(blockEntity instanceof KineticBlockEntity neighbourBE))
-	// 			continue;
-
-	// 		if (!neighbourBE.hasSource() || !neighbourBE.source.equals(pos))
-	// 			continue;
-
-	// 		propagateMissingSource(neighbourBE);
-	// 	}
-
-	}
-
-	// /**
-	//  * Clear the entire subnetwork depending on the given entity and find a new
-	//  * source
-	//  *
-	//  * @param updateTE
-	//  */
-	static void propagateMissingSource(KineticBlockEntity& updateTE) {
-	// 	final Level world = updateTE.getLevel();
-
-	// 	List<KineticBlockEntity> potentialNewSources = new LinkedList<>();
-	// 	List<BlockPos> frontier = new LinkedList<>();
-	// 	frontier.add(updateTE.getBlockPos());
-	// 	BlockPos missingSource = updateTE.hasSource() ? updateTE.source : null;
-
-	// 	while (!frontier.isEmpty()) {
-	// 		final BlockPos pos = frontier.remove(0);
-	// 		BlockEntity blockEntity = world.getBlockEntity(pos);
-	// 		if (!(blockEntity instanceof KineticBlockEntity currentBE))
-	// 			continue;
-
-	// 		currentBE.removeSource();
-	// 		currentBE.sendData();
-
-	// 		for (KineticBlockEntity neighbourBE : getConnectedNeighbours(currentBE)) {
-	// 			if (neighbourBE.getBlockPos()
-	// 				.equals(missingSource))
-	// 				continue;
-	// 			if (!neighbourBE.hasSource())
-	// 				continue;
-
-	// 			if (!neighbourBE.source.equals(pos)) {
-	// 				potentialNewSources.add(neighbourBE);
-	// 				continue;
-	// 			}
-
-	// 			if (neighbourBE.isSource())
-	// 				potentialNewSources.add(neighbourBE);
-
-	// 			frontier.add(neighbourBE.getBlockPos());
-	// 		}
-	// 	}
-
-	// 	for (KineticBlockEntity newSource : potentialNewSources) {
-	// 		if (newSource.hasSource() || newSource.isSource()) {
-	// 			propagateNewSource(newSource);
-	// 			return;
-	// 		}
-	// 	}
-	}
+	/**
+	 * Clear the entire subnetwork depending on the given entity and find a new
+	 * source
+	 *
+	 * @param updateTE
+	 */
+	static void propagateMissingSource(const KineticBlockEntity& updateTE);
 
 	static KineticBlockEntity* findConnectedNeighbour(KineticBlockEntity& currentTE, const BlockPos& neighbourPos);
 

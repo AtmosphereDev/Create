@@ -2,6 +2,7 @@
 #include "content/kinetics/simpleRelays/AbstractSimpleShaftBlock.hpp"
 #include "content/kinetics/simpleRelays/ICogWheel.hpp"
 #include "content/kinetics/simpleRelays/SimpleKineticBlockEntity.hpp"
+#include "content/kinetics/simpleRelays/BracketedKineticBlockEntity.hpp"
 
 class CogWheelBlock : public AbstractSimpleShaftBlock, public ICogWheel {
 public:
@@ -26,7 +27,7 @@ public:
     }
 
     virtual std::shared_ptr<BlockActor> newBlockEntity(const BlockPos& pos, const Block& block) const override {
-		return std::make_shared<SimpleKineticBlockEntity>(pos, "A");
+		return std::make_shared<BracketedKineticBlockEntity>(pos, "A");
 	}
 
     static bool isValidCogWheelPosition(bool large, const Dimension& dim, const BlockPos& pos, Facing::Axis cogAxis) {

@@ -244,7 +244,77 @@ void RotationPropagator::propagateNewSource(KineticBlockEntity &currentTE)
     }
 }
 
-KineticBlockEntity* RotationPropagator::findConnectedNeighbour(KineticBlockEntity &currentTE, const BlockPos &neighbourPos)
+void RotationPropagator::handleRemoved(const Dimension &worldIn, const BlockPos &pos, KineticBlockEntity *removedBE)
+{
+    if (worldIn.isClientSide()) return;
+    if (removedBE == nullptr) return;
+    if (removedBE->getTheoreticalSpeed() == 0) return;
+
+    const BlockSource& region = *worldIn.mBlockSource;
+
+    for (const auto& neighbourPos : getPotentialNeighbourLocations(*removedBE)) {
+        const Block& neighbourState = region.getBlock(neighbourPos);
+        const IRotate* rotate = IRotate::asIRotate(neighbourState.mLegacyBlock);
+        if (rotate == nullptr)
+            continue;
+
+        const BlockActor* blockEntity = region.getBlockEntity(neighbourPos);
+        const KineticBlockEntity* neighbourBE = KineticBlockEntity::asKineticBlockEntity(blockEntity);
+        if (!neighbourBE) continue;
+        if (!neighbourBE->hasSource() || neighbourBE->source != pos) continue;
+
+        propagateMissingSource(*neighbourBE);
+    }
+}
+
+void RotationPropagator::propagateMissingSource(const KineticBlockEntity &updateTE)
+{
+    const Dimension& world = updateTE.getLevel();
+    const BlockSource& region = *world.mBlockSource;
+
+    std::vector<KineticBlockEntity*> potentialNewSources;
+    std::queue<BlockPos> frontier;
+    frontier.push(updateTE.getBlockPos());
+    std::optional<BlockPos> missingSource = updateTE.hasSource() ? std::optional<BlockPos>(updateTE.source.value()) : std::nullopt;
+
+    while (!frontier.empty()) {
+        BlockPos pos = frontier.front();
+        frontier.pop();
+
+        BlockActor* blockEntity = region.getBlockEntity(pos);
+        KineticBlockEntity* currentBE = KineticBlockEntity::asKineticBlockEntity(blockEntity);
+        if (!currentBE) continue;
+
+        currentBE->removeSource();
+        currentBE->sendData();
+
+        for (KineticBlockEntity* neighbourBE : getConnectedNeighbours(*currentBE)) {
+            if (neighbourBE->getBlockPos() == missingSource)
+                continue;
+            if (!neighbourBE->hasSource()) 
+                continue;
+
+            if (neighbourBE->source.value() != pos) {
+                potentialNewSources.push_back(neighbourBE);
+                continue;
+            }
+
+            if (neighbourBE->isSource()) 
+                potentialNewSources.push_back(neighbourBE);
+            
+            frontier.push(neighbourBE->getBlockPos());
+        }
+    }
+
+    for (KineticBlockEntity* newSource : potentialNewSources) {
+        if (newSource->hasSource() || newSource->isSource()) {
+            RotationPropagator::propagateNewSource(*newSource);
+            return;
+        }
+    }
+}
+
+KineticBlockEntity *RotationPropagator::findConnectedNeighbour(KineticBlockEntity &currentTE, const BlockPos &neighbourPos)
 {
     const BlockSource& region = *currentTE.getLevel().mBlockSource;
 

@@ -42,12 +42,7 @@ public:
         Log::Info("Creative motor initialize!! generated speed {}, speed {}", getGeneratedSpeed(), speed);
     }
 
-    virtual float getGeneratedSpeed() override {
-        // if (!AllBlocks.CREATIVE_MOTOR.has(getBlockState())) why is this here?
-		// 	return 0;
-
-        return convertToDirection(generatedSpeed->getValue(), getBlock().getState<FacingID>(VanillaStates::FacingDirection));
-    }
+    virtual float getGeneratedSpeed() const override;
 
     class MotorValueBox : public SidedValueBoxTransform {
     protected:

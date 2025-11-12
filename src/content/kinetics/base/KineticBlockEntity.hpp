@@ -252,11 +252,11 @@ public:
 		return updateSpeed;
 	}
 
-	virtual float getGeneratedSpeed() {
+	virtual float getGeneratedSpeed() const {
 		return 0;
 	}
 
-	bool isSource() {
+	bool isSource() const {
 		return getGeneratedSpeed() != 0;
 	}
 
@@ -275,7 +275,7 @@ public:
 		this->speed = speed;
 	}
 
-	bool hasSource() {
+	bool hasSource() const {
 		return source != std::nullopt;
 	}
 
@@ -293,6 +293,7 @@ public:
 		const KineticBlockEntity& sourceBE = static_cast<const KineticBlockEntity&>(*blockEntity);
 		setNetwork(sourceBE.network);
 		copySequenceContextFrom(sourceBE);
+
 	}
 
 	void copySequenceContextFrom(const KineticBlockEntity& sourceBE) {
@@ -343,7 +344,7 @@ public:
 
 	void detachKinetics() {
 		Log::Info("KineticBlockEntity detachKinetics called at {}", mPosition);
-		RotationPropagator::handleRemoved(*level, mPosition, *this);
+		RotationPropagator::handleRemoved(*level, mPosition, this);
 	}
 
 	// boolean isSpeedRequirementFulfilled() {
@@ -462,10 +463,10 @@ public:
 
 		for (auto& offset : BlockPos::betweenClosed(BlockPos(-1, -1, -1), BlockPos(1, 1, 1))) {
 			if (Facing::choose(axis, offset.x, offset.y, offset.z) != 0)
-				return neighbours;
+				continue;
 
 			if (offset.distSqr(BlockPos::ZERO) != 2)
-				return neighbours;
+				continue;
 
 			neighbours.push_back(mPosition + offset);
 		};

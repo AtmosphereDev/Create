@@ -51,7 +51,7 @@ void KineticNetwork::updateCapacityFor(KineticBlockEntity *be, float capacity)
 }
 
 void KineticNetwork::updateStressFor(KineticBlockEntity *be, float stress)
- {
+{
     members[be] = stress;
     updateStress();
 }

@@ -8,7 +8,7 @@ public:
         : KineticBlockEntity(pos, id) {}
 
     virtual std::vector<BlockPos> addPropagationLocations(IRotate& block, const Block& state, std::vector<BlockPos> neighbours) override {
-        if (ICogWheel::isLargeCog(state)) {
+        if (!ICogWheel::isLargeCog(state)) {
             return KineticBlockEntity::addPropagationLocations(block, state, neighbours);
         }
         

@@ -1,5 +1,6 @@
 #pragma once
 #include "content/kinetics/simpleRelays/AbstractSimpleShaftBlock.hpp"
+#include "content/kinetics/simpleRelays/BracketedKineticBlockEntity.hpp"
 
 class ShaftBlock : public AbstractSimpleShaftBlock {
 public:
@@ -7,6 +8,6 @@ public:
         : AbstractSimpleShaftBlock(name, id, material) {}
 
     virtual std::shared_ptr<BlockActor> newBlockEntity(const BlockPos& pos, const Block& block) const override {
-		return std::make_shared<KineticBlockEntity>(pos, "ShaftBlock");
+		return std::make_shared<BracketedKineticBlockEntity>(pos, "ShaftBlock");
 	}
 };
