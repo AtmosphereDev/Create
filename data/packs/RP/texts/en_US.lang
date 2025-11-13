@@ -1,3 +1,5 @@
 kinetics.creative_motor.rotation_speed=Generated Speed in RPM
 gui.value_settings.release_to_confirm=Release Right Button to Confirm
 gui.value_settings.hold_to_edit=Click and hold to edit
+
+item.fx_create:belt_connector.name=Mechanical Belt

@@ -42,6 +42,7 @@ void AllBlocks::RegisterBlocks(RegisterBlocksEvent &ev)
     BELT = BlockTypeRegistry::registerBlock<BeltBlock>("fx_create:belt", ev.blockDefinitions.getNextBlockId(), material);
     BELT->addState(BeltBlock::SLOPE());
     BELT->addState(BeltBlock::PART());
+    BELT->addState(HorizontalKineticBlock::HORIZONTAL_FACING());
 }
 
 void AllBlocks::RegisterBlockItems(RegisterItemsEvent &ev)
@@ -51,7 +52,7 @@ void AllBlocks::RegisterBlockItems(RegisterItemsEvent &ev)
     ev.itemRegistry.registerItemShared<BlockItem>(CREATIVE_MOTOR->mNameInfo.mFullName.getString(), ev.itemRegistry.getNextItemID(), CREATIVE_MOTOR->mNameInfo.mFullName);
     ev.itemRegistry.registerItemShared<BlockItem>(COGWHEEL->mNameInfo.mFullName.getString(), ev.itemRegistry.getNextItemID(), COGWHEEL->mNameInfo.mFullName);
     ev.itemRegistry.registerItemShared<BlockItem>(LARGE_COGWHEEL->mNameInfo.mFullName.getString(), ev.itemRegistry.getNextItemID(), LARGE_COGWHEEL->mNameInfo.mFullName);
-    ev.itemRegistry.registerItemShared<BlockItem>(BELT->mNameInfo.mFullName.getString(), ev.itemRegistry.getNextItemID(), BELT->mNameInfo.mFullName);
+    // ev.itemRegistry.registerItemShared<BlockItem>(BELT->mNameInfo.mFullName.getString(), ev.itemRegistry.getNextItemID(), BELT->mNameInfo.mFullName);
 
     auto& construction = ev.mCreativeItemRegistry.GetVanillaCategory(CreativeItemCategory::Construction);
     construction.AddCreativeItem(SHAFT->getRenderBlock());
@@ -59,7 +60,9 @@ void AllBlocks::RegisterBlockItems(RegisterItemsEvent &ev)
     construction.AddCreativeItem(CREATIVE_MOTOR->getRenderBlock());
     construction.AddCreativeItem(COGWHEEL->getRenderBlock());
     construction.AddCreativeItem(LARGE_COGWHEEL->getRenderBlock());
-    construction.AddCreativeItem(BELT->getRenderBlock());
+    // construction.AddCreativeItem(BELT->getRenderBlock());
+
+
 }
 
 void AllBlocks::InitBlockGraphics(InitBlockGraphicsEvent &ev)

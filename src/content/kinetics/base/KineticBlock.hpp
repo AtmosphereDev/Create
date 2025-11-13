@@ -12,6 +12,12 @@ public:
         return false;
     }
 
+    bool areStatesKineticallyEquivalent(const Block& oldState, const Block& newState) const {
+        if (oldState.mLegacyBlock != newState.mLegacyBlock)
+            return false;
+        return getRotationAxis(oldState) == getRotationAxis(newState);
+    }
+
     // equivalent of updateIndirectNeighbourShapes (i hope, not entirely sure)
     virtual void neighborChanged(BlockSource& unk0, const BlockPos& unk1, const BlockPos& unk2) const override;
 };

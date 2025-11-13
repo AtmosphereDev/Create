@@ -12,6 +12,17 @@ public:
     static std::shared_ptr<PartialModel> COGWHEEL_SHAFT;
     static std::shared_ptr<PartialModel> COGWHEEL;
 
+    static std::shared_ptr<PartialModel> BELT_PULLEY;
+    static std::shared_ptr<PartialModel> BELT_START;
+    static std::shared_ptr<PartialModel> BELT_MIDDLE;
+    static std::shared_ptr<PartialModel> BELT_END;
+    static std::shared_ptr<PartialModel> BELT_START_BOTTOM;
+    static std::shared_ptr<PartialModel> BELT_MIDDLE_BOTTOM;
+    static std::shared_ptr<PartialModel> BELT_END_BOTTOM;
+    static std::shared_ptr<PartialModel> BELT_DIAGONAL_START;
+    static std::shared_ptr<PartialModel> BELT_DIAGONAL_MIDDLE;
+    static std::shared_ptr<PartialModel> BELT_DIAGONAL_END;
+
 private:
     static std::shared_ptr<PartialModel> block(const std::string& path, const std::string& texture) {
         auto model = PartialModel::of(path, texture);

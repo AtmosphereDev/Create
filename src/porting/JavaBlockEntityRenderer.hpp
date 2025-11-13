@@ -10,6 +10,7 @@
 #include "content/kinetics/motor/CreativeMotorRenderer.hpp"
 #include "content/kinetics/simpleRelays/encased/EncasedCogRenderer.hpp"
 #include "content/kinetics/simpleRelays/BracketedKineticBlockEntityRenderer.hpp"
+#include "content/kinetics/belt/BeltRenderer.hpp"
 
 class JavaBlockEntityRenderer : public BlockActorRenderer {
 public:
@@ -21,6 +22,7 @@ public:
         mRenderers["fx_create:shaft"] = std::make_unique<BracketedKineticBlockEntityRenderer>();
         mRenderers["fx_create:cogwheel"] = std::make_unique<BracketedKineticBlockEntityRenderer>();
         mRenderers["fx_create:large_cogwheel"] = std::make_unique<BracketedKineticBlockEntityRenderer>();
+        mRenderers["fx_create:belt"] = std::make_unique<BeltRenderer>();
     };
 
     virtual void render(BaseActorRenderContext& ctx, BlockActorRenderData& data) override {
@@ -31,7 +33,7 @@ public:
             it->second->render(*this, ctx, data);
         }
         else {
-            Log::Warning("No renderer found for JavaBlockEntity with id {}", actor.getBlock().mLegacyBlock->mNameInfo.mFullName.getString());
+            // Log::Warning("No renderer found for JavaBlockEntity with id {}", actor.getBlock().mLegacyBlock->mNameInfo.mFullName.getString());
         }
     }
 };

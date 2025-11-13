@@ -1,0 +1,42 @@
+{
+	"format_version": "1.21.0",
+	"minecraft:geometry": [
+		{
+			"description": {
+				"identifier": "geometry.fx_create.belt_middle",
+				"texture_width": 16,
+				"texture_height": 16,
+				"visible_bounds_width": 2,
+				"visible_bounds_height": 2.5,
+				"visible_bounds_offset": [0, 0.75, 0]
+			},
+			"bones": [
+				{
+					"name": "bone",
+					"pivot": [8, 0, -8],
+					"cubes": [
+						{
+							"origin": [-7, 11, -8],
+							"size": [14, 2, 16],
+							"uv": {
+								"east": {"uv": [0, 0], "uv_size": [2, 16], "uv_rotation": 270},
+								"west": {"uv": [14, 0], "uv_size": [2, 16], "uv_rotation": 90},
+								"up": {"uv": [15, 16], "uv_size": [-14, -16], "uv_rotation": 180},
+								"down": {"uv": [15, 16], "uv_size": [-14, -16]}
+							}
+						},
+						{
+							"origin": [-5, 10, -8],
+							"size": [10, 1, 16],
+							"uv": {
+								"east": {"uv": [12, 0], "uv_size": [1, 16], "uv_rotation": 270},
+								"west": {"uv": [3, 0], "uv_size": [1, 16], "uv_rotation": 90},
+								"down": {"uv": [13, 16], "uv_size": [-10, -16]}
+							}
+						}
+					]
+				}
+			]
+		}
+	]
+}

@@ -19,11 +19,15 @@ public:
     BeltBlock(const std::string& name, short id, const Material& material)
         : HorizontalKineticBlock(name, id, material) {}
 
+    virtual std::shared_ptr<BlockActor> newBlockEntity(const BlockPos& pos, const Block& block) const override;
+
     Facing::Axis getRotationAxis(const Block& state) const override {
         if (state.getState<BeltSlope::Type>(SLOPE()) == BeltSlope::SIDEWAYS) {
             return Facing::Axis::Y;
         }
-        return 
+        return Facing::getAxis(
+            Facing::getClockWise(state.getState<FacingID>(HORIZONTAL_FACING()))
+        );
     }
 
     const Block& getPlacementBlock(const Actor& unk0, const BlockPos& unk1, FacingID face, const Vec3& unk3, int unk4) const override {
@@ -34,4 +38,10 @@ public:
 
         return *renderBlock;
     }
+
+    static void initBelt(BlockSource& region, const BlockPos& pos);
+
+    static std::vector<BlockPos> getBeltChain(BlockSource& region, const BlockPos& startPos);
+
+    static std::optional<BlockPos> nextSegmentPosition(const Block& state, const BlockPos& _pos, bool forward);
 };

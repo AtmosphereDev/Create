@@ -8,6 +8,7 @@
 #include "foundation/blockEntity/behaviour/ValueSettingsScreen.hpp"
 #include "foundation/blockEntity/behaviour/ValueSettingsClient.hpp"
 #include "AllPackets.hpp"
+#include "AllItems.hpp"
 
 class Create {
 public:
@@ -15,6 +16,7 @@ public:
 
     static void Initialize() {
         AllBlocks::AddEventListeners();
+        AllItems::AddEventListeners();
         AllPartialModels::AddEventListeners();
         ClientEvents::AddEventListeners();
         ClientInputs::AddEventListeners();

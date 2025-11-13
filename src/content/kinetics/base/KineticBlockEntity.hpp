@@ -8,6 +8,7 @@
 #include <mc/src-deps/core/math/Math.hpp>
 #include <infrastructure/config/AllConfigs.hpp>
 #include <mc/src/common/nbt/NbtUtils.hpp>
+#include "content/kinetics/base/KineticBlock.hpp"
 
 class KineticBlockEntity : public SmartBlockEntity {
 public:
@@ -387,6 +388,8 @@ public:
 
 	// 	world.setBlock(pos, state, Block.UPDATE_ALL);
 	// }
+
+	static void switchToBlockState(Dimension& world, const BlockPos& pos, const Block& state);
 
 	virtual void addBehaviours(std::vector<std::shared_ptr<BlockEntityBehaviour>>& behavioursList) override {}
 
