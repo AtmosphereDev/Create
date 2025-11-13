@@ -32,5 +32,5 @@ public:
 
     virtual void loadTextures(std::shared_ptr<mce::TextureGroup> textures) {}
 
-    virtual void renderSafe(BlockActorRenderer& self, BaseActorRenderContext& ctx, BlockActorRenderData& data) const = 0;
+    virtual void renderSafe(BlockActorRenderer& self, BaseActorRenderContext& ctx, BlockActorRenderData& data) = 0;
 };

@@ -33,9 +33,6 @@ public:
     const Block& getPlacementBlock(const Actor& unk0, const BlockPos& unk1, FacingID face, const Vec3& unk3, int unk4) const override {
         const Block* renderBlock = &getRenderBlock();
         renderBlock = renderBlock->setState<BeltPart::Type>(SLOPE(), BeltPart::PULLEY);
-
-        Log::Info("getState {}", (uint64_t)renderBlock->getState<BeltPart::Type>(SLOPE()));
-
         return *renderBlock;
     }
 

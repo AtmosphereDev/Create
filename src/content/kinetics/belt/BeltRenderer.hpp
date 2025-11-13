@@ -5,10 +5,23 @@
 #include "content/kinetics/belt/BeltBlock.hpp"
 #include "content/kinetics/belt/BeltBlockEntity.hpp"
 #include "AllBlocks.hpp"
+#include <mc/src-deps/minecraftrenderer/renderer/GlobalConstantBuffers.hpp>
+#include <mc/src-client/common/client/renderer/RenderMaterialGroup.hpp>
 
 class BeltRenderer : public KineticBlockEntityRenderer {
 public:
-    virtual void renderSafe(BlockActorRenderer& self, BaseActorRenderContext& ctx, BlockActorRenderData& data) const override {
+    mce::MaterialPtr mBeltMaterial;
+
+    mce::MaterialPtr& getBeltMaterial() {
+        if (mBeltMaterial.isNull()) {
+            mBeltMaterial = mce::RenderMaterialGroup::switchable.getMaterial("mechanical_belt");
+            Log::Info("Loaded belt material {}", mBeltMaterial.mRenderMaterialInfoPtr->mHashedName);
+        }
+
+        return mBeltMaterial;
+    }
+
+    virtual void renderSafe(BlockActorRenderer& self, BaseActorRenderContext& ctx, BlockActorRenderData& data) override {
         BeltBlockEntity& be = static_cast<BeltBlockEntity&>(data.entity);
         Vec3 renderPos = Vec3(be.getBlockPos()) - ctx.mCameraTargetPosition;
 
@@ -50,9 +63,29 @@ public:
             auto beltPartial = getBeltPartial(diagonal, start, end, bottom);
             auto beltBuffer = Models::partial(ctx.mScreenContext.tessellator, beltPartial);
 
-            // todo figure out how to UV animate
+            auto* uvOffset = ctx.mScreenContext.constantBuffers.entityConstantBuffer.UV_ANIM;
+            auto data = uvOffset->getData();
+
+            // UV shift
+            float speed = 16; // temp hardcoded
+            if (speed != 0) {
+                float time = getTime() * Facing::getStep(axisDirection);
+                if (diagonal && (downward ^ alongX) || !sideways && !diagonal && alongX 
+                    || sideways && axisDirection == Facing::AxisDirection::NEGATIVE) {
+                    speed = -speed;
+                }
+
+                float scrollMult = diagonal ? 3.0f / 8.0f : 0.5f;
+                float spriteSize = 16.0f; // hardcoded, i think this is right
+                double scroll = speed * time / (31.5f * 16.0f) + (bottom ? 0.5f : 0.0f);
+                scroll = scroll - std::floor(scroll);
+                scroll = scroll * spriteSize * scrollMult;
+
+                data.y = static_cast<float>(scroll);
+                uvOffset->setData(data);
+            }
             
-            beltBuffer->render(ctx, self.getEntityMaterial());
+            beltBuffer->render(ctx, getBeltMaterial());
 
             // Diagonal belt do not have a separate bottom model
             if (diagonal)

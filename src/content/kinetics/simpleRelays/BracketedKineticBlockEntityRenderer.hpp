@@ -13,7 +13,7 @@ public:
         mLargeCogwheelTexture = textures->getTexture("textures/entity/large_cogwheel", false, std::nullopt, cg::TextureSetLayerType::Normal);
     }
 
-    virtual void renderSafe(BlockActorRenderer& self, BaseActorRenderContext& ctx, BlockActorRenderData& data) const override {
+    virtual void renderSafe(BlockActorRenderer& self, BaseActorRenderContext& ctx, BlockActorRenderData& data) override {
         // Non large cogwheels just pass through to base        
         const SimpleKineticBlockEntity& be = static_cast<const SimpleKineticBlockEntity&>(data.entity);
         if (AllBlocks::LARGE_COGWHEEL != be.getBlock().mLegacyBlock) {

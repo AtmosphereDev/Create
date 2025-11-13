@@ -14,7 +14,7 @@ public:
         this->large = large;
     }
 
-    virtual void renderSafe(BlockActorRenderer& self, BaseActorRenderContext& ctx, BlockActorRenderData& data) const override {
+    virtual void renderSafe(BlockActorRenderer& self, BaseActorRenderContext& ctx, BlockActorRenderData& data) override {
         // Large cogs sometimes have to offset their teeth by 11.25 degrees in order to
 		// mesh properly
         // KineticBlockEntity& be = static_cast<KineticBlockEntity&>(data.entity);

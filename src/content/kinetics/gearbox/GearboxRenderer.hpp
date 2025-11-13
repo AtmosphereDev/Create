@@ -16,7 +16,7 @@ public:
         mHalfShaftTexture = textures->getTexture("textures/entity/axis", false, std::nullopt, cg::TextureSetLayerType::Normal);
     }
 
-    virtual void renderSafe(BlockActorRenderer& self, BaseActorRenderContext& ctx, BlockActorRenderData& data) const override {
+    virtual void renderSafe(BlockActorRenderer& self, BaseActorRenderContext& ctx, BlockActorRenderData& data) override {
         KineticBlockEntity& be = static_cast<KineticBlockEntity&>(data.entity);
         Facing::Axis boxAxis = getRotationAxisOf(be);
         float time = KineticBlockEntityRenderer::getTime();

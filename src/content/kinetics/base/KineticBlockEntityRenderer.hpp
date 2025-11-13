@@ -20,7 +20,7 @@ public:
     
 	KineticBlockEntityRenderer() : SafeBlockEntityRenderer() {}
 
-    virtual void renderSafe(BlockActorRenderer& self, BaseActorRenderContext& ctx, BlockActorRenderData& data) const override;
+    virtual void renderSafe(BlockActorRenderer& self, BaseActorRenderContext& ctx, BlockActorRenderData& data) override;
 
     virtual void renderAdditional(BlockActorRenderer& self, BaseActorRenderContext& ctx, BlockActorRenderData& data) const {}
 

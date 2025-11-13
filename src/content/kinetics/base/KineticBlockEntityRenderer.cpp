@@ -11,7 +11,7 @@
 #include <glm/gtc/constants.hpp>
 #include <glm/gtc/epsilon.hpp>
 
-void KineticBlockEntityRenderer::renderSafe(BlockActorRenderer &self, BaseActorRenderContext &ctx, BlockActorRenderData &data) const
+void KineticBlockEntityRenderer::renderSafe(BlockActorRenderer &self, BaseActorRenderContext &ctx, BlockActorRenderData &data)
 {
     // if (VisualizationManager.supportsVisualization(be.getLevel())) return;
 
