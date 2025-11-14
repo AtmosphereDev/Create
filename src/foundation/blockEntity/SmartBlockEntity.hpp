@@ -75,7 +75,7 @@ public:
     /**
 	 * Block destroyed or Chunk unloaded. Usually invalidates capabilities
 	 */
-	void invalidate();
+	virtual void invalidate();
 
     /**
 	 * Block destroyed or picked up by a contraption. Usually detaches kinetics
@@ -87,7 +87,7 @@ public:
     /**
 	 * Block destroyed or replaced. Requires Block to call IBE::onRemove
 	 */
-	void destroy();
+	virtual void destroy();
 
     void onChunkUnloaded() { chunkUnloaded = true; }
 

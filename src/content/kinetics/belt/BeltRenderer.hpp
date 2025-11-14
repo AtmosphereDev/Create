@@ -67,7 +67,7 @@ public:
             auto data = uvOffset->getData();
 
             // UV shift
-            float speed = 16; // temp hardcoded
+            float speed = be.getSpeed(); // temp hardcoded
             if (speed != 0) {
                 float time = getTime() * Facing::getStep(axisDirection);
                 if (diagonal && (downward ^ alongX) || !sideways && !diagonal && alongX 
@@ -76,7 +76,7 @@ public:
                 }
 
                 float scrollMult = diagonal ? 3.0f / 8.0f : 0.5f;
-                float spriteSize = 16.0f; // hardcoded, i think this is right
+                float spriteSize = 1.0f; // hardcoded, i think this is right
                 double scroll = speed * time / (31.5f * 16.0f) + (bottom ? 0.5f : 0.0f);
                 scroll = scroll - std::floor(scroll);
                 scroll = scroll * spriteSize * scrollMult;

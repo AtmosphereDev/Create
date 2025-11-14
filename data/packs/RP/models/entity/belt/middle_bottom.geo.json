@@ -29,9 +29,9 @@
 							"origin": [-5, 5, -8],
 							"size": [10, 1, 16],
 							"uv": {
-								"east": {"uv": [12, 0], "uv_size": [1, 16], "uv_rotation": 90},
-								"west": {"uv": [3, 0], "uv_size": [1, 16], "uv_rotation": 270},
-								"up": {"uv": [13, 16], "uv_size": [-10, -16]}
+								"east": {"uv": [13, 0], "uv_size": [-1, 16], "uv_rotation": 90},
+								"west": {"uv": [3, 16], "uv_size": [1, -16], "uv_rotation": 270},
+								"up": {"uv": [13, 0], "uv_size": [-10, 16], "uv_rotation": 180}
 							}
 						}
 					]

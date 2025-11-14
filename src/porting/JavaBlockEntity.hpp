@@ -83,6 +83,10 @@ public:
     virtual bool _isSmartBlockEntity() const {
         return false;
     }
+
+    void invalidateCapabilities() {
+        // Seems to be a Forge specific thing for making non hardcoded behaviours, hmmm not sure how to port this
+    }
 };
 
 void JavaBlockEntityHooks();

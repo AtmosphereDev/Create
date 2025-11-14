@@ -19,8 +19,8 @@
 							"origin": [-5, 10, -6],
 							"size": [10, 1, 14],
 							"uv": {
-								"east": {"uv": [3, 0], "uv_size": [1, 14], "uv_rotation": 270},
-								"west": {"uv": [12, 0], "uv_size": [1, 14], "uv_rotation": 90},
+								"east": {"uv": [3, 0], "uv_size": [1, 14], "uv_rotation": 90},
+								"west": {"uv": [12, 0], "uv_size": [1, 14], "uv_rotation": 270},
 								"down": {"uv": [13, 14], "uv_size": [-10, -14]}
 							}
 						},

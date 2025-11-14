@@ -1,6 +1,7 @@
 #include "KineticBlockEntity.hpp"
 #include "Create.hpp"
 #include "content/kinetics/base/GeneratingKineticBlockEntity.hpp"
+#include "content/kinetics/simpleRelays/ICogWheel.hpp"
 
 KineticNetwork *KineticBlockEntity::getOrCreateNetwork()
 {
@@ -41,4 +42,9 @@ void KineticBlockEntity::switchToBlockState(Dimension &world, const BlockPos &po
     }
 
     region.setBlock(pos, state, 0, nullptr, nullptr);
+}
+
+bool KineticBlockEntity::canPropagateDiagonally(IRotate &block, const Block &state)
+{
+    return ICogWheel::isSmallCog(state);
 }

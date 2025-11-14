@@ -139,7 +139,7 @@ public:
 		return getBlock();
 	}
 
-	float calculateStressApplied() {
+	virtual float calculateStressApplied() {
 		float impact = (float)BlockStressValues::getImpact(getStressConfigKey());
 		this->lastStressApplied = impact;
 		return impact;
@@ -393,7 +393,7 @@ public:
 
 	virtual void addBehaviours(std::vector<std::shared_ptr<BlockEntityBehaviour>>& behavioursList) override {}
 
-	void clearKineticInformation() {
+	virtual void clearKineticInformation() {
 		speed = 0;
 		source = std::nullopt;
 		network = std::nullopt;
@@ -443,7 +443,7 @@ public:
 	 * @return factor of rotation speed from this BE to other. 0 if no rotation is
 	 * transferred, or the standard rules apply (integrated shafts/cogs)
 	 */
-	float propagateRotationTo(KineticBlockEntity& target, const Block& stateFrom, const Block& stateTo, const BlockPos& diff,
+	virtual float propagateRotationTo(KineticBlockEntity& target, const Block& stateFrom, const Block& stateTo, const BlockPos& diff,
 									 bool connectedViaAxes, bool connectedViaCogs) {
 		return 0;
 	}
@@ -489,14 +489,11 @@ public:
 	 * @return true if this and the other component should check their propagation
 	 * factor and are not already connected via integrated cogs or shafts
 	 */
-	bool isCustomConnection(KineticBlockEntity& other, const Block& state, const Block& otherState) {
+	virtual bool isCustomConnection(KineticBlockEntity& other, const Block& state, const Block& otherState) {
 		return false;
 	}
 
-	virtual bool canPropagateDiagonally(IRotate& block, const Block& state) {
-		// return ICogWheel.isSmallCog(state);
-		return false;
-	}
+	virtual bool canPropagateDiagonally(IRotate& block, const Block& state);
 
 	// @Override
 	// public void requestModelDataUpdate() {
