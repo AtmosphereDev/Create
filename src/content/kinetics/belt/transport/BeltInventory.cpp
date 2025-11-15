@@ -1,6 +1,11 @@
 #include "BeltInventory.hpp"
 #include "content/kinetics/belt/BeltBlockEntity.hpp"
 #include "content/kinetics/belt/BeltBlock.hpp"
+#include "content/kinetics/belt/behaviour/BeltProcessingBehaviour.hpp"
+#include "content/kinetics/belt/behaviour/TransportedItemStackHandlerBehaviour.hpp"
+#include "content/kinetics/belt/behaviour/DirectBeltInputBehaviour.hpp"
+#include "foundation/utility/BlockHelper.hpp"
+#include <mc/src/common/world/Facing.hpp>
 
 void BeltInventory::tick()
 {
@@ -196,7 +201,112 @@ void BeltInventory::tick()
     }
 }
 
+bool BeltInventory::handleBeltProcessingAndCheckIfRemoved(TransportedItemStack &currentItem, float nextOffset, bool noMovement)
+{
+    int currentSegment = static_cast<int>(std::floor(currentItem.beltPosition));
+
+    if (currentItem.locked) {
+        auto processingBehaviour = getBeltProcessingAtSegment(currentSegment);
+        auto stackHandlerBehaviour = getTransportedItemStackHandlerAtSegment(currentSegment);
+
+        if (stackHandlerBehaviour == nullptr)
+            return false;
+        if (processingBehaviour == nullptr) {
+            currentItem.locked = false;
+            belt->notifyUpdate();
+            return false;
+        }
+
+        auto result = processingBehaviour->handleHeldItem(currentItem, *stackHandlerBehaviour);
+        if (result == BeltProcessingBehaviour::ProcessingResult::REMOVE) 
+            return true;
+        if (result == BeltProcessingBehaviour::ProcessingResult::HOLD)
+            return false;
+        
+        currentItem.locked = false;
+        belt->notifyUpdate();
+        return false;
+    }
+
+    if (noMovement)
+        return false;
+
+    // See if any new belt processing catches the item
+    if (currentItem.beltPosition > 0.5f || beltMovementPositive) {
+        int firstUpcomingSegment = static_cast<int>(std::floor(currentItem.beltPosition + (beltMovementPositive ? 0.5f : -0.5f)));
+        int step = beltMovementPositive ? 1 : -1;
+
+        for (int segment = firstUpcomingSegment; beltMovementPositive ? segment + 0.5f <= nextOffset : segment + 0.5f >= nextOffset; segment += step) {
+            auto processingBehaviour = getBeltProcessingAtSegment(segment);
+            auto stackHandlerBehaviour = getTransportedItemStackHandlerAtSegment(segment);
+
+            if (processingBehaviour == nullptr || stackHandlerBehaviour == nullptr)
+                continue;
+
+            if (BeltProcessingBehaviour::isBlocked(belt->getLevel(), BeltHelper::getPositionForOffset(belt, segment)))
+                continue;  
+            
+            auto result = processingBehaviour->handleReceivedItem(currentItem, *stackHandlerBehaviour);
+            if (result == BeltProcessingBehaviour::ProcessingResult::REMOVE) 
+                return true;
+            if (result == BeltProcessingBehaviour::ProcessingResult::HOLD) {
+                currentItem.beltPosition = segment + 0.5f + (beltMovementPositive ? 1 / 512.0f : -1 / 512.0f);
+                currentItem.locked = true;
+                belt->notifyUpdate();
+                return false;
+            }
+        }
+    }
+
+    return false;
+}
+
+std::shared_ptr<BeltProcessingBehaviour> BeltInventory::getBeltProcessingAtSegment(int segment)
+{
+    return BlockEntityBehaviour::get<BeltProcessingBehaviour>(*belt->getLevel().mBlockSource.get(), BeltHelper::getPositionForOffset(belt, segment)
+        .above(2), BeltProcessingBehaviour::TYPE);
+}
+
+std::shared_ptr<TransportedItemStackHandlerBehaviour> BeltInventory::getTransportedItemStackHandlerAtSegment(int segment)
+{
+    return BlockEntityBehaviour::get<TransportedItemStackHandlerBehaviour>(*belt->getLevel().mBlockSource.get(), BeltHelper::getPositionForOffset(belt, segment)
+        .above(2), TransportedItemStackHandlerBehaviour::TYPE);
+}
+
 void BeltInventory::ejectAll()
 {
     Log::Info("BeltInventory::ejectAll not implemented yet");
+}
+
+BeltInventory::Ending BeltInventory::resolveEnding()
+{
+    BlockSource& region = *belt->getLevel().mBlockSource;
+    BlockPos nextPosition = BeltHelper::getPositionForOffset(belt, beltMovementPositive ? belt->beltLength : -1);
+
+    auto inputBehaviour = BlockEntityBehaviour::get<DirectBeltInputBehaviour>(region, nextPosition, DirectBeltInputBehaviour::TYPE);
+    if (inputBehaviour != nullptr) 
+        return BeltInventory::Ending::INSERT;
+    
+    if (BlockHelper::hasBlockSolidSide(region.getBlock(nextPosition), region, nextPosition, Facing::getOpposite(belt->getMovementFacing())))
+        return BeltInventory::Ending::BLOCKED;
+
+    return BeltInventory::Ending::EJECT;
+}
+
+void BeltInventory::insert(TransportedItemStack &&newStack)
+{
+    if (items.empty()) {
+        items.push_back(std::move(newStack));
+        return;
+    }
+
+    int index = 0;
+    for (auto& stack : items) {
+        if (stack.compareTo(newStack) > 0 == beltMovementPositive) {
+            break;
+        }
+        index++;
+    }
+
+    items.insert(items.begin() + index, std::move(newStack));
 }

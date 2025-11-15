@@ -3,6 +3,7 @@
 
 class TransportedItemStack;
 class TransportedItemStackHandlerBehaviour;
+class Dimension;
 
 class BeltProcessingBehaviour : public BlockEntityBehaviour {
 public:
@@ -51,5 +52,5 @@ public:
         return TYPE;
     }
 
-    static bool isBlocked(BlockSource& world, const BlockPos& processingSpace);
+    static bool isBlocked(Dimension& world, const BlockPos& processingSpace);
 };

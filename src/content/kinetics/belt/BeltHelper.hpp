@@ -2,6 +2,7 @@
 
 class ItemStack;
 class BeltBlockEntity;
+class BlockPos;
 
 class BeltHelper {
 public:

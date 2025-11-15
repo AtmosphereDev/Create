@@ -41,6 +41,15 @@ void BeltBlockEntity::invalidate()
     invalidateCapabilities();
 }
 
+float BeltBlockEntity::getDirectionAwareBeltMovementSpeed() const
+{
+    FacingID facing = getBeltFacing();
+    int offset = Facing::getStep(Facing::getAxisDirection(facing));
+    if (Facing::getAxis(facing) == Facing::Axis::X) 
+        offset *= -1;
+    return getBeltMovementSpeed() * offset;
+}
+
 bool BeltBlockEntity::hasPulley() const
 {
     if (AllBlocks::BELT != getBlock().mLegacyBlock) 
@@ -67,7 +76,21 @@ float BeltBlockEntity::propagateRotationTo(KineticBlockEntity &target, const Blo
     return getController() == targetBeltBE->getController() ? 1.0f : 0.0f;
 }
 
-std::optional<BeltInventory>& BeltBlockEntity::getInventory()
+FacingID BeltBlockEntity::getMovementFacing() const
+{
+    Facing::Axis axis = Facing::getAxis(getBeltFacing());
+    return Facing::fromDirectionAndAxis(
+        getBeltMovementSpeed() < 0 ^ axis == Facing::Axis::X ? Facing::AxisDirection::NEGATIVE : Facing::AxisDirection::POSITIVE, 
+        axis
+    );
+}
+
+FacingID BeltBlockEntity::getBeltFacing() const
+{
+    return getBlock().getState<FacingID>(HorizontalKineticBlock::HORIZONTAL_FACING());
+}
+
+std::optional<BeltInventory> &BeltBlockEntity::getInventory()
 {
     return inventory;
 }

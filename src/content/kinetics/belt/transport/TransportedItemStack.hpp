@@ -34,4 +34,8 @@ public:
     float getTargetSideOffset() const {
         return (angle - 180) / (360.0f * 3.0f);
     }
+
+    int compareTo(const TransportedItemStack& other) const {
+        return beltPosition < other.beltPosition ? 1 : beltPosition > other.beltPosition ? -1 : 0;
+    }
 };
