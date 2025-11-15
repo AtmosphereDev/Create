@@ -10,9 +10,9 @@ class BeltBlockEntity;
 class BeltInventory {
 public:
     BeltBlockEntity* belt;
-    std::vector<TransportedItemStack> items;
-    std::vector<TransportedItemStack> toInsert;
-    std::vector<TransportedItemStack> toRemove;
+    std::vector<std::shared_ptr<TransportedItemStack>> items;
+    std::vector<std::shared_ptr<TransportedItemStack>> toInsert;
+    std::vector<std::shared_ptr<TransportedItemStack>> toRemove;
     bool beltMovementPositive;
     float SEGMENT_WINDOW = 0.75f;
 
@@ -67,11 +67,11 @@ public:
 
     bool isBlocking(int segment, FacingID side, float segmentPos, TransportedItemStack& stack);
 
-    void addItem(TransportedItemStack&& stack);
+    void addItem(std::shared_ptr<TransportedItemStack> stack);
 
-    void insert(TransportedItemStack&& stack);
+    void insert(std::shared_ptr<TransportedItemStack> stack);
 
-    TransportedItemStack* getStackAtOffset(int offset);
+    std::shared_ptr<TransportedItemStack> getStackAtOffset(int offset);
 
     void read(const CompoundTag& nbt);
 
@@ -83,7 +83,7 @@ public:
 
     void applyToEachWithin(float position, float maxDistanceToPosition, std::function<TransportedItemStackHandlerBehaviour::TransportedResult(TransportedItemStack&)> func);
 
-    std::vector<TransportedItemStack>& getTransportedItems() {
+    std::vector<std::shared_ptr<TransportedItemStack>>& getTransportedItems() {
         return items;
     }
 

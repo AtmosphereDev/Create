@@ -9,6 +9,7 @@
 #include "foundation/blockEntity/behaviour/ValueSettingsClient.hpp"
 #include "AllPackets.hpp"
 #include "AllItems.hpp"
+#include "content/kinetics/belt/BeltBlockEntity.hpp"
 
 class Create {
 public:
@@ -20,6 +21,9 @@ public:
         AllPartialModels::AddEventListeners();
         ClientEvents::AddEventListeners();
         ClientInputs::AddEventListeners();
+
+        // Block event handlers
+        BeltBlockEntity::AddEventListeners();
 
         // Misc implementation event handlers
         ValueSettingsScreen::AddEventListeners();

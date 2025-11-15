@@ -4,6 +4,8 @@
 #include <mc/src/common/nbt/CompoundTag.hpp>
 #include "content/kinetics/belt/behaviour/TransportedItemStackHandlerBehaviour.hpp"
 #include "content/kinetics/belt/transport/BeltInventory.hpp"
+#include "amethyst/game/capabilities/IItemHandler.hpp"
+#include "amethyst/runtime/events/RegisterCapabilitiesEvent.hpp"
 
 class BeltInventory;
 class TransportedItemStack;
@@ -19,14 +21,14 @@ public:
 	bool covered;
 
 	std::optional<BlockPos> controller;
-	std::optional<BeltInventory> inventory;
-	// IItemHandler itemHandler;
+	std::shared_ptr<BeltInventory> inventory;
+	std::shared_ptr<IItemHandler> itemHandler;
 	// publicVersionedInventoryTrackerBehaviour invVersionTracker;
 
 	CompoundTag trackerUpdateTag;
 
     BeltBlockEntity(const BlockPos& pos, const std::string& id)
-        : KineticBlockEntity(pos, id), controller(std::nullopt), beltLength(0), inventory(std::nullopt) {}
+        : KineticBlockEntity(pos, id), controller(std::nullopt), beltLength(0), inventory(nullptr) {}
 
     virtual void addBehaviours(std::vector<std::shared_ptr<BlockEntityBehaviour>>& behavioursList) override {
         KineticBlockEntity::addBehaviours(behavioursList);
@@ -36,6 +38,12 @@ public:
 		// 	.withStackPlacement(this::getWorldPositionOf));
 		// behaviours.add(invVersionTracker = new VersionedInventoryTrackerBehaviour(this));
     }
+
+	static void registerCapabilities(RegisterCapabilitiesEvent& event);
+
+	static void AddEventListeners() {
+		Amethyst::GetEventBus().AddListener<RegisterCapabilitiesEvent>(registerCapabilities);
+	}
 
     virtual void tick(BlockSource& source) override;
 
@@ -97,7 +105,7 @@ public:
 
 	FacingID getBeltFacing() const;
 
-	std::optional<BeltInventory>& getInventory();
+	std::shared_ptr<BeltInventory> getInventory();
 
 	void applyToAllItems(const std::function<TransportedItemStackHandlerBehaviour::TransportedResult(TransportedItemStack&)>& func);
 

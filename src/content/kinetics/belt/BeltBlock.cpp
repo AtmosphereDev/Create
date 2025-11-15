@@ -1,9 +1,72 @@
 #include "BeltBlock.hpp"
 #include "content/kinetics/belt/BeltBlockEntity.hpp"
 #include "AllBlocks.hpp"
+#include "mc/src/common/world/actor/Actor.hpp"
+#include "foundation/item/ItemHelper.hpp"
 
 std::shared_ptr<BlockActor> BeltBlock::newBlockEntity(const BlockPos &pos, const Block &block) const {
     return std::make_shared<BeltBlockEntity>(pos, "BeltBlock");
+}
+
+void BeltBlock::entityInside(BlockSource &region, const BlockPos &pos, Actor &actor)
+{
+    const Block& state = region.getBlock(pos);
+    if (!canTransportObjects(state)) {
+        return;
+    }
+
+    // if (entityIn instanceof Player player) {
+    //     if (player.isShiftKeyDown() && !AllItems.CARDBOARD_BOOTS.isIn(player.getItemBySlot(EquipmentSlot.FEET)))
+    //         return;
+    //     if (player.getAbilities().flying)
+    //         return;
+    // }
+
+    // if (DivingBootsItem.isWornBy(entityIn))
+    //     return;
+
+    BeltBlockEntity* belt = BeltHelper::getSegmentBE(region, pos);
+    if (belt == nullptr)
+        return;
+
+    ItemStack asItem = ItemHelper::fromItemEntity(actor);
+    if (!asItem.isEmpty()) {
+        if (region.isClientSide()) return;
+        if (actor.getDeltaMovement().y > 0) return;
+
+        // Vec3 targetLocation = VecHelper.getCenterOf(pos)
+		// 		.add(0, 5 / 16f, 0);
+		// 	if (!PackageEntity.centerPackage(entityIn, targetLocation))
+		// 		return;
+		// 	if (BeltTunnelInteractionHandler.getTunnelOnPosition(worldIn, pos) != null)
+		// 		return;
+
+        withBlockEntityDo(region, pos, [&](BeltBlockEntity& be) {
+            IItemHandler* handler = be.getLevel().getCapability(Amethyst::GetServerCtx().mCapabilities.itemHandler.BLOCK, pos, state, &be, std::optional<FacingID>{});
+            if (handler == nullptr) return;
+
+            // if implementing packages, this needs to be changed!! TODO
+            ItemActor& itemActor = static_cast<ItemActor&>(actor);
+
+            ItemStack remainder = handler->insertItem(0, asItem, false);
+            if (remainder.isEmpty())
+                actor.remove();
+            else if (remainder.mCount != asItem.mCount) {
+                itemActor.mItem = remainder;
+            }
+        });
+
+        return;
+    }
+}
+
+AABB BeltBlock::getCollisionShape(const Block &block, const BlockSource &region, const BlockPos &at, optional_ref<const GetCollisionShapeInterface> shapeInterface) const
+{
+    // bad impl to test since i cba to do proper collisions 
+    AABB base = BlockLegacy::getCollisionShape(block, region, at, shapeInterface);
+    // chop a bit off the top
+    base.max.y -= 0.1875f;
+    return base;
 }
 
 void BeltBlock::initBelt(BlockSource &region, const BlockPos &pos)
@@ -46,7 +109,7 @@ void BeltBlock::initBelt(BlockSource &region, const BlockPos &pos)
 
         BeltBlockEntity* be = dynamic_cast<BeltBlockEntity*>(blockEntity);
         if (be != nullptr && AllBlocks::BELT == currentState.mLegacyBlock) {
-            // be->setController(currentPos);
+            be->setController(currentPos);
             be->beltLength = static_cast<int>(beltChain.size());
             be->index = index;
             be->attachKinetics();
@@ -109,4 +172,14 @@ std::optional<BlockPos> BeltBlock::nextSegmentPosition(const Block &state, const
         return pos.above(slope == BeltSlope::UPWARD ? offset : -offset);
     }
     return pos;
+}
+
+bool BeltBlock::canTransportObjects(const Block &state)
+{
+    if (AllBlocks::BELT != state.mLegacyBlock) {
+        return false;
+    }
+
+    BeltSlope::Type slope = state.getState<BeltSlope::Type>(SLOPE());
+    return slope != BeltSlope::SIDEWAYS && slope != BeltSlope::VERTICAL;
 }

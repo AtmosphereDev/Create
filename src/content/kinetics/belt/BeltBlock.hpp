@@ -3,8 +3,10 @@
 #include <mc/src/common/world/level/block/BlockState.hpp>
 #include "content/kinetics/belt/BeltSlope.hpp"
 #include "content/kinetics/belt/BeltPart.hpp"   
+#include "foundation/block/IBE.hpp"
+#include "content/kinetics/belt/BeltBlockEntity.hpp"
 
-class BeltBlock : public HorizontalKineticBlock {
+class BeltBlock : public HorizontalKineticBlock, public IBE<BeltBlockEntity> {
 public:
     static CustomBlockState<BeltSlope::Type>& SLOPE() {
         static CustomBlockState<BeltSlope::Type> instance("slope", BeltSlope::MAX_VALUE);
@@ -36,9 +38,15 @@ public:
         return *renderBlock;
     }
 
+    virtual void entityInside(BlockSource& unk0, const BlockPos& unk1, Actor& unk2) override;
+
+    virtual AABB getCollisionShape(const Block& block, const BlockSource& region, const BlockPos& at, optional_ref<const GetCollisionShapeInterface> shapeInterface) const override;
+
     static void initBelt(BlockSource& region, const BlockPos& pos);
 
     static std::vector<BlockPos> getBeltChain(BlockSource& region, const BlockPos& startPos);
 
     static std::optional<BlockPos> nextSegmentPosition(const Block& state, const BlockPos& _pos, bool forward);
+
+    static bool canTransportObjects(const Block& state);
 };

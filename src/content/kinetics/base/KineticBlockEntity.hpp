@@ -262,6 +262,8 @@ public:
 	}
 
 	float getSpeed() const {
+		return 16.0f; // temp
+
 		if (overStressed) // || (level != nullptr && level->tickRateManager().isFrozen()
 			return 0;
 

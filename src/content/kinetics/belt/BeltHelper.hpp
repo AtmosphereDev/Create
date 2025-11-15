@@ -3,6 +3,8 @@
 class ItemStack;
 class BeltBlockEntity;
 class BlockPos;
+class BlockSource;
+class Vec3;
 
 class BeltHelper {
 public:
@@ -22,4 +24,8 @@ public:
     }
 
 	static BlockPos getPositionForOffset(BeltBlockEntity* controller, int offset);
+
+	static BeltBlockEntity* getSegmentBE(BlockSource& region, const BlockPos& pos);
+
+	static Vec3 getVectorForOffset(BeltBlockEntity* controller, float offset);
 };

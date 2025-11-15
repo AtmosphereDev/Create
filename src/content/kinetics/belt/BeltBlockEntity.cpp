@@ -2,9 +2,44 @@
 #include "BeltBlock.hpp"
 #include "AllBlocks.hpp"
 #include "content/kinetics/belt/transport/BeltInventory.hpp"
+#include "content/kinetics/belt/transport/ItemHandlerBeltSegment.hpp"
+#include "mc/src/common/SharedPtr.hpp"
+
+void BeltBlockEntity::registerCapabilities(RegisterCapabilitiesEvent &event)
+{
+    // Dereference the WeakPtr and cast to const BlockLegacy*
+    const BlockLegacy* beltBlock = static_cast<const BlockLegacy*>(AllBlocks::BELT.get());
+
+    // Reference to the BlockCapability object
+    auto& blockCapability = event.capabilities.itemHandler.BLOCK;
+
+    // Provider lambda
+    BlockCapability<IItemHandler, std::optional<FacingID>>::ProviderFn provider = [](Level& level, const BlockPos& pos, const Block& state, BlockActor* be, const std::optional<FacingID>& side) -> IItemHandler* {
+        
+        if (!BeltBlock::canTransportObjects(state))
+            return nullptr;
+
+        BeltBlockEntity* beltBE = dynamic_cast<BeltBlockEntity*>(be);
+        if (beltBE != nullptr && beltBE->itemHandler == nullptr)
+            beltBE->initializeItemHandler();
+
+        return beltBE->itemHandler.get();
+    };
+
+    event.registerBlockEntity(blockCapability, beltBlock, provider);
+}
+
+BeltBlockEntity *BeltBlockEntity::getControllerBE() const
+{
+    if (!controller.has_value())
+        return nullptr;
+
+    BlockActor* actor = level->getBlockSource().getBlockEntity(controller.value());
+    return dynamic_cast<BeltBlockEntity*>(actor);
+}
 
 void BeltBlockEntity::tick(BlockSource &source)
- {
+{
     // jank fix
     if (level == nullptr) return;
 
@@ -25,6 +60,26 @@ void BeltBlockEntity::tick(BlockSource &source)
     getInventory()->tick();
 
     // Todo impl Move entities
+}
+
+void BeltBlockEntity::initializeItemHandler()
+{
+    if (level->isClientSide() || itemHandler != nullptr)
+        return;
+    if (beltLength == 0 || controller == std::nullopt) 
+        return;
+
+    BlockActor* actor = level->getBlockSource().getBlockEntity(controller.value());
+    BeltBlockEntity* be = dynamic_cast<BeltBlockEntity*>(actor);
+    if (be == nullptr)
+        return;
+
+    auto inventory = be->getInventory();
+    if (inventory == nullptr)
+        return;
+
+    itemHandler = std::make_shared<ItemHandlerBeltSegment>(inventory, index);
+    invalidateCapabilities();
 }
 
 void BeltBlockEntity::destroy()
@@ -76,6 +131,41 @@ float BeltBlockEntity::propagateRotationTo(KineticBlockEntity &target, const Blo
     return getController() == targetBeltBE->getController() ? 1.0f : 0.0f;
 }
 
+BlockPos BeltBlockEntity::getBeltChainDirection() const
+{
+    return getMovementDirection(true, true);
+}
+
+BlockPos BeltBlockEntity::getMovementDirection(bool firstHalf, bool ignoreHalves) const
+{
+    if (getSpeed() == 0)
+        return BlockPos::ZERO;
+
+    const Block& blockState = getBlock();
+    FacingID beltFacing = blockState.getState<FacingID>(HorizontalKineticBlock::HORIZONTAL_FACING());
+    BeltSlope::Type slope = blockState.getState<BeltSlope::Type>(BeltBlock::SLOPE());
+    BeltPart::Type part = blockState.getState<BeltPart::Type>(BeltBlock::PART());
+    Facing::Axis axis = Facing::getAxis(beltFacing);
+
+    FacingID movementFacing = Facing::fromDirectionAndAxis(
+        axis == Facing::Axis::X ? Facing::AxisDirection::NEGATIVE : Facing::AxisDirection::POSITIVE, 
+        axis
+    );
+    bool notHorizontal = slope != BeltSlope::HORIZONTAL;
+    if (getSpeed() < 0)
+        movementFacing = Facing::getOpposite(movementFacing);
+    BlockPos movement = Facing::normal(movementFacing);
+
+    bool slopeBeforeHalf = (part == BeltPart::END) == (Facing::getAxisDirection(beltFacing) == Facing::AxisDirection::POSITIVE);
+    bool onSlope = notHorizontal && (part == BeltPart::MIDDLE || slopeBeforeHalf == firstHalf || ignoreHalves);
+    bool movingUp = onSlope && slope == (movementFacing == beltFacing ? BeltSlope::UPWARD : BeltSlope::DOWNWARD);
+
+    if (!onSlope)
+        return movement;
+
+    return BlockPos(movement.x, movingUp ? 1 : -1, movement.z);
+}
+
 FacingID BeltBlockEntity::getMovementFacing() const
 {
     Facing::Axis axis = Facing::getAxis(getBeltFacing());
@@ -90,7 +180,16 @@ FacingID BeltBlockEntity::getBeltFacing() const
     return getBlock().getState<FacingID>(HorizontalKineticBlock::HORIZONTAL_FACING());
 }
 
-std::optional<BeltInventory> &BeltBlockEntity::getInventory()
+std::shared_ptr<BeltInventory> BeltBlockEntity::getInventory()
 {
-    return inventory;
+    if (!isController()) {
+		BeltBlockEntity* controllerBE = getControllerBE();
+		if (controllerBE != nullptr) return controllerBE->getInventory();
+		return nullptr;
+    }
+
+    if (inventory == nullptr) {
+        inventory = std::make_shared<BeltInventory>(this);
+	}
+	return inventory;
 }

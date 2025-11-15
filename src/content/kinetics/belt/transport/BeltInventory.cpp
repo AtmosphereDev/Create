@@ -22,7 +22,7 @@ void BeltInventory::tick()
     // Added/Removed items from previous cycle
     if (!toInsert.empty() || !toRemove.empty()) {
         for (auto& stack : toInsert) {
-            insert(std::move(stack));
+            insert(stack);
         }
 
         toInsert.clear();
@@ -31,10 +31,10 @@ void BeltInventory::tick()
             std::remove_if(
                 items.begin(),
                 items.end(),
-                [this](const TransportedItemStack& stack) {
+                [this](const std::shared_ptr<TransportedItemStack>& stack) {
                     // Check if stack exists in toRemove
                     return std::any_of(toRemove.begin(), toRemove.end(),
-                                       [&](const TransportedItemStack& r) { return &r == &stack; });
+                                       [&](const std::shared_ptr<TransportedItemStack>& r) { return r.get() == stack.get(); });
                 }),
             items.end()
         );
@@ -69,7 +69,7 @@ void BeltInventory::tick()
 
     for (auto iterator = items.begin(); iterator != items.end(); /*purposefully no iterator*/) {
         stackInFront = currentItem;
-        currentItem = &*iterator;
+        currentItem = iterator->get();
 
         if (currentItem->stack.isNull()) {
             items.erase(iterator);
@@ -189,11 +189,11 @@ void BeltInventory::tick()
         }
 
         if (ending == Ending::EJECT) {
-            Log::Info("BeltInventory::tick EJECT not implemented yet");
-            // ++iterator;
-            // remove iterator
+            eject(*currentItem);
             items.erase(iterator);
             currentItem = nullptr;
+            // flapTunnel(this, lastOffset, movementFacing, false);
+            belt->notifyUpdate();
             continue;
         }
 
@@ -273,6 +273,16 @@ std::shared_ptr<TransportedItemStackHandlerBehaviour> BeltInventory::getTranspor
         .above(2), TransportedItemStackHandlerBehaviour::TYPE);
 }
 
+void BeltInventory::eject(TransportedItemStack &stack)
+{
+    const ItemStack& ejected = stack.stack;
+    Vec3 outPos = BeltHelper::getVectorForOffset(belt, stack.beltPosition);
+    float movementSpeed = std::max(std::abs(belt->getBeltMovementSpeed()), 1 / 8.0f);
+    Vec3 outMotion = (Vec3::atLowerCornerOf(belt->getBeltChainDirection()) * movementSpeed) + Vec3(0, 1 / 8.0f, 0);
+    outPos = outPos + outMotion.normalized() * 0.001;
+    Log::Info("Ejecting item {} at position ({}, {}, {}) with motion ({}, {}, {})", ejected.mItem->mFullName, outPos.x, outPos.y, outPos.z, outMotion.x, outMotion.y, outMotion.z);
+}
+
 void BeltInventory::ejectAll()
 {
     Log::Info("BeltInventory::ejectAll not implemented yet");
@@ -293,7 +303,47 @@ BeltInventory::Ending BeltInventory::resolveEnding()
     return BeltInventory::Ending::EJECT;
 }
 
-void BeltInventory::insert(TransportedItemStack &&newStack)
+bool BeltInventory::canInsertAt(int segment)
+{
+    return canInsertAtFromSide(segment, FacingID::UP);
+}
+
+bool BeltInventory::canInsertAtFromSide(int segment, FacingID side)
+{
+    float segmentPos = (float)segment;
+    if (belt->getMovementFacing() == Facing::getOpposite(side))
+        return false;
+    if (belt->getMovementFacing() != side) 
+        segmentPos += 0.5f;
+    else if (!beltMovementPositive)
+        segmentPos += 1.0f;
+
+    for (const auto& stack : items) {
+        if (isBlocking(segment, side, segmentPos, *stack.get()))
+            return false;
+    }
+
+    for (const auto& stack : toInsert) {
+        if (isBlocking(segment, side, segmentPos, *stack.get()))
+            return false;
+    }
+
+    return true;
+}
+
+bool BeltInventory::isBlocking(int segment, FacingID side, float segmentPos, TransportedItemStack &stack)
+{
+    float currentPos = stack.beltPosition;
+    return stack.insertedAt == segment && stack.insertedFrom == side 
+        && (beltMovementPositive ? currentPos <= segmentPos + 1 : currentPos >= segmentPos - 1);
+}
+
+void BeltInventory::addItem(std::shared_ptr<TransportedItemStack> stack)
+{
+    toInsert.push_back(stack);
+}
+
+void BeltInventory::insert(std::shared_ptr<TransportedItemStack> newStack)
 {
     if (items.empty()) {
         items.push_back(std::move(newStack));
@@ -302,11 +352,31 @@ void BeltInventory::insert(TransportedItemStack &&newStack)
 
     int index = 0;
     for (auto& stack : items) {
-        if (stack.compareTo(newStack) > 0 == beltMovementPositive) {
+        if (stack->compareTo(*newStack.get()) > 0 == beltMovementPositive) {
             break;
         }
         index++;
     }
 
     items.insert(items.begin() + index, std::move(newStack));
+}
+
+std::shared_ptr<TransportedItemStack> BeltInventory::getStackAtOffset(int offset)
+{
+    float min = static_cast<float>(offset);
+    float max = min + 1.0f;
+
+    for (auto& stack : items) {
+        if (stack->beltPosition > max || stack->beltPosition < min)
+            continue;
+        
+        if (toRemove.end() != std::find_if(toRemove.begin(), toRemove.end(),
+            [&](const std::shared_ptr<TransportedItemStack>& r) { return r.get() == stack.get(); })) {
+            continue;
+        }
+
+        return stack;
+    }
+
+    return nullptr;
 }

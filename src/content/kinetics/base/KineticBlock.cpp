@@ -5,7 +5,7 @@
 void KineticBlock::onRemove(BlockSource &blockSource, const BlockPos &pos) const
 {
 	Log::Info("KineticBlock::onRemove called at {}", pos);
-    IBE::onRemove(*this, blockSource, pos);
+    IBE<KineticBlockEntity>::onRemove(*this, blockSource, pos);
 }
 
 void KineticBlock::neighborChanged(BlockSource& region, const BlockPos& pos, const BlockPos& neighborPos) const
