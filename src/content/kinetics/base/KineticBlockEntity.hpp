@@ -174,10 +174,7 @@ public:
 		SmartBlockEntity::remove();
 	}
 
-	// equivallent of write in original code
-	virtual std::unique_ptr<BlockActorDataPacket> _getUpdatePacket(BlockSource& unk0) override {
-		CompoundTag compound;
-
+	virtual void write(CompoundTag& compound, BlockSource& region) {
 		compound.putFloat("Speed", speed);
 
 		// if (sequenceContext != null && (!clientPacket || syncSequenceContext()))
@@ -204,12 +201,19 @@ public:
 
 			compound.put("Network", std::move(networkTag));
 		}
+	}
 
+	virtual std::unique_ptr<BlockActorDataPacket> _getUpdatePacket(BlockSource& region) final {
+		CompoundTag compound;
+		write(compound, region);
 		return std::make_unique<BlockActorDataPacket>(mPosition, std::move(compound));
 	}
 
-	// equivallent of read in original code
 	virtual void _onUpdatePacket(const CompoundTag& compound, BlockSource& region) override {
+		read(compound, region);
+	}
+
+	virtual void read(const CompoundTag& compound, BlockSource& region) {
 		bool overStressedBefore = overStressed;
 		clearKineticInformation();
 
@@ -245,8 +249,6 @@ public:
 
 			overStressed = capacity < stress && IRotate::StressImpact::isEnabled();
 		}
-
-		Log::Info("KineticBlockEntity onUpdatePacket called, speed: {}, hasNetwork: {}, overStressed: {}", speed, hasNetwork(), overStressed);
 	}
 
 	bool needsSpeedUpdate() {

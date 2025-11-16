@@ -2,6 +2,8 @@
 #include <mc/src/common/world/item/ItemStack.hpp>
 #include "porting/Random.hpp"
 #include "content/kinetics/belt/BeltHelper.hpp"
+#include <mc/src/common/nbt/CompoundTagVariant.hpp>
+#include <mc/src/common/nbt/CompoundTag.hpp>
 
 class TransportedItemStack {
 public:
@@ -37,5 +39,52 @@ public:
 
     int compareTo(const TransportedItemStack& other) const {
         return beltPosition < other.beltPosition ? 1 : beltPosition > other.beltPosition ? -1 : 0;
+    }
+
+    std::unique_ptr<CompoundTag> serializeNBT() const {
+        std::unique_ptr<CompoundTag> nbt = std::make_unique<CompoundTag>();
+        nbt->put("Item", stack.save());
+        nbt->putFloat("Pos", beltPosition);
+        nbt->putFloat("PrevPos", prevBeltPosition);
+        nbt->putFloat("Offset", sideOffset);
+        nbt->putFloat("PrevOffset", prevSideOffset);
+        nbt->putInt("InSegment", insertedAt);
+        nbt->putInt("Angle", angle);
+        nbt->putInt("InDirection", (int)insertedFrom);
+        // if (processedBy != null) {
+		// 	ResourceLocation key = CreateBuiltInRegistries.FAN_PROCESSING_TYPE.getKey(processedBy);
+		// 	if (key == null)
+		// 		throw new IllegalArgumentException("Could not get id for FanProcessingType " + processedBy + "!");
+
+		// 	nbt.putString("FanProcessingType", key.toString());
+		// 	nbt.putInt("FanProcessingTime", processingTime);
+		// }
+
+        if (locked)
+            nbt->putByte("Locked", 1);
+        if (lockedExternally)
+            nbt->putByte("LockedExternally", 1);
+        return nbt;
+    }
+
+    static TransportedItemStack deserializeNBT(const CompoundTag& nbt) {
+        ItemStack item = ItemStack();
+        const CompoundTag* itemTag = nbt.getCompound("Item");
+        if (itemTag != nullptr) {
+            item._loadItem(itemTag);
+        }
+
+        TransportedItemStack stack(item);
+        stack.beltPosition = nbt.getFloat("Pos");
+        stack.prevBeltPosition = nbt.getFloat("PrevPos");
+        stack.sideOffset = nbt.getFloat("Offset");
+        stack.prevSideOffset = nbt.getFloat("PrevOffset");
+        stack.insertedAt = nbt.getInt("InSegment");
+        stack.angle = nbt.getInt("Angle");
+        stack.insertedFrom = static_cast<FacingID>(nbt.getInt("InDirection"));
+
+        // if (nbt.contains("FanProcessingType", Tag::Type::String)) {
+
+        return stack;
     }
 };

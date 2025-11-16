@@ -273,6 +273,45 @@ std::shared_ptr<TransportedItemStackHandlerBehaviour> BeltInventory::getTranspor
         .above(2), TransportedItemStackHandlerBehaviour::TYPE);
 }
 
+CompoundTag BeltInventory::write() const
+{
+    CompoundTag nbt = CompoundTag();
+    ListTag itemsList = ListTag();
+
+    for (const auto& stack : items) {
+        itemsList.add(stack->serializeNBT());
+    }
+
+    nbt.put("Items", std::move(itemsList));
+    if (lazyClientItem.has_value()) {
+        nbt.put("LazyClientItem", lazyClientItem->serializeNBT());
+    }
+    nbt.putByte("PositiveOrder", beltMovementPositive ? 1 : 0);
+    Log::Info("BeltInventory::write completed {}", items.size());
+    return nbt;
+}
+
+void BeltInventory::read(const CompoundTag &nbt)
+{
+    items.clear();
+    const ListTag* itemsList = nbt.getList("Items");
+
+    for (const auto& inbt : itemsList->mList) {
+        const CompoundTag& tag = static_cast<const CompoundTag&>(*inbt);
+        TransportedItemStack stack = TransportedItemStack::deserializeNBT(tag);
+        Log::Info("BeltInventory::read loading item {} at position {}", stack.stack.mItem->mFullName, stack.beltPosition);
+        items.push_back(std::make_shared<TransportedItemStack>(stack));
+    }
+
+    if (nbt.contains("LazyClientItem", Tag::Type::Compound)) {
+        const CompoundTag& lazyTag = *nbt.getCompound("LazyClientItem");
+        TransportedItemStack lazyStack = TransportedItemStack::deserializeNBT(lazyTag);
+        lazyClientItem = lazyStack;
+    }
+
+    beltMovementPositive = nbt.getByte("PositiveOrder") != 0;
+}
+
 void BeltInventory::eject(TransportedItemStack &stack)
 {
     const ItemStack& ejected = stack.stack;

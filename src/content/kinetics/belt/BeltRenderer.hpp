@@ -76,12 +76,12 @@ public:
                 }
 
                 float scrollMult = diagonal ? 3.0f / 8.0f : 0.5f;
-                float spriteSize = 1.0f; // hardcoded, i think this is right
-                double scroll = speed * time / (31.5f * 16.0f) + (bottom ? 0.5f : 0.0f);
+                float spriteSize = 16.0f; // hardcoded 16x16 texture size, bleh
+                float scroll = speed * time / (31.5f * 16.0f) + (bottom ? 0.5f : 0.0f);
                 scroll = scroll - std::floor(scroll);
                 scroll = scroll * spriteSize * scrollMult;
 
-                data.y = static_cast<float>(scroll);
+                data.y = scroll;
                 uvOffset->setData(data);
             }
             

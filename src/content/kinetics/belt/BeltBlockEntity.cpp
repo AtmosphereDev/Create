@@ -96,6 +96,63 @@ void BeltBlockEntity::invalidate()
     invalidateCapabilities();
 }
 
+void BeltBlockEntity::write(CompoundTag &compound, BlockSource &region)
+{
+    if (controller.has_value()) {
+        compound.put("Controller", NbtUtils::writeBlockPos(controller.value()));
+    }
+    compound.putByte("IsController", isController() ? 1 : 0);
+    compound.putInt("Length", beltLength);
+    compound.putInt("Index", index);
+    // casing
+    // covered
+    // color
+
+    if (isController()) {
+        compound.put("Inventory", getInventory()->write());
+    }
+
+    KineticBlockEntity::write(compound, region);
+}
+
+void BeltBlockEntity::read(const CompoundTag &compound, BlockSource &region)
+{
+    KineticBlockEntity::read(compound, region);
+
+    if (compound.getByte("IsController") != 0) {
+        controller = mPosition;
+    }
+
+    // color
+
+    if (!wasMoved) {
+        if (!isController()) {
+            controller = NbtUtils::readBlockPos(*compound.getCompound("Controller"));
+        }
+        // trackerUpdateTag
+        index = compound.getInt("Index");
+        beltLength = compound.getInt("Length");
+    }
+
+    if (isController())
+        getInventory()->read(*compound.getCompound("Inventory"));
+
+    // CasingType casingBefore = casing;
+    // boolean coverBefore = covered;
+    // casing = NBTHelper.readEnum(compound, "Casing", CasingType.class);
+    // covered = compound.getBoolean("Covered");
+
+    if (!region.isClientSide())
+        return;
+
+    // if (casingBefore == casing && coverBefore == covered)
+    //     return;
+    // if (!isVirtual())
+    //     requestModelDataUpdate();
+    // if (hasLevel())
+    //     level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 16);
+}
+
 float BeltBlockEntity::getDirectionAwareBeltMovementSpeed() const
 {
     FacingID facing = getBeltFacing();

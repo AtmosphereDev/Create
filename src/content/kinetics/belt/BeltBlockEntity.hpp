@@ -59,6 +59,10 @@ public:
 
 	virtual void invalidate() override;
 
+	virtual void write(CompoundTag& compound, BlockSource& region) override;
+
+	virtual void read(const CompoundTag& compound, BlockSource& region) override;
+
 	// read 
 
 	// write
