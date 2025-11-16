@@ -7,6 +7,8 @@
 #include "AllBlocks.hpp"
 #include <mc/src-deps/minecraftrenderer/renderer/GlobalConstantBuffers.hpp>
 #include <mc/src-client/common/client/renderer/RenderMaterialGroup.hpp>
+#include <mc/src-client/common/client/renderer/game/ItemInHandRenderer.hpp>
+#include <mc/src-client/common/client/world/item/ItemIconManager.hpp>
 
 class BeltRenderer : public KineticBlockEntityRenderer {
 public:
@@ -36,7 +38,7 @@ public:
 
         bool downward = beltSlope == BeltSlope::DOWNWARD;
         bool upward = beltSlope == BeltSlope::UPWARD;
-        bool diagonal = BeltSlope::isDiagonal(beltSlope);
+        bool diagonal = downward || upward;
         bool start = part == BeltPart::START;
         bool end = part == BeltPart::END;
         bool sideways = beltSlope == BeltSlope::SIDEWAYS;
@@ -58,6 +60,7 @@ public:
 
         auto beltMat = stack.push();
         beltMat->translate(renderPos.x + 0.5f, renderPos.y, renderPos.z + 0.5f);
+        float renderTime = getTime();
 
         for (bool bottom : {false, true}) {
             auto beltPartial = getBeltPartial(diagonal, start, end, bottom);
@@ -69,7 +72,7 @@ public:
             // UV shift
             float speed = be.getSpeed(); // temp hardcoded
             if (speed != 0) {
-                float time = getTime() * Facing::getStep(axisDirection);
+                float time = renderTime * Facing::getStep(axisDirection);
                 if (diagonal && (downward ^ alongX) || !sideways && !diagonal && alongX 
                     || sideways && axisDirection == Facing::AxisDirection::NEGATIVE) {
                     speed = -speed;
@@ -116,6 +119,101 @@ public:
         }
 
         stack.pop();
+
+        renderItems(be, renderTime, stack, ctx);
+    }
+
+    void renderItems(BeltBlockEntity& be, float partialTicks, MatrixStack& ms, BaseActorRenderContext& ctx) {
+        if (!be.isController())
+            return;
+        if (be.beltLength == 0)
+            return;
+
+        auto mat = ms.push();
+
+        FacingID beltFacing = be.getBeltFacing();
+        BlockPos directionVec = Facing::normal(beltFacing);
+        Vec3 beltStartOffset = Vec3::atLowerCornerOf(directionVec) * 0.5f + Vec3(0.5f, 15.0f / 16.0f, 0.5f); 
+        mat->translate(beltStartOffset);
+
+        BeltSlope::Type slope = be.getBlock().getState<BeltSlope::Type>(BeltBlock::SLOPE());
+        int verticality = slope == BeltSlope::DOWNWARD ? -1 : (slope == BeltSlope::UPWARD ? 1 : 0);
+        bool slopeAlongX = Facing::getAxis(beltFacing) == Facing::Axis::X;
+        bool onContraption = false; // todo
+
+        const auto& inventory = be.getInventory();
+        for (const auto& transported : inventory->getTransportedItems()) {
+            renderItem(be, partialTicks, ms, ctx, beltFacing, directionVec, slope, verticality, slopeAlongX, onContraption, *transported.get(), beltStartOffset);
+        }
+
+        const auto& lazyItem = inventory->getLazyClientItem();
+        if (lazyItem.has_value()) {
+            renderItem(be, partialTicks, ms, ctx, beltFacing, directionVec, slope, verticality, slopeAlongX, onContraption, lazyItem.value(), beltStartOffset);
+        }
+
+        ms.pop();
+    }
+
+    void renderItem(BeltBlockEntity& be, float partialTicks, MatrixStack& ms, BaseActorRenderContext& ctx, FacingID beltFacing, BlockPos directionVec, BeltSlope::Type slope, 
+        int verticality, bool slopeAlongX, bool onContraption, const TransportedItemStack& transported, Vec3 beltStartOffset) 
+    {
+        float offset = std::lerp(transported.prevBeltPosition, transported.beltPosition, partialTicks);
+        float sideOffset = std::lerp(transported.prevSideOffset, transported.sideOffset, partialTicks);
+        float verticalMovement = verticality;
+
+        if (be.getSpeed() == 0) {
+            offset = transported.beltPosition;
+            sideOffset = transported.sideOffset;
+        }
+
+        if (offset < 0.5f) {
+            verticalMovement = 0;
+        }
+        else {
+            verticalMovement = verticality * (std::min(offset, be.beltLength - 0.5f) - 0.5f);
+        }
+
+        Vec3 offsetVec = Vec3::atLowerCornerOf(directionVec) * offset;
+        if (verticalMovement != 0) {
+            offsetVec.y += verticalMovement;
+        }
+        bool onSlope = slope != BeltSlope::HORIZONTAL && std::clamp(offset, 0.5f, be.beltLength - 0.5f) == offset;
+        bool tiltForward = (slope == BeltSlope::DOWNWARD 
+            ^ Facing::getAxisDirection(beltFacing) == Facing::AxisDirection::POSITIVE) == (Facing::getAxis(beltFacing) == Facing::Axis::Z);
+        float slopeAngle = onSlope ? (tiltForward ? -45.5f : 45.5f) : 0.0f;
+
+        Vec3 itemPos = beltStartOffset + be.getBlockPos() + offsetVec;
+
+        auto itemMat = ms.push();
+
+        //ResolvedItemIconInfo iconInfo = transported.stack.getItem()->getIconInfo(transported.stack, 0, false);
+		TextureAtlasItem* atlasItem = ItemIconManager::getIcon(transported.stack.getItem()->getIconInfo(transported.stack, 0, false));
+        float iconWidth = atlasItem->pixelWidth();
+        //Log::Info("iconWidth of {} is {}", transported.stack.getItem()->mFullName, iconWidth);
+
+        itemMat->scale(0.4f / iconWidth);
+
+        // todo nudge angle
+        itemMat->translate(itemPos);
+
+        bool alongX = Facing::getAxis(Facing::getClockWise(beltFacing)) == Facing::Axis::X;
+        if (!alongX)
+            sideOffset *= -1.0f;
+
+        itemMat->translate(alongX ? sideOffset : 0.0f, 0.0f, alongX ? 0.0f : sideOffset);
+        itemMat->translate(ctx.mCameraTargetPosition * -1.0f); // camera adjust
+
+        const ItemRenderCall& renderCall = ctx.mItemInHandRenderer.getRenderCallAtFrame(ctx, transported.stack, 0);
+        if (ctx.mScreenContext.tessellator.mForceTessellateIntercept) {
+            Log::Warning("Force intercepted item rendering is not implemented! Item name: '{}'", transported.stack.getItem()->mFullName);
+        }
+        else {
+            ctx.mItemInHandRenderer.renderObject(ctx, renderCall, dragon::RenderMetadata(be.getBlockPos()), ItemContextFlags::None);
+            // Log::Info("{}", ctx.mScreenContext.tessellator.mForceTessellateIntercept ? "force tessellate" : "normal render");
+            
+        }
+
+        ms.pop();
     }
 
     static std::shared_ptr<PartialModel> getBeltPartial(bool diagonal, bool start, bool end, bool bottom) {
