@@ -81,7 +81,7 @@ public:
 
     void ejectAll();
 
-    void applyToEachWithin(float position, float maxDistanceToPosition, std::function<TransportedItemStackHandlerBehaviour::TransportedResult(TransportedItemStack&)> func);
+    void applyToEachWithin(float position, float maxDistanceToPosition, std::function<std::optional<TransportedItemStackHandlerBehaviour::TransportedResult>(TransportedItemStack &)> func);
 
     std::vector<std::shared_ptr<TransportedItemStack>>& getTransportedItems() {
         return items;

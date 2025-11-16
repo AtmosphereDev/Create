@@ -4,6 +4,7 @@
 #include "AllPartialModels.hpp"
 #include "foundation/blockEntity/behaviour/ValueSettingsInputHandler.hpp"
 #include "foundation/events/ClientEvents.hpp"
+#include "foundation/events/CommonEvents.hpp"
 #include "porting/ClientInputs.hpp"
 #include "foundation/blockEntity/behaviour/ValueSettingsScreen.hpp"
 #include "foundation/blockEntity/behaviour/ValueSettingsClient.hpp"
@@ -20,7 +21,9 @@ public:
         AllItems::AddEventListeners();
         AllPartialModels::AddEventListeners();
         ClientEvents::AddEventListeners();
+        CommonEvents::AddEventListeners();
         ClientInputs::AddEventListeners();
+        ServerSpeedProvider::AddEventListeners();
 
         // Block event handlers
         BeltBlockEntity::AddEventListeners();

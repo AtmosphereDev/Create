@@ -18,21 +18,19 @@ public:
 
     class TransportedResult {
     public:
-        std::shared_ptr<std::vector<TransportedItemStack>> outputs;
+        std::vector<std::shared_ptr<TransportedItemStack>> outputs;
         std::shared_ptr<TransportedItemStack> heldOutput;
 
         static TransportedResult doNothing() {
-            return TransportedResult(nullptr, nullptr);
+            return TransportedResult({}, nullptr);
         }
 
         static TransportedResult removeItem() {
-            return TransportedResult(std::make_shared<std::vector<TransportedItemStack>>(), nullptr);
+            return TransportedResult({}, nullptr);
         }
 
         static TransportedResult convertTo(const TransportedItemStack& output) {
-            auto vec = std::make_shared<std::vector<TransportedItemStack>>();
-            vec->push_back(output);
-            return TransportedResult(vec, nullptr);
+            return TransportedResult({ std::make_shared<TransportedItemStack>(output) }, nullptr);
         }
 
         static TransportedResult convertTo(const std::vector<TransportedItemStack>& outputs);
@@ -41,35 +39,31 @@ public:
                                                        const TransportedItemStack& heldOutput);
 
         bool doesNothing() const {
-            return outputs == nullptr;
+            return outputs.size() == 0;
         }
 
         bool didntChangeFrom(const ItemStack& stackBefore) const;
 
-        const std::vector<TransportedItemStack>& getOutputs() const {
-            if (!outputs)
-                throw std::runtime_error("Do not call getOutputs() on a Result that doesNothing().");
-            return *outputs;
+        const std::vector<std::shared_ptr<TransportedItemStack>>& getOutputs() const {
+            return outputs;
         }
 
         bool hasHeldOutput() const {
             return heldOutput != nullptr;
         }
 
-        const TransportedItemStack& getHeldOutput() const {
-            if (!heldOutput)
-                throw std::runtime_error("Do not call getHeldOutput() on a Result with hasHeldOutput() == false.");
-            return *heldOutput;
+        std::shared_ptr<TransportedItemStack> getHeldOutput() const {
+            return heldOutput;
         }
 
     private:
-        TransportedResult(std::shared_ptr<std::vector<TransportedItemStack>> outputs,
+        TransportedResult(std::vector<std::shared_ptr<TransportedItemStack>> outputs,
                           std::shared_ptr<TransportedItemStack> heldOutput)
             : outputs(std::move(outputs)), heldOutput(std::move(heldOutput)) {}
     };
 
     using ProcessingCallback =
-        std::function<void(float, std::function<TransportedResult(TransportedItemStack&)>)>;
+        std::function<void(float, std::function<std::optional<TransportedResult>(TransportedItemStack&)>)>;
 
     using PositionGetter =
         std::function<Vec3(TransportedItemStack&)>;
@@ -91,21 +85,24 @@ public:
         return *this;
     }
 
-    void handleProcessingOnAllItems(std::function<TransportedResult(TransportedItemStack&)> processFunction) {
+    void handleProcessingOnAllItems(std::function<std::optional<TransportedResult>(TransportedItemStack&)> processFunction) {
         handleCenteredProcessingOnAllItems(0.51f, std::move(processFunction));
     }
 
     void handleProcessingOnItem(TransportedItemStack& item, const TransportedResult& processOutput) {
-        handleCenteredProcessingOnAllItems(0.51f, [&](TransportedItemStack& t) -> TransportedResult {
+        handleCenteredProcessingOnAllItems(0.51f, [&](TransportedItemStack& t) -> std::optional<TransportedResult> {
             if (&t == &item)
                 return processOutput;
-            return TransportedResult::doNothing();
+            return std::nullopt;
         });
     }
 
     void handleCenteredProcessingOnAllItems(float maxDistanceFromCenter,
-                                            std::function<TransportedResult(TransportedItemStack&)> processFunction) {
-        processingCallback(maxDistanceFromCenter, std::move(processFunction));
+                                            std::function<std::optional<TransportedResult>(TransportedItemStack&)> processFunction) {
+        this->processingCallback(
+            maxDistanceFromCenter,
+            std::move(processFunction)
+        );
     }
 
     Vec3 getWorldPositionOf(TransportedItemStack& transported) {

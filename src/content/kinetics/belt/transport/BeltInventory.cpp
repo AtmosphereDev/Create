@@ -6,6 +6,7 @@
 #include "content/kinetics/belt/behaviour/DirectBeltInputBehaviour.hpp"
 #include "foundation/utility/BlockHelper.hpp"
 #include <mc/src/common/world/Facing.hpp>
+#include "foundation/utility/ServerSpeedProvider.hpp"
 
 void BeltInventory::tick()
 {
@@ -47,7 +48,7 @@ void BeltInventory::tick()
         return;
 
     // Reverse item collection if belt just reversed
-    if (beltMovementPositive != belt->getDirectionAwareBeltMovementSpeed() > 0) {
+    if (beltMovementPositive != (belt->getDirectionAwareBeltMovementSpeed() > 0)) {
         beltMovementPositive = !beltMovementPositive;
         std::reverse(items.begin(), items.end());
         belt->notifyUpdate();
@@ -70,6 +71,8 @@ void BeltInventory::tick()
     for (auto iterator = items.begin(); iterator != items.end(); /*purposefully no iterator*/) {
         stackInFront = currentItem;
         currentItem = iterator->get();
+        currentItem->prevBeltPosition = currentItem->beltPosition;
+        currentItem->prevSideOffset = currentItem->sideOffset;
 
         if (currentItem->stack.isNull()) {
             items.erase(iterator);
@@ -79,7 +82,7 @@ void BeltInventory::tick()
 
         float movement = beltSpeed;
         if (onClient) {
-            // movement *= ServerSpeedProvider.get(); TODO
+            movement *= ServerSpeedProvider::get();
         }
 
         // Don't move if held by processing (client)
@@ -107,7 +110,7 @@ void BeltInventory::tick()
 
         // Don't move beyond the edge
         float diffToEnd = beltMovementPositive ? belt->beltLength - currentPos : -currentPos;
-        if (std::abs(diffToEnd) <= std::abs(movement) + 1) {
+        if (std::abs(diffToEnd) < std::abs(movement) + 1) {
             if (ending == Ending::UNRESOLVED)
                 ending = resolveEnding();
             diffToEnd += beltMovementPositive ? -ending.margin : ending.margin;
@@ -203,7 +206,7 @@ void BeltInventory::tick()
 
 bool BeltInventory::handleBeltProcessingAndCheckIfRemoved(TransportedItemStack &currentItem, float nextOffset, bool noMovement)
 {
-    int currentSegment = static_cast<int>(std::floor(currentItem.beltPosition));
+    int currentSegment = static_cast<int>(currentItem.beltPosition);
 
     if (currentItem.locked) {
         auto processingBehaviour = getBeltProcessingAtSegment(currentSegment);
@@ -233,7 +236,7 @@ bool BeltInventory::handleBeltProcessingAndCheckIfRemoved(TransportedItemStack &
 
     // See if any new belt processing catches the item
     if (currentItem.beltPosition > 0.5f || beltMovementPositive) {
-        int firstUpcomingSegment = static_cast<int>(std::floor(currentItem.beltPosition + (beltMovementPositive ? 0.5f : -0.5f)));
+        int firstUpcomingSegment = static_cast<int>(currentItem.beltPosition + (beltMovementPositive ? 0.5f : -0.5f));
         int step = beltMovementPositive ? 1 : -1;
 
         for (int segment = firstUpcomingSegment; beltMovementPositive ? segment + 0.5f <= nextOffset : segment + 0.5f >= nextOffset; segment += step) {
@@ -270,7 +273,7 @@ std::shared_ptr<BeltProcessingBehaviour> BeltInventory::getBeltProcessingAtSegme
 std::shared_ptr<TransportedItemStackHandlerBehaviour> BeltInventory::getTransportedItemStackHandlerAtSegment(int segment)
 {
     return BlockEntityBehaviour::get<TransportedItemStackHandlerBehaviour>(*belt->getLevel().mBlockSource.get(), BeltHelper::getPositionForOffset(belt, segment)
-        .above(2), TransportedItemStackHandlerBehaviour::TYPE);
+        , TransportedItemStackHandlerBehaviour::TYPE);
 }
 
 CompoundTag BeltInventory::write() const
@@ -284,7 +287,7 @@ CompoundTag BeltInventory::write() const
 
     nbt.put("Items", std::move(itemsList));
     if (lazyClientItem.has_value()) {
-        nbt.put("LazyClientItem", lazyClientItem->serializeNBT());
+        nbt.put("LazyItem", lazyClientItem->serializeNBT());
     }
     nbt.putByte("PositiveOrder", beltMovementPositive ? 1 : 0);
     Log::Info("BeltInventory::write completed {}", items.size());
@@ -303,8 +306,8 @@ void BeltInventory::read(const CompoundTag &nbt)
         items.push_back(std::make_shared<TransportedItemStack>(stack));
     }
 
-    if (nbt.contains("LazyClientItem", Tag::Type::Compound)) {
-        const CompoundTag& lazyTag = *nbt.getCompound("LazyClientItem");
+    if (nbt.contains("LazyItem", Tag::Type::Compound)) {
+        const CompoundTag& lazyTag = *nbt.getCompound("LazyItem");
         TransportedItemStack lazyStack = TransportedItemStack::deserializeNBT(lazyTag);
         lazyClientItem = lazyStack;
     }
@@ -325,6 +328,44 @@ void BeltInventory::eject(TransportedItemStack &stack)
 void BeltInventory::ejectAll()
 {
     Log::Info("BeltInventory::ejectAll not implemented yet");
+}
+
+void BeltInventory::applyToEachWithin(float position, float maxDistanceToPosition, std::function<std::optional<TransportedItemStackHandlerBehaviour::TransportedResult>(TransportedItemStack &)> func)
+{
+    bool dirty = false;
+
+    for (auto& transported : items) {
+        // if to remove contains stack, skip
+        if (toRemove.end() != std::find_if(toRemove.begin(), toRemove.end(),
+            [&](const std::shared_ptr<TransportedItemStack>& r) { return r.get() == transported.get(); })) {
+            continue;
+        }
+
+        ItemStack stackBefore = transported->stack;
+        if (std::abs(position - transported->beltPosition) >= maxDistanceToPosition)
+            continue;
+
+        auto result = func(*transported.get());
+        if (!result.has_value() || result->didntChangeFrom(stackBefore))
+            continue;
+
+        dirty = true;
+        if (result->hasHeldOutput()) {
+            auto held = result->getHeldOutput();
+            held->beltPosition = ((int)position) + 0.5f - (beltMovementPositive ? 1 / 512.0f : -1 / 512.0f);
+            toInsert.push_back(held);
+        }
+        // add all of result.getOutputs()
+        for (const auto& output : result->getOutputs()) {
+            toInsert.push_back(output);
+        }
+
+        toRemove.push_back(transported);
+    }
+
+    if (dirty) {
+        belt->notifyUpdate();
+    }
 }
 
 BeltInventory::Ending BeltInventory::resolveEnding()

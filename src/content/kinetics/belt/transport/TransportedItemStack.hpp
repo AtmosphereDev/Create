@@ -24,7 +24,8 @@ public:
     int processingTime;
 
     TransportedItemStack(ItemStack stack)
-        : stack(stack) {
+        : stack(stack), beltPosition(0.0f), sideOffset(0.0f), angle(0), insertedAt(0), insertedFrom(FacingID::UP),
+          locked(false), lockedExternally(false), prevBeltPosition(0.0f), prevSideOffset(0.0f), processingTime(0) {
             bool centered = BeltHelper::isItemUpright(stack);
             angle = centered ? 180 : Random::nextInt(360);
             // if (PackageItem.isPackage(stack))

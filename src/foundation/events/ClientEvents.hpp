@@ -3,6 +3,7 @@
 #include <mc/src/common/world/level/Level.hpp>
 #include "CreateClient.hpp"
 #include "foundation/blockEntity/behaviour/scrollValue/ScrollValueRenderer.hpp"
+#include "foundation/utility/ServerSpeedProvider.hpp"
 
 class ClientEvents {
 public:
@@ -23,6 +24,8 @@ public:
 			// AirCurrent.Client.tickClientPlayerSounds();
 			// return;
         }
+
+        ServerSpeedProvider::clientTick();
 
         ScrollValueRenderer::tick();
         CreateClient::VALUE_SETTINGS_HANDLER.tick();

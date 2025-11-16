@@ -52,7 +52,7 @@ void BeltBlockEntity::tick(BlockSource &source)
     if (AllBlocks::BELT != getBlock().mLegacyBlock) 
         return;
 
-    // initializeItemHandler();
+    initializeItemHandler();
 
     if (!isController())
         return;
@@ -249,4 +249,24 @@ std::shared_ptr<BeltInventory> BeltBlockEntity::getInventory()
         inventory = std::make_shared<BeltInventory>(this);
 	}
 	return inventory;
+}
+
+void BeltBlockEntity::applyToAllItems(float maxDistanceFromCenter, const std::function<std::optional<TransportedItemStackHandlerBehaviour::TransportedResult>(TransportedItemStack &)> &func)
+{
+    BeltBlockEntity* controller = getControllerBE();
+    if (controller == nullptr)
+        return;
+    auto inventory = controller->getInventory();
+    if (inventory == nullptr)
+        return; 
+    inventory->applyToEachWithin(index + 0.5f, maxDistanceFromCenter, func);
+}
+
+Vec3 BeltBlockEntity::getWorldPositionOf(const TransportedItemStack &stack) const
+{
+    BeltBlockEntity* controller = getControllerBE();
+    if (controller == nullptr)
+        return Vec3::ZERO;
+
+    return BeltHelper::getVectorForOffset(controller, stack.beltPosition);
 }

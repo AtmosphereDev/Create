@@ -73,6 +73,11 @@ float KineticBlockEntityRenderer::getTime()
     return Amethyst::GetClientCtx().mMinecraft->mSimTimer.mLastTimeSeconds * 20.0f; // to ticks to match java
 }
 
+float KineticBlockEntityRenderer::getTickAlpha()
+{
+    return Amethyst::GetClientCtx().mMinecraft->mSimTimer.mAlpha; // to ticks to match java
+}
+
 void KineticBlockEntityRenderer::rotateVerticalToFace(Matrix &mat, FacingID dir)
 {
     switch (dir) {

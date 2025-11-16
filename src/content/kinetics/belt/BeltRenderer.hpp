@@ -70,7 +70,7 @@ public:
             auto data = uvOffset->getData();
 
             // UV shift
-            float speed = be.getSpeed(); // temp hardcoded
+            float speed = be.getSpeed() / 16.0f; // temp hardcoded
             if (speed != 0) {
                 float time = renderTime * Facing::getStep(axisDirection);
                 if (diagonal && (downward ^ alongX) || !sideways && !diagonal && alongX 
@@ -120,7 +120,7 @@ public:
 
         stack.pop();
 
-        renderItems(be, renderTime, stack, ctx);
+        renderItems(be, getTickAlpha(), stack, ctx);
     }
 
     void renderItems(BeltBlockEntity& be, float partialTicks, MatrixStack& ms, BaseActorRenderContext& ctx) {
@@ -133,7 +133,7 @@ public:
 
         FacingID beltFacing = be.getBeltFacing();
         BlockPos directionVec = Facing::normal(beltFacing);
-        Vec3 beltStartOffset = Vec3::atLowerCornerOf(directionVec) * 0.5f + Vec3(0.5f, 15.0f / 16.0f, 0.5f); 
+        Vec3 beltStartOffset = Vec3::atLowerCornerOf(directionVec) * -0.5f + Vec3(0.5f, 15.0f / 16.0f, 0.5f); 
         mat->translate(beltStartOffset);
 
         BeltSlope::Type slope = be.getBlock().getState<BeltSlope::Type>(BeltBlock::SLOPE());
@@ -189,7 +189,6 @@ public:
         //ResolvedItemIconInfo iconInfo = transported.stack.getItem()->getIconInfo(transported.stack, 0, false);
 		TextureAtlasItem* atlasItem = ItemIconManager::getIcon(transported.stack.getItem()->getIconInfo(transported.stack, 0, false));
         float iconWidth = atlasItem->pixelWidth();
-        //Log::Info("iconWidth of {} is {}", transported.stack.getItem()->mFullName, iconWidth);
 
         itemMat->scale(0.4f / iconWidth);
 
@@ -209,8 +208,6 @@ public:
         }
         else {
             ctx.mItemInHandRenderer.renderObject(ctx, renderCall, dragon::RenderMetadata(be.getBlockPos()), ItemContextFlags::None);
-            // Log::Info("{}", ctx.mScreenContext.tessellator.mForceTessellateIntercept ? "force tessellate" : "normal render");
-            
         }
 
         ms.pop();

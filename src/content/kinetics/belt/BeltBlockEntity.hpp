@@ -34,8 +34,23 @@ public:
         KineticBlockEntity::addBehaviours(behavioursList);
         // behaviours.add(new DirectBeltInputBehaviour(this).onlyInsertWhen(this::canInsertFrom)
 		// 	.setInsertionHandler(this::tryInsertingFromSide).considerOccupiedWhen(this::isOccupied));
-		// behaviours.add(new TransportedItemStackHandlerBehaviour(this, this::applyToAllItems)
-		// 	.withStackPlacement(this::getWorldPositionOf));
+
+		auto transportedItemStackHandlerBehaviour = std::make_shared<TransportedItemStackHandlerBehaviour>(
+			this, 
+			[this](
+				float maxDistanceFromCenter,
+				std::function<std::optional<TransportedItemStackHandlerBehaviour::TransportedResult>(TransportedItemStack &)> process
+			) {
+				this->applyToAllItems(maxDistanceFromCenter, process);
+			}
+		);	
+
+		transportedItemStackHandlerBehaviour->withStackPlacement(
+			[this](const TransportedItemStack& stack){ return getWorldPositionOf(stack); }
+		);
+
+		behavioursList.push_back(transportedItemStackHandlerBehaviour);
+
 		// behaviours.add(invVersionTracker = new VersionedInventoryTrackerBehaviour(this));
     }
 
@@ -111,8 +126,8 @@ public:
 
 	std::shared_ptr<BeltInventory> getInventory();
 
-	void applyToAllItems(const std::function<TransportedItemStackHandlerBehaviour::TransportedResult(TransportedItemStack&)>& func);
-
+	void applyToAllItems(float maxDistanceFromCenter, const std::function<std::optional<TransportedItemStackHandlerBehaviour::TransportedResult>(TransportedItemStack &)>& func);
+	
 	Vec3 getWorldPositionOf(const TransportedItemStack& stack) const;
 
 	// setCasingType

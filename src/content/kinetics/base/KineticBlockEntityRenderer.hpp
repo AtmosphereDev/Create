@@ -70,6 +70,8 @@ public:
 
     static float getTime();
 
+    static float getTickAlpha();
+
     static void rotateVerticalToFace(Matrix& mat, FacingID face);
 
     static void rotateToFace(Matrix& mat, FacingID axis);
