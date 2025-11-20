@@ -38,7 +38,6 @@ public:
 
     void cancelInteraction() {
         interactHeldTicks = -1;
-        Log::Info("CancelInteraction called!");
     }
 
     void showHoverTip(std::vector<std::string> tip) {

@@ -24,7 +24,7 @@ public:
 	}
 
 	static double getCapacity(const Block& block) {
-        return 0;
+        return 100;
 		// DoubleSupplier supplier = CAPACITIES.get(block);
 		// return supplier == null ? 0 : supplier.getAsDouble();
 	}

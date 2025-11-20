@@ -78,10 +78,6 @@ public:
 
 	virtual void read(const CompoundTag& compound, BlockSource& region) override;
 
-	// read 
-
-	// write
-
 	virtual void clearKineticInformation() override {
 		KineticBlockEntity::clearKineticInformation();
 		beltLength = 0;

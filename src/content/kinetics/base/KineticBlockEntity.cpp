@@ -22,7 +22,7 @@ void KineticBlockEntity::switchToBlockState(Dimension &world, const BlockPos &po
         return;
 
     if (!blockEntity || !isKinetic) {
-        region.setBlock(pos, state, 0, nullptr, nullptr);
+        region.setBlock(pos, state, 3, nullptr, nullptr);
         return;
     }
 
@@ -41,7 +41,7 @@ void KineticBlockEntity::switchToBlockState(Dimension &world, const BlockPos &po
         generatingBlockEntity->reActivateSource = true;
     }
 
-    region.setBlock(pos, state, 0, nullptr, nullptr);
+    region.setBlock(pos, state, 3, nullptr, nullptr);
 }
 
 bool KineticBlockEntity::canPropagateDiagonally(IRotate &block, const Block &state)

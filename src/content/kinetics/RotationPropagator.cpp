@@ -184,12 +184,14 @@ void RotationPropagator::propagateNewSource(KineticBlockEntity &currentTE)
             
         bool speedChangedTooOften = currentTE.getFlickerScore() > MAX_FLICKER_SCORE;
         if (tooFast || speedChangedTooOften) {
+            Log::Info("Rotation speed too fast or changed too often at {}", pos);
             world.destroyBlock(pos, true);
             return;
         }
 
         // Opposite directions
         if (incompatible) {
+            Log::Info("Rotation direction incompatible at {}", pos);
             world.destroyBlock(pos, true);
             return;
 

@@ -35,6 +35,7 @@ void KineticNetwork::addSilently(KineticBlockEntity *be, float lastCapacity, flo
 
 void KineticNetwork::add(KineticBlockEntity *be)
  {
+	Log::Info("KineticNetwork add called for BE at {}", be->getBlockPos());
     if (members.find(be) != members.end())
         return;
     if (be->isSource())
@@ -64,9 +65,16 @@ void KineticNetwork::remove(KineticBlockEntity *be)
         sources.erase(be);
     members.erase(be);
     be->updateFromNetwork(0, 0, 0);
+	Log::Info("Current network for be is {}", be->network.has_value() ? std::to_string(be->network.value()) : "none");
 
     if (members.empty()) {
         TorquePropagator::networks[be->level->mId].erase(this->id);
+		Log::Info("KineticNetwork removed entirely as last member was removed, all remaning networks, count {}", TorquePropagator::networks.size());
+
+        for (auto& [_, network] : TorquePropagator::networks[be->level->mId]) {
+            Log::Info("network id {}, members: {}, sources: {}", network.id, network.members.size(), network.sources.size());
+		}
+
         return;
     }
 

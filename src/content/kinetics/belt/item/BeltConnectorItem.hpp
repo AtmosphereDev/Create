@@ -33,8 +33,6 @@ public:
             return validAxis ? InteractionResult(InteractionResult::Result::SUCCESS | InteractionResult::Result::SWING) : InteractionResult();
         }
 
-        Log::Info("Using Belt Connector at {}", pos);
-
         std::optional<BlockPos> firstPulley = std::nullopt;
 
         // Remove first if no longer existant or valid
@@ -43,27 +41,19 @@ public:
 
             if (!validateAxis(dim, *firstPulley) || !firstPulley->closerThan(pos, maxLength())) {
                 heldStack.mUserData->remove("BeltFirstShaft");
-                Log::Info("Removed invalid first pulley at {}", *firstPulley);
             }
         }
 
         if (!validAxis) 
             return InteractionResult();
 
-        Log::Info("Was valid axis for belt connector at {}", pos);
-
         if (heldStack.mUserData != nullptr && heldStack.mUserData->contains("BeltFirstShaft")) {
-            Log::Info("Found first pulley data at {}", *firstPulley);
             if (!canConnect(dim, *firstPulley, pos)) {
-                Log::Info("canConnect returned false!");
                 return InteractionResult();
             }
 
-            Log::Info("Can connect between {} and {}", *firstPulley, pos);
-
             if (*firstPulley != pos) {
                 createBelts(dim, firstPulley.value(), pos);
-                Log::Info("Created belts between {} and {}", *firstPulley, pos);
                 if (!player.isCreative()) heldStack.mCount--;
             }
             return InteractionResult(InteractionResult::Result::SUCCESS);
@@ -71,10 +61,8 @@ public:
 
         if (heldStack.mUserData == nullptr) {
             heldStack.mUserData = new CompoundTag();
-            Log::Info("Created new user data for held stack");
         }
         heldStack.mUserData->put("BeltFirstShaft", NbtUtils::writeBlockPos(pos));
-        Log::Info("Set first pulley at {}", pos);
         return InteractionResult(InteractionResult::Result::SUCCESS);
     }
 
@@ -86,14 +74,14 @@ public:
 		// 	.scale(.5f)), SoundEvents.WOOL_PLACE, SoundSource.BLOCKS, 0.5F, 1F);
 
         BeltSlope::Type slope = getSlopeBetween(start, end);
-        FacingID direction = getFacingFromTo(start, end);
+        FacingID facing = getFacingFromTo(start, end);
 
         BlockPos diff = end - start;
         if (diff.x == diff.z)
-            direction = Facing::fromDirectionAndAxis(Facing::getAxisDirection(direction), 
+            facing = Facing::fromDirectionAndAxis(Facing::getAxisDirection(facing), 
                 region.getBlock(start).getState<Facing::Axis>(VanillaStates::PillarAxis) == Facing::Axis::X ? Facing::Axis::Z : Facing::Axis::X);
 
-        std::vector<BlockPos> beltsToCreate = getBeltChainBetween(start, end, slope, direction);
+        std::vector<BlockPos> beltsToCreate = getBeltChainBetween(start, end, slope, facing);
         const Block& beltBlock = *AllBlocks::BELT->mDefaultState;
         bool failed = false;
 
@@ -119,7 +107,7 @@ public:
             KineticBlockEntity::switchToBlockState(world, pos,
                 *AllBlocks::BELT->mDefaultState->setState(BeltBlock::SLOPE(), slope)
                     ->setState(BeltBlock::PART(), part)
-                    ->setState(HorizontalKineticBlock::HORIZONTAL_FACING(), direction).get());
+                    ->setState(HorizontalKineticBlock::HORIZONTAL_FACING(), facing).get());
         }
 
         if (!failed)
@@ -160,7 +148,8 @@ public:
         return BeltSlope::HORIZONTAL;
     }
 
-    static std::vector<BlockPos> getBeltChainBetween(const BlockPos& start, const BlockPos& end, BeltSlope::Type slope, FacingID direction) {
+    static std::vector<BlockPos> getBeltChainBetween(const BlockPos& start, const BlockPos& end, BeltSlope::Type slope, FacingID facing) {
+        Log::Info("Getting belt chain between {} and {} with slope {} and direction {}", start, end, (int)slope, (int)facing);
         std::vector<BlockPos> positions;
         int limit = 1000;
         BlockPos current = start;
@@ -169,11 +158,11 @@ public:
             positions.push_back(current);
 
             if (slope == BeltSlope::VERTICAL) {
-                current = current.above(Facing::getAxisDirection(direction) == Facing::AxisDirection::POSITIVE ? 1 : -1);
+                current = current.above(Facing::getAxisDirection(facing) == Facing::AxisDirection::POSITIVE ? 1 : -1);
                 continue;
             }
 
-            current = current.neighbor(direction);
+            current = current.neighbor(facing);
             if (slope != BeltSlope::HORIZONTAL)
                 current = current.above(slope == BeltSlope::UPWARD ? 1 : -1);
 
@@ -207,6 +196,8 @@ public:
         if (sames != 1) 
             return false;
         if (shaftAxis != region.getBlock(second).getState<Facing::Axis>(VanillaStates::PillarAxis))
+            return false;
+        if (shaftAxis == Facing::Axis::Y && diff.x != 0 && diff.z != 0)
             return false;
 
         KineticBlockEntity* blockEntity = KineticBlockEntity::asKineticBlockEntity(region.getBlockEntity(first));

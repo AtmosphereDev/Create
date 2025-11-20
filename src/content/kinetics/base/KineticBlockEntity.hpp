@@ -35,10 +35,10 @@ public:
 
     KineticBlockEntity(const BlockPos& pos, const std::string& id)
 		: SmartBlockEntity(pos, id), speed(0), capacity(0), stress(0), overStressed(false), wasMoved(false), flickerTally(0),
-		networkSize(0), validationCountdown(0), lastStressApplied(0), lastCapacityProvided(0), networkDirty(false), preventSpeedUpdate(0)
+		networkSize(0), validationCountdown(0), lastStressApplied(0), lastCapacityProvided(0), networkDirty(false), preventSpeedUpdate(0), updateSpeed(true),
+		source(std::nullopt), network(std::nullopt)
 	{
 		// effects = new KineticEffectHandler(this);
-		updateSpeed = true;
 	}
 
 	virtual void initialize() override {
@@ -74,8 +74,7 @@ public:
 		}
 
 		if (validationCountdown-- <= 0) {
-			 validationCountdown = AllConfigs::server().kinetics.kineticValidationFrequency.get();
-			
+			validationCountdown = AllConfigs::server().kinetics.kineticValidationFrequency.get();
 			validateKinetics();
 		}
 
@@ -116,9 +115,9 @@ public:
 	}
 
 	void updateFromNetwork(float maxStress, float currentStress, int networkSize) {
-		networkDirty = false;
-		capacity = maxStress;
-		stress = currentStress;
+		this->networkDirty = false;
+		this->capacity = maxStress;
+		this->stress = currentStress;
 		this->networkSize = networkSize;
 		bool overStressed = maxStress < currentStress && IRotate::StressImpact::isEnabled();
 		setChanged();
@@ -158,7 +157,6 @@ public:
 		bool directionSwap = !fromOrToZero && mce::Math::signum(previousSpeed) != mce::Math::signum(getSpeed());
 		if (fromOrToZero || directionSwap)
 			flickerTally = getFlickerScore() + 5;
-
 		setChanged();
 	}
 
@@ -175,6 +173,7 @@ public:
 	}
 
 	virtual void write(CompoundTag& compound, BlockSource& region) {
+		Log::Info("KineticBlockEntity::write {}", speed);
 		compound.putFloat("Speed", speed);
 
 		// if (sequenceContext != null && (!clientPacket || syncSequenceContext()))
@@ -195,7 +194,6 @@ public:
 
 			if (lastStressApplied != 0)
 				networkTag.putFloat("AddedStress", lastStressApplied);
-
 			if (lastCapacityProvided != 0)
 				networkTag.putFloat("AddedCapacity", lastCapacityProvided);
 
@@ -214,6 +212,7 @@ public:
 	}
 
 	virtual void read(const CompoundTag& compound, BlockSource& region) {
+		float beforeSpeed = speed;
 		bool overStressedBefore = overStressed;
 		clearKineticInformation();
 
@@ -224,6 +223,7 @@ public:
 		}
 
 		speed = compound.getFloat("Speed");
+		Log::Info("KineticBlockEntity::read {} {}", beforeSpeed, speed);
 		// sequenceContext = SequenceContext.fromNBT(compound.getCompound("Sequence"));
 
 		source = std::nullopt;
@@ -234,6 +234,7 @@ public:
 		if (compound.contains("Network")) {
 			const CompoundTag& networkTag = *compound.getCompound("Network");
 			network = static_cast<uint64_t>(networkTag.getInt64("Id"));
+			Log::Info("read set network to {} at {}", network.has_value() ? std::to_string(network.value()) : "std::nullopt", mPosition);
 			stress = networkTag.getFloat("Stress");
 			capacity = networkTag.getFloat("Capacity");
 			networkSize = networkTag.getInt("Size");
@@ -264,8 +265,6 @@ public:
 	}
 
 	float getSpeed() const {
-		return 16.0f; // temp
-
 		if (overStressed) // || (level != nullptr && level->tickRateManager().isFrozen()
 			return 0;
 
@@ -277,6 +276,7 @@ public:
 	}
 
 	void setSpeed(float speed) {
+		Log::Info("Speed set to {} at {}", speed, mPosition);
 		this->speed = speed;
 	}
 
@@ -317,6 +317,9 @@ public:
 	}
 
 	void setNetwork(std::optional<uint64_t> networkIn) {
+		Log::Info("setNetwork called with {} at {}", networkIn.has_value() ? std::to_string(networkIn.value()) : "nullopt", mPosition);
+		Log::Info("Current network is {} at {}", network.has_value() ? std::to_string(network.value()) : "nullopt", mPosition);
+
 		if (network == networkIn)
 			return;
 
@@ -401,6 +404,7 @@ public:
 		speed = 0;
 		source = std::nullopt;
 		network = std::nullopt;
+		Log::Info("Set network to nullopt at {}", mPosition);
 		overStressed = false;
 		stress = 0;
 		capacity = 0;

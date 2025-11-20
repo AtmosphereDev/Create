@@ -28,6 +28,7 @@ public:
     void setChanged() {
         // i assume this is all the java impl does too
         mChanged = true;
+        Log::Info("setChanged called on {}", mPosition);
     }
 
     virtual void onChanged(BlockSource& region) override {

@@ -148,6 +148,12 @@ std::vector<BlockPos> BeltBlock::getBeltChain(BlockSource &region, const BlockPo
         currentPos = nextSegmentPosition(currentState, currentPos.value(), true);
     }
 
+    if (positions.size() > 10) {
+		Log::Error("Belt chain starting at {} is too long ({} segments), cancelling initialization!", startPos, positions.size());
+		positions.clear();
+		return positions;
+    }
+
     return positions;
 }
 

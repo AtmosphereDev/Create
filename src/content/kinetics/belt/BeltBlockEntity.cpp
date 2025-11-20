@@ -101,6 +101,11 @@ void BeltBlockEntity::write(CompoundTag &compound, BlockSource &region)
     if (controller.has_value()) {
         compound.put("Controller", NbtUtils::writeBlockPos(controller.value()));
     }
+    else if (!isController()) {
+        // Safety check: non-controllers should always have a controller
+        Log::Warning("BeltBlockEntity at {} is not a controller but has no controller set!", mPosition);
+    }
+
     compound.putByte("IsController", isController() ? 1 : 0);
     compound.putInt("Length", beltLength);
     compound.putInt("Index", index);
@@ -127,7 +132,14 @@ void BeltBlockEntity::read(const CompoundTag &compound, BlockSource &region)
 
     if (!wasMoved) {
         if (!isController()) {
-            controller = NbtUtils::readBlockPos(*compound.getCompound("Controller"));
+            if (compound.contains("Controller")) {
+                controller = NbtUtils::readBlockPos(*compound.getCompound("Controller"));
+				Log::Info("BeltBlockEntity at {} loaded with controller at {}", mPosition, controller.value());
+            }
+            else {
+				Log::Info("BeltBlockEntity at {} is not a controller but has no controller set in NBT!", mPosition);
+                controller = std::nullopt;
+            }
         }
         // trackerUpdateTag
         index = compound.getInt("Index");
