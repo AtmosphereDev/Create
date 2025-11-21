@@ -92,8 +92,8 @@ public:
 		controller = controllerPos;
 	}
 
-	std::optional<BlockPos> getController() const {
-		return controller;
+	BlockPos getController() const {
+		return controller.has_value() ? controller.value() : mPosition;
 	}
 
 	bool isController() const {

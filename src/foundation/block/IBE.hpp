@@ -27,7 +27,7 @@ public:
 
     void withBlockEntityDo(BlockSource& world, const BlockPos& pos, std::function<void(T&)> action);
 
-    T* getBlockEntityOptional(BlockSource& world, const BlockPos& pos);
+    T* getBlockEntityOptional(const BlockSource& world, const BlockPos& pos) const;
 };
 
 #include "foundation/block/IBE.inl"

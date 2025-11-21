@@ -340,7 +340,7 @@ public:
 
 	KineticNetwork* getOrCreateNetwork();
 
-	bool hasNetwork() {
+	bool hasNetwork() const {
 		return network != std::nullopt;
 	}
 

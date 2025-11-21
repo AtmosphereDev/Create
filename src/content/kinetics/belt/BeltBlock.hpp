@@ -23,6 +23,17 @@ public:
 
     virtual std::shared_ptr<BlockActor> newBlockEntity(const BlockPos& pos, const Block& block) const override;
 
+    bool hasShaftTowards(const Dimension& world, const BlockPos& pos, const Block& state, FacingID face) const override {
+        if (Facing::getAxis(face) != getRotationAxis(state))
+            return false;
+
+        auto be = getBlockEntityOptional(world.getBlockSource(), pos);
+        if (be == nullptr)
+            return false;
+
+        return be->hasPulley();
+    }
+
     Facing::Axis getRotationAxis(const Block& state) const override {
         if (state.getState<BeltSlope::Type>(SLOPE()) == BeltSlope::SIDEWAYS) {
             return Facing::Axis::Y;

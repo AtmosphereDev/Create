@@ -61,13 +61,11 @@ public:
     }
 
     virtual bool save(CompoundTag& unk0) const override {
-        Log::Info("JavaBlockEntity::save at {}", mPosition);
-        unk0.putByte("test", 0);
         return true;
     }
 
     virtual void load(Level& unk0, const CompoundTag& unk1, DataLoadHelper& unk2) override {
-        Log::Info("JavaBlockEntity::load {} at {}", unk1.getByte("test"), mPosition);
+        // Log::Info("JavaBlockEntity::load {} at {}", unk1.getByte("test"), mPosition);
     }
 
     void _initializeAfterBlockEntityConstructed(LevelChunk& lc) {

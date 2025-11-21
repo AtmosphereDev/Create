@@ -11,7 +11,7 @@ void IBE<T>::withBlockEntityDo(BlockSource &world, const BlockPos &pos, std::fun
 } 
 
 template <typename T>
-inline T *IBE<T>::getBlockEntityOptional(BlockSource &world, const BlockPos &pos)
+inline T *IBE<T>::getBlockEntityOptional(const BlockSource &world, const BlockPos &pos) const
 {
     BlockActor* blockEntity = world.getBlockEntity(pos);
     if (blockEntity != nullptr && SmartBlockEntity::IsSmartBlockEntity(*blockEntity)) {
