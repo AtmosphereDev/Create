@@ -3,6 +3,8 @@
 #include "AllBlocks.hpp"
 #include "mc/src/common/world/actor/Actor.hpp"
 #include "foundation/item/ItemHelper.hpp"
+#include <mc/src/common/world/level/block/registry/BlockTypeRegistry.hpp>
+#include "content/kinetics/simpleRelays/ShaftBlock.hpp"
 
 std::shared_ptr<BlockActor> BeltBlock::newBlockEntity(const BlockPos &pos, const Block &block) const {
     return std::make_shared<BeltBlockEntity>(pos, "BeltBlock");
@@ -126,6 +128,60 @@ void BeltBlock::initBelt(BlockSource &region, const BlockPos &pos)
         }
 
         index++;
+    }
+}
+
+void BeltBlock::onRemove(BlockSource &blockSource, const BlockPos &pos) const
+{
+    static bool isFirstCall = true;
+    if (!isFirstCall) {
+        Log::Info("Skipping belt onRemove due to isFirstCall at {}", pos);
+        return;
+    }
+    // I'm aware this is janky as hell to fix stack overflow, but trying to set a non air block in here ends up calling onRemove again
+    // So some shitty fix :p
+
+    HorizontalKineticBlock::onRemove(blockSource, pos);
+    if (blockSource.isClientSide())
+        return;
+
+    const Block& state = blockSource.getBlock(pos);
+    const Block& air = *BlockTypeRegistry::getDefaultBlockState("minecraft:air");
+    
+    // Destroy chain
+    for (bool forward : { true, false }) {
+        std::optional<BlockPos> currentPos = nextSegmentPosition(state, pos, forward);
+        if (!currentPos.has_value())
+            continue;
+
+        const Block& currentState = blockSource.getBlock(currentPos.value());
+        if (AllBlocks::BELT != currentState.mLegacyBlock)
+            continue;
+
+        bool hasPulley = false;
+        BlockActor* blockEntity = blockSource.getBlockEntity(currentPos.value());
+        BeltBlockEntity* belt = dynamic_cast<BeltBlockEntity*>(blockEntity);
+        if (belt != nullptr) {
+            if (belt->isController()) {
+                belt->getInventory()->ejectAll();
+            }
+
+            hasPulley = belt->hasPulley();
+        }
+        
+        isFirstCall = false;
+
+        const Block& shaftState = *AllBlocks::SHAFT->mDefaultState
+            ->setState(VanillaStates::PillarAxis, getRotationAxis(currentState));
+
+        if (hasPulley) {
+            blockSource.setBlock(currentPos.value(), shaftState, 3, nullptr, nullptr);
+            continue;
+        }
+
+		blockSource.setBlock(currentPos.value(), air, 3, nullptr, nullptr);
+
+        isFirstCall = true;
     }
 }
 

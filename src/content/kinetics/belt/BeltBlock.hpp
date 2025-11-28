@@ -55,6 +55,8 @@ public:
 
     static void initBelt(BlockSource& region, const BlockPos& pos);
 
+    virtual void onRemove(BlockSource& blockSource, const BlockPos& pos) const override;
+
     static std::vector<BlockPos> getBeltChain(BlockSource& region, const BlockPos& startPos);
 
     static std::optional<BlockPos> nextSegmentPosition(const Block& state, const BlockPos& _pos, bool forward);

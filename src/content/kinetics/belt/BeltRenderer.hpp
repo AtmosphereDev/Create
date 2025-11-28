@@ -60,7 +60,7 @@ public:
 
         auto beltMat = stack.push();
         beltMat->translate(renderPos.x + 0.5f, renderPos.y, renderPos.z + 0.5f);
-        float renderTime = getTime();
+        float renderTime = getTime() / 8.0f;
 
         for (bool bottom : {false, true}) {
             auto beltPartial = getBeltPartial(diagonal, start, end, bottom);
@@ -70,7 +70,7 @@ public:
             auto data = uvOffset->getData();
 
             // UV shift
-            float speed = be.getSpeed() / 16.0f; // temp hardcoded
+            float speed = be.getSpeed();
             if (speed != 0) {
                 float time = renderTime * Facing::getStep(axisDirection);
                 if (diagonal && (downward ^ alongX) || !sideways && !diagonal && alongX 
@@ -79,12 +79,12 @@ public:
                 }
 
                 float scrollMult = diagonal ? 3.0f / 8.0f : 0.5f;
-                float spriteSize = 16.0f; // hardcoded 16x16 texture size, bleh
+                float spriteSize = 1.0f; 
                 float scroll = speed * time / (31.5f * 16.0f) + (bottom ? 0.5f : 0.0f);
                 scroll = scroll - std::floor(scroll);
                 scroll = scroll * spriteSize * scrollMult;
 
-                data.y = scroll;
+                data.y = scroll * 16.0f;
                 uvOffset->setData(data);
             }
             
