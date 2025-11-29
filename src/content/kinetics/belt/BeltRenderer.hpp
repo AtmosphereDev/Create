@@ -46,11 +46,11 @@ public:
 
         MatrixStack& stack = ctx.mScreenContext.camera->worldMatrixStack;
         auto msr = stack.push();
-        msr->translate(0.0f, -0.5f, 0.0f); // .center
+        msr->translate(0.0f, -1.0f, 0.0f); // .center
         msr->rotateYDegrees(Facing::horizontalAngle(facing) + (upward ? 180.0f : 0.0f) + (sideways ? 270.0f : 0.0f));
         msr->rotateZDegrees(sideways ? 90.0f : 0.0f);
         msr->rotateXDegrees(!diagonal && beltSlope != BeltSlope::HORIZONTAL ? 90.0f : 0.0f);
-        msr->translate(0.0, 0.5f, 0.0f); // .uncenter
+        msr->translate(0.0, 1.0f, 0.0f); // .uncenter
 
         if (downward || beltSlope == BeltSlope::VERTICAL && axisDirection == Facing::AxisDirection::POSITIVE) {
             bool b = start;
@@ -58,8 +58,7 @@ public:
             end = b;
         }
 
-        auto beltMat = stack.push();
-        beltMat->translate(renderPos.x + 0.5f, renderPos.y, renderPos.z + 0.5f);
+        
         float renderTime = getTime() / 8.0f;
 
         for (bool bottom : {false, true}) {
@@ -88,14 +87,15 @@ public:
                 uvOffset->setData(data);
             }
             
+            auto beltMat = stack.push();
+            beltMat->translate(renderPos.x + 0.5f, renderPos.y, renderPos.z + 0.5f);
             beltBuffer->render(ctx, getBeltMaterial());
+            stack.pop();
 
             // Diagonal belt do not have a separate bottom model
             if (diagonal)
                 break;
         }
-
-        stack.pop();
 
         // if has pulley
         if (be.hasPulley()) {

@@ -17,9 +17,9 @@ std::shared_ptr<PartialModel> AllPartialModels::BELT_END = AllPartialModels::blo
 std::shared_ptr<PartialModel> AllPartialModels::BELT_START_BOTTOM = AllPartialModels::block("geometry.fx_create.belt_start_bottom", "textures/entity/belt");
 std::shared_ptr<PartialModel> AllPartialModels::BELT_MIDDLE_BOTTOM = AllPartialModels::block("geometry.fx_create.belt_middle_bottom", "textures/entity/belt");
 std::shared_ptr<PartialModel> AllPartialModels::BELT_END_BOTTOM = AllPartialModels::block("geometry.fx_create.belt_end_bottom", "textures/entity/belt");
-std::shared_ptr<PartialModel> AllPartialModels::BELT_DIAGONAL_START = AllPartialModels::block("geometry.fx_create.belt_diagonal_start", "textures/entity/belt");
-std::shared_ptr<PartialModel> AllPartialModels::BELT_DIAGONAL_MIDDLE = AllPartialModels::block("geometry.fx_create.belt_diagonal_middle", "textures/entity/belt");
-std::shared_ptr<PartialModel> AllPartialModels::BELT_DIAGONAL_END = AllPartialModels::block("geometry.fx_create.belt_diagonal_end", "textures/entity/belt");
+std::shared_ptr<PartialModel> AllPartialModels::BELT_DIAGONAL_START = AllPartialModels::block("geometry.fx_create.belt_diagonal_start", "textures/entity/belt_diagonal");
+std::shared_ptr<PartialModel> AllPartialModels::BELT_DIAGONAL_MIDDLE = AllPartialModels::block("geometry.fx_create.belt_diagonal_middle", "textures/entity/belt_diagonal");
+std::shared_ptr<PartialModel> AllPartialModels::BELT_DIAGONAL_END = AllPartialModels::block("geometry.fx_create.belt_diagonal_end", "textures/entity/belt_diagonal");
 
 // Model loading
 
