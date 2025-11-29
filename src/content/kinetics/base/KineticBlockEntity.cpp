@@ -31,7 +31,7 @@ void KineticBlockEntity::switchToBlockState(Dimension &world, const BlockPos &po
 
     if (kineticBlock && !kineticBlock->areStatesKineticallyEquivalent(currentState, state)) {
         if (kineticBlockEntity->hasNetwork())
-            kineticBlockEntity->getOrCreateNetwork()->remove(kineticBlockEntity);
+            kineticBlockEntity->getOrCreateNetwork()->remove(kineticBlockEntity->getShared<KineticBlockEntity>());
 
         kineticBlockEntity->detachKinetics();
         kineticBlockEntity->removeSource();

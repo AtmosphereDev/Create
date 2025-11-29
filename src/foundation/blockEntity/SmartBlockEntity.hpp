@@ -58,14 +58,14 @@ public:
     virtual void onChunkUnloaded(LevelChunk& unk0) override {
         CachedRenderBBBlockEntity::onChunkUnloaded(unk0);
         chunkUnloaded = true;
-		Log::Info("SmartBlockEntity onChunkUnloaded called at {}", mPosition);
+		// Log::Info("SmartBlockEntity onChunkUnloaded called at {}", mPosition);
     }
 
     virtual void onRemoved(BlockSource& region) override {
         CachedRenderBBBlockEntity::onRemoved(region);
         if (!chunkUnloaded) remove();
         else {
-            Log::Info("SmartBlockEntity onRemoved did not call remove() due to chunkUnloaded at {}", mPosition);
+            // Log::Info("SmartBlockEntity onRemoved did not call remove() due to chunkUnloaded at {}", mPosition);
         }
             
 
@@ -81,7 +81,7 @@ public:
 	 * Block destroyed or picked up by a contraption. Usually detaches kinetics
 	 */
 	virtual void remove() {
-		Log::Info("SmartBlockEntity::remove at {}", mPosition);
+		
     }
 
     /**

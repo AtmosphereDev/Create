@@ -7,6 +7,8 @@
 #include "foundation/utility/BlockHelper.hpp"
 #include <mc/src/common/world/Facing.hpp>
 #include "foundation/utility/ServerSpeedProvider.hpp"
+#include <mc/src/common/world/level/Spawner.hpp>
+#include <mc/src/common/world/actor/item/ItemActor.hpp>
 
 void BeltInventory::tick()
 {
@@ -290,7 +292,6 @@ CompoundTag BeltInventory::write() const
         nbt.put("LazyItem", lazyClientItem->serializeNBT());
     }
     nbt.putByte("PositiveOrder", beltMovementPositive ? 1 : 0);
-    Log::Info("BeltInventory::write completed {}", items.size());
     return nbt;
 }
 
@@ -302,7 +303,6 @@ void BeltInventory::read(const CompoundTag &nbt)
     for (const auto& inbt : itemsList->mList) {
         const CompoundTag& tag = static_cast<const CompoundTag&>(*inbt);
         TransportedItemStack stack = TransportedItemStack::deserializeNBT(tag);
-        Log::Info("BeltInventory::read loading item {} at position {}", stack.stack.mItem->mFullName, stack.beltPosition);
         items.push_back(std::make_shared<TransportedItemStack>(stack));
     }
 
@@ -321,8 +321,20 @@ void BeltInventory::eject(TransportedItemStack &stack)
     Vec3 outPos = BeltHelper::getVectorForOffset(belt, stack.beltPosition);
     float movementSpeed = std::max(std::abs(belt->getBeltMovementSpeed()), 1 / 8.0f);
     Vec3 outMotion = (Vec3::atLowerCornerOf(belt->getBeltChainDirection()) * movementSpeed) + Vec3(0, 1 / 8.0f, 0);
-    outPos = outPos + outMotion.normalized() * 0.001;
-    Log::Info("Ejecting item {} at position ({}, {}, {}) with motion ({}, {}, {})", ejected.mItem->mFullName, outPos.x, outPos.y, outPos.z, outMotion.x, outMotion.y, outMotion.z);
+    outPos = outPos + (outMotion.normalized() * 0.001);
+    outPos.y += 1.0f;
+    
+    ItemActor* item = belt->getLevel().getLevel().getSpawner().spawnItem(
+        belt->getLevel().getBlockSource(), ejected, nullptr, outPos + Vec3(0, 0.6f, 0), 10
+    );
+    if (!item) {
+        Log::Warning("BeltInventory::eject failed to spawn item actor for ejected item {}", ejected.toString());
+        return;
+    }
+
+    item->applyImpulse(outMotion);
+    
+    Log::Info("outPos: {}, impulse: {}", outPos, outMotion);
 }
 
 void BeltInventory::ejectAll()

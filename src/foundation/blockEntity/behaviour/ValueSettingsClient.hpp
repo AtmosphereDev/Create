@@ -54,9 +54,6 @@ public:
     }
 
     void render(MinecraftUIRenderContext& ctx, ClientInstance& client, UIControl& owner, int32_t pass, RectangleArea& renderAABB, float propagatedAlpha) {
-  //      std::string screenName = client.mSceneStack->getScreenName();
-		//Log::Info("ValueSettingsClient::render called on screen {}", screenName);
-
         if (hoverTicks == 0 || lastHoverTip.empty())
             return;
 

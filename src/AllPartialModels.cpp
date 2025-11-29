@@ -46,7 +46,6 @@ void BlockActorRenderDispatcher_initializeBlockEntityRenderers(
 	void* a8, 
 	void* a9
 ) {
-	Log::Info("AllPartialModels::initializeBlockEntityRenderers!");
     self->mRenderers[(BlockActorRendererId)((int)BlockActorRendererId::Count + 1)] = std::make_unique<JavaBlockEntityRenderer>();
 
 	for (const auto& model : AllPartialModels::getAllModels()) {

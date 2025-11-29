@@ -15,7 +15,6 @@ void ValueSettingsClient::startInteractionWith(const BlockPos &pos, const Behavi
     interactHeldPos = pos;
     interactHeldBehaviour = &type;
     interactHeldFace = direction;
-    Log::Info("Started ValueSettings interaction at pos {} with {}", pos, type.getName());
 }
 
 void ValueSettingsClient::tick()
@@ -73,7 +72,6 @@ void ValueSettingsClient::tick()
     if (interactHeldTicks++ < 5)
         return;
 
-    Log::Info("Opening Value Settings Screen for behaviour: {}", behaviour->getType().getName());
     // ScreenOpener.open(new ValueSettingsScreen(interactHeldPos,
 	// 		valueSettingBehaviour.createBoard(player, blockHitResult), valueSettingBehaviour.getValueSettings(),
 	// 		valueSettingBehaviour::newSettingHovered, valueSettingBehaviour.netId()));
@@ -101,7 +99,6 @@ void ValueSettingsClient::tick()
     auto scene = factory.createUIScene(*mc->mMinecraftGame, *mc, "value_settings_screen.value_settings_screen", controller);
     auto screen = factory._createScreen(scene);
     factory.getCurrentSceneStack()->pushScreen(screen, false);
-	Log::Info("Value Settings Screen opened.");
 
     interactHeldTicks = -1;
 }

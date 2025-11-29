@@ -10,7 +10,7 @@ public:
 
 protected:
     void notifyStressCapacityChange(float capacity) {
-        getOrCreateNetwork()->updateCapacityFor(this, capacity);
+        getOrCreateNetwork()->updateCapacityFor(this->getShared<KineticBlockEntity>(), capacity);
     }
 
     virtual void removeSource() override {
@@ -52,8 +52,6 @@ protected:
 
         if (level == nullptr || level->isClientSide()) return;
 
-		Log::Info("GeneratingKineticBlockEntity::updateGeneratedRotation called at {} with speed {}, previous speed {}", mPosition, speed, prevSpeed);
-
         if (prevSpeed != speed) {
             if (!hasSource()) {
                 IRotate::SpeedLevel levelBefore = IRotate::SpeedLevel::of(this->speed);
@@ -69,7 +67,7 @@ protected:
         if (hasNetwork() && speed != 0) {
             KineticNetwork* network = getOrCreateNetwork();
             notifyStressCapacityChange(calculateAddedStressCapacity());
-            getOrCreateNetwork()->updateStressFor(this, calculateStressApplied());
+            getOrCreateNetwork()->updateStressFor(this->getShared<KineticBlockEntity>(), calculateStressApplied());
             network->updateStress();
         }
 
@@ -82,7 +80,7 @@ protected:
         if (speed == 0) {
             if (hasSource()) {
                 notifyStressCapacityChange(0.0f);
-                getOrCreateNetwork()->updateStressFor(this, calculateStressApplied());
+                getOrCreateNetwork()->updateStressFor(this->getShared<KineticBlockEntity>(), calculateStressApplied());
                 return;
             }
 

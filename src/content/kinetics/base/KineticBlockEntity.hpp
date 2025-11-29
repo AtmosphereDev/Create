@@ -47,7 +47,7 @@ public:
 			if (!network->initialized)
 				network->initFromTE(capacity, stress, networkSize);
 
-			network->addSilently(this, lastCapacityProvided, lastStressApplied);
+			network->addSilently(this->getShared<KineticBlockEntity>(), lastCapacityProvided, lastStressApplied);
 		}
 
 		SmartBlockEntity::initialize();
@@ -152,7 +152,6 @@ public:
 
 	void onSpeedChanged(float previousSpeed) {
 		bool fromOrToZero = (previousSpeed == 0) != (getSpeed() == 0);
-		Log::Info("KineticBlockEntity onSpeedChanged called, fromOrToZero: {}, previousSpeed: {}, newSpeed: {}", fromOrToZero, previousSpeed, getSpeed());
 
 		bool directionSwap = !fromOrToZero && mce::Math::signum(previousSpeed) != mce::Math::signum(getSpeed());
 		if (fromOrToZero || directionSwap)
@@ -166,14 +165,13 @@ public:
 
 		if (!level->mLevel->isClientSide()) {
 			if (hasNetwork())
-				getOrCreateNetwork()->remove(this);
+				getOrCreateNetwork()->remove(this->getShared<KineticBlockEntity>());
 			detachKinetics();
 		}
 		SmartBlockEntity::remove();
 	}
 
 	virtual void write(CompoundTag& compound, BlockSource& region) {
-		Log::Info("KineticBlockEntity::write {}", speed);
 		compound.putFloat("Speed", speed);
 
 		// if (sequenceContext != null && (!clientPacket || syncSequenceContext()))
@@ -218,12 +216,10 @@ public:
 
 		if (wasMoved) {
 			SmartBlockEntity::_onUpdatePacket(compound, region);
-			Log::Info("_onUpdatePacket ignored since wasMoved was true");
 			return;
 		}
 
 		speed = compound.getFloat("Speed");
-		Log::Info("KineticBlockEntity::read {} {}", beforeSpeed, speed);
 		// sequenceContext = SequenceContext.fromNBT(compound.getCompound("Sequence"));
 
 		source = std::nullopt;
@@ -234,7 +230,6 @@ public:
 		if (compound.contains("Network")) {
 			const CompoundTag& networkTag = *compound.getCompound("Network");
 			network = static_cast<uint64_t>(networkTag.getInt64("Id"));
-			Log::Info("read set network to {} at {}", network.has_value() ? std::to_string(network.value()) : "std::nullopt", mPosition);
 			stress = networkTag.getFloat("Stress");
 			capacity = networkTag.getFloat("Capacity");
 			networkSize = networkTag.getInt("Size");
@@ -276,7 +271,6 @@ public:
 	}
 
 	void setSpeed(float speed) {
-		Log::Info("Speed set to {} at {}", speed, mPosition);
 		this->speed = speed;
 	}
 
@@ -317,14 +311,11 @@ public:
 	}
 
 	void setNetwork(std::optional<uint64_t> networkIn) {
-		Log::Info("setNetwork called with {} at {}", networkIn.has_value() ? std::to_string(networkIn.value()) : "nullopt", mPosition);
-		Log::Info("Current network is {} at {}", network.has_value() ? std::to_string(network.value()) : "nullopt", mPosition);
-
 		if (network == networkIn)
 			return;
 
 		if (network != std::nullopt)
-			getOrCreateNetwork()->remove(this);
+			getOrCreateNetwork()->remove(this->getShared<KineticBlockEntity>());
 
 		network = networkIn;
 		setChanged();
@@ -335,7 +326,7 @@ public:
 		network = networkIn;
 		KineticNetwork* network = getOrCreateNetwork();
 		network->initialized = true;
-		network->add(this);
+		network->add(this->getShared<KineticBlockEntity>());
 	}
 
 	KineticNetwork* getOrCreateNetwork();
@@ -345,13 +336,11 @@ public:
 	}
 
 	void attachKinetics() {
-		Log::Info("KineticBlockEntity attachKinetics called at {}", mPosition);
 		updateSpeed = false;
 		RotationPropagator::handleAdded(*level, mPosition, *this);
 	}
 
 	void detachKinetics() {
-		Log::Info("KineticBlockEntity detachKinetics called at {}", mPosition);
 		RotationPropagator::handleRemoved(*level, mPosition, this);
 	}
 
@@ -404,7 +393,6 @@ public:
 		speed = 0;
 		source = std::nullopt;
 		network = std::nullopt;
-		Log::Info("Set network to nullopt at {}", mPosition);
 		overStressed = false;
 		stress = 0;
 		capacity = 0;

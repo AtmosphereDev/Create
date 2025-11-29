@@ -8,8 +8,8 @@ class KineticNetwork {
 public:
     uint64_t id;
     bool initialized;
-    std::unordered_map<KineticBlockEntity*, float> sources;
-    std::unordered_map<KineticBlockEntity*, float> members;
+    std::unordered_map<std::shared_ptr<KineticBlockEntity>, float> sources;
+    std::unordered_map<std::shared_ptr<KineticBlockEntity>, float> members;
 
 private:
     float currentCapacity;
@@ -23,19 +23,19 @@ public:
 
     void initFromTE(float maxStress, float currentStress, int membersCount);
 
-    void addSilently(KineticBlockEntity* be, float lastCapacity, float lastStress);
+    void addSilently(std::shared_ptr<KineticBlockEntity> be, float lastCapacity, float lastStress);
 
-    void add(KineticBlockEntity* be);
+    void add(std::shared_ptr<KineticBlockEntity> be);
 
-    void updateCapacityFor(KineticBlockEntity* be, float capacity);
+    void updateCapacityFor(std::shared_ptr<KineticBlockEntity> be, float capacity);
+    
+    void updateStressFor(std::shared_ptr<KineticBlockEntity> be, float stress);
 
-    void updateStressFor(KineticBlockEntity* be, float stress);
-
-    void remove(KineticBlockEntity* be);
+    void remove(std::shared_ptr<KineticBlockEntity> be);
 
     void sync();
 
-    void updateFromNetwork(KineticBlockEntity* be);
+    void updateFromNetwork(std::shared_ptr<KineticBlockEntity> be);
 
     void updateCapacity();
 
@@ -47,9 +47,9 @@ public:
 
     float calculateStress();
 
-    float getActualCapacityOf(KineticBlockEntity* be);
+    float getActualCapacityOf(std::shared_ptr<KineticBlockEntity> be);
 
-    float getActualStressOf(KineticBlockEntity* be);
+    float getActualStressOf(std::shared_ptr<KineticBlockEntity> be);
 
     static float getStressMultiplierForSpeed(float speed);
 

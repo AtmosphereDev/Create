@@ -12,7 +12,7 @@ void KineticNetwork::initFromTE(float maxStress, float currentStress, int member
     updateCapacity();
 }
 
-void KineticNetwork::addSilently(KineticBlockEntity *be, float lastCapacity, float lastStress)
+void KineticNetwork::addSilently(std::shared_ptr<KineticBlockEntity> be, float lastCapacity, float lastStress)
 {
     if (members.find(be) != members.end())
         return;
@@ -33,9 +33,8 @@ void KineticNetwork::addSilently(KineticBlockEntity *be, float lastCapacity, flo
     if (unloadedStress < 0) unloadedStress = 0;
 }
 
-void KineticNetwork::add(KineticBlockEntity *be)
- {
-	Log::Info("KineticNetwork add called for BE at {}", be->getBlockPos());
+void KineticNetwork::add(std::shared_ptr<KineticBlockEntity> be)
+{
     if (members.find(be) != members.end())
         return;
     if (be->isSource())
@@ -45,19 +44,19 @@ void KineticNetwork::add(KineticBlockEntity *be)
     be->networkDirty = true;
 }
 
-void KineticNetwork::updateCapacityFor(KineticBlockEntity *be, float capacity)
+void KineticNetwork::updateCapacityFor(std::shared_ptr<KineticBlockEntity> be, float capacity)
 {
     sources[be] = capacity;
     updateCapacity();
 }
 
-void KineticNetwork::updateStressFor(KineticBlockEntity *be, float stress)
+void KineticNetwork::updateStressFor(std::shared_ptr<KineticBlockEntity> be, float stress)
 {
     members[be] = stress;
     updateStress();
 }
 
-void KineticNetwork::remove(KineticBlockEntity *be)
+void KineticNetwork::remove(std::shared_ptr<KineticBlockEntity> be)
 {
     if (members.find(be) == members.end())
         return;
@@ -65,16 +64,9 @@ void KineticNetwork::remove(KineticBlockEntity *be)
         sources.erase(be);
     members.erase(be);
     be->updateFromNetwork(0, 0, 0);
-	Log::Info("Current network for be is {}", be->network.has_value() ? std::to_string(be->network.value()) : "none");
 
     if (members.empty()) {
         TorquePropagator::networks[be->level->mId].erase(this->id);
-		Log::Info("KineticNetwork removed entirely as last member was removed, all remaning networks, count {}", TorquePropagator::networks.size());
-
-        for (auto& [_, network] : TorquePropagator::networks[be->level->mId]) {
-            Log::Info("network id {}, members: {}, sources: {}", network.id, network.members.size(), network.sources.size());
-		}
-
         return;
     }
 
@@ -90,7 +82,7 @@ void KineticNetwork::sync()
         updateFromNetwork(be);
 }
 
-void KineticNetwork::updateFromNetwork(KineticBlockEntity *be)
+void KineticNetwork::updateFromNetwork(std::shared_ptr<KineticBlockEntity> be)
 {
     be->updateFromNetwork(currentCapacity, currentStress, getSize());
 }
@@ -144,8 +136,8 @@ float KineticNetwork::calculateStress()
 {
     float presentStress = 0;
     for (auto it = members.begin(); it != members.end(); ) {
-        KineticBlockEntity* be = it->first;
-        if (be->level->mBlockSource->getBlockEntity(be->getBlockPos()) != be) {
+        auto be = it->first;
+        if (be->level->mBlockSource->getBlockEntity(be->getBlockPos()) != be.get()) {
             it = members.erase(it);
             continue;
         }
@@ -155,7 +147,7 @@ float KineticNetwork::calculateStress()
     return presentStress + unloadedStress;
 }
 
-float KineticNetwork::getActualCapacityOf(KineticBlockEntity *be)
+float KineticNetwork::getActualCapacityOf(std::shared_ptr<KineticBlockEntity> be)
 {
     auto it = sources.find(be);
     if (it == sources.end())
@@ -163,7 +155,7 @@ float KineticNetwork::getActualCapacityOf(KineticBlockEntity *be)
     return it->second * getStressMultiplierForSpeed(be->getGeneratedSpeed());
 }
 
-float KineticNetwork::getActualStressOf(KineticBlockEntity *be)
+float KineticNetwork::getActualStressOf(std::shared_ptr<KineticBlockEntity> be)
 {
     auto it = members.find(be);
     if (it == members.end())

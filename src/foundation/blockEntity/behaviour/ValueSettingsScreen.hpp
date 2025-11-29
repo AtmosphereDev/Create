@@ -83,7 +83,6 @@ public:
             int w = ctx.getLineLength(*ctx.mDebugTextFontHandle.mDefaultFont, component, 1.0f, false);
             maxLabelWidth = std::max(maxLabelWidth, w);
         }
-        Log::Info("maxLabelWidth {}", maxLabelWidth);
 
         if (iconMode) 
             maxLabelWidth = -18;
@@ -100,7 +99,6 @@ public:
         if (soundCoolDown > 0) soundCoolDown--;
 
         if (!ClientInputs::useKeyDown) {
-            Log::Info("ValueSettingsScreen: Use key released, closing screen.");
             saveAndClose();
         }
 
@@ -162,9 +160,6 @@ public:
             ctx.drawText(font, title, textX - titleWidth / 2, y - 14, 0xddddddff, alpha);
             ctx.drawText(font, tip, textX - tipWidth / 2, y + windowHeight + additionalHeight - 27, 0xaaaaaaff, alpha);
         }
-        // else {
-        //     Log::Info("Skipping title/tip render, fadeInWidth {} <= fattestLabel {}", fadeInWidth, fattestLabel);
-        // }
 
         renderBrassFrame(ctx, x + maxLabelWidth + 14, y - 3, valueBarWidth + 8, board.rows.size() * 11 + 5);
         ctx.flushImages(whiteFlush, alpha, "ui_flush");

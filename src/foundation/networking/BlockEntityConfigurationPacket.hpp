@@ -41,7 +41,6 @@ public:
 class BlockEntityConfigurationPacketHandler : public Amethyst::CustomPacketHandler {
 public:
     virtual void handle(const NetworkIdentifier& networkId, NetEventCallback& callback, const Amethyst::CustomPacket& _packet) const override {
-        Log::Info("BlockEntityConfigurationPacketHandler::handle called");
         const BlockEntityConfigurationPacket& packet = static_cast<const BlockEntityConfigurationPacket&>(_packet);
         ServerNetworkHandler& serverNetwork = (ServerNetworkHandler&)callback;
         ServerPlayer* serverPlayer = serverNetwork._getServerPlayer(networkId, SubClientId::PrimaryClient);

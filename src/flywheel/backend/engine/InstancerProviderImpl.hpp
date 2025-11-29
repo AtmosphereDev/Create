@@ -36,7 +36,6 @@ public:
 
 	virtual std::shared_ptr<I> createInstance() override {
 		auto handle = std::make_shared<TestHandle>();
-		Log::Info("TestInstancer::createInstance called!");
 		return std::make_shared<I>(typePtr, handle);
 	}
 };

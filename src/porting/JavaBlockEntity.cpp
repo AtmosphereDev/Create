@@ -24,19 +24,12 @@ BlockActorType JavaBlockEntity::TYPE = (BlockActorType)((int)BlockActorType::Cou
 Amethyst::InlineHook<decltype(&LevelChunk::_placeBlockEntity)> _LevelChunk__placeBlockEntity;
 
 void LevelChunk__placeBlockEntity(LevelChunk* self, std::shared_ptr<BlockActor> actor) {
-
-    //Log::Info("_placeBlockEntity at {}", actor->mPosition);
-    if (actor->mPosition.x == -17 && actor->mPosition.y == 71 && actor->mPosition.z == -13) {
-        Log::Info("Found test");
-    }
+    _LevelChunk__placeBlockEntity(self, actor);
 
     if (actor != nullptr && JavaBlockEntity::IsJavaBlockEntity(*actor)) {
         JavaBlockEntity& javaEntity = static_cast<JavaBlockEntity&>(*actor);
         javaEntity._initializeAfterBlockEntityConstructed(*self);
-        Log::Info("_initializeAfterBlockEntityConstructed");
 	}
-
-    _LevelChunk__placeBlockEntity(self, actor);
 }
 
 void JavaBlockEntityHooks()

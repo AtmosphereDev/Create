@@ -149,7 +149,7 @@ void BeltBlock::onRemove(BlockSource &blockSource, const BlockPos &pos) const
     const Block& air = *BlockTypeRegistry::getDefaultBlockState("minecraft:air");
     
     // Destroy chain
-    for (bool forward : { true, false }) {
+    for (bool forward : { false, true }) {
         std::optional<BlockPos> currentPos = nextSegmentPosition(state, pos, forward);
         if (!currentPos.has_value())
             continue;
@@ -176,10 +176,15 @@ void BeltBlock::onRemove(BlockSource &blockSource, const BlockPos &pos) const
 
         if (hasPulley) {
             blockSource.setBlock(currentPos.value(), shaftState, 3, nullptr, nullptr);
+            blockSource.fireBlockChanged(currentPos.value(), 0, currentState, shaftState, 3, BlockChangedEventTarget::SelfBlock, nullptr, nullptr);
+            Log::Info("Replaced belt at {} with shaft due to pulley", currentPos.value());
+            isFirstCall = true;
             continue;
         }
 
 		blockSource.setBlock(currentPos.value(), air, 3, nullptr, nullptr);
+        blockSource.fireBlockChanged(currentPos.value(), 0, currentState, air, 3, BlockChangedEventTarget::SelfBlock, nullptr, nullptr);
+        Log::Info("Removed belt at {}", currentPos.value());
 
         isFirstCall = true;
     }

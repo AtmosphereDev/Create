@@ -20,19 +20,20 @@ public:
     // Java actually uses level to mean a specific dimension
 	Dimension* level; // Not actually in here, but its in the java BlockEntity class, maybe would be good to make a kinda middleman?
 
+    // Stores a weak to itself, useful for passing to other things as a std::shared_ptr
+    std::weak_ptr<JavaBlockEntity> weakThis;
+
     JavaBlockEntity(const BlockPos& pos, const std::string& id)
-        : BlockActor(JavaBlockEntity::TYPE, pos, id), level(nullptr) {
+        : BlockActor(JavaBlockEntity::TYPE, pos, id), level(nullptr), weakThis() {
             mRendererId = (BlockActorRendererId)((int)BlockActorRendererId::Count + 1);
         }
 
     void setChanged() {
         // i assume this is all the java impl does too
         mChanged = true;
-        Log::Info("setChanged called on {}", mPosition);
     }
 
     virtual void onChanged(BlockSource& region) override {
-        Log::Info("JavaBlockEntity::onChanged at {}", mPosition);
         region.fireBlockChanged(mPosition, 0, *mBlock, *mBlock, 3, BlockChangedEventTarget::SelfBlock, nullptr, nullptr);
     }
 
@@ -58,18 +59,34 @@ public:
 
     virtual void afterConstructed() {
         // Called directly after a block entity is spawned
+        std::shared_ptr<BlockActor> baseShared = this->findSharedFromRegion(*level->mBlockSource);
+        std::shared_ptr<JavaBlockEntity> shared = std::dynamic_pointer_cast<JavaBlockEntity>(baseShared);
+        weakThis = shared;
+
+        if (weakThis.expired()) {
+            Log::Warning("JavaBlockEntity::afterConstructed weakThis is expired at {}, this is bad!", mPosition);
+        }
+    }
+
+    template <typename T = JavaBlockEntity>
+    std::shared_ptr<T> getShared() {
+        auto shared = weakThis.lock();
+
+        if (!shared) {
+            Log::Warning("JavaBlockEntity::getShared called but weakThis is expired at {}", mPosition);
+            return nullptr;
+        }
+
+        return std::dynamic_pointer_cast<T>(shared);
     }
 
     virtual bool save(CompoundTag& unk0) const override {
         return true;
     }
 
-    virtual void load(Level& unk0, const CompoundTag& unk1, DataLoadHelper& unk2) override {
-        // Log::Info("JavaBlockEntity::load {} at {}", unk1.getByte("test"), mPosition);
-    }
+    virtual void load(Level& unk0, const CompoundTag& unk1, DataLoadHelper& unk2) override {}
 
     void _initializeAfterBlockEntityConstructed(LevelChunk& lc) {
-        Log::Info("_initializeAfterBlockEntityConstructed");
         level = lc.mDimension;
 		mBlock = &level->mBlockSource->getBlock(mPosition);
 		afterConstructed();

@@ -134,10 +134,8 @@ void BeltBlockEntity::read(const CompoundTag &compound, BlockSource &region)
         if (!isController()) {
             if (compound.contains("Controller")) {
                 controller = NbtUtils::readBlockPos(*compound.getCompound("Controller"));
-				Log::Info("BeltBlockEntity at {} loaded with controller at {}", mPosition, controller.value());
             }
             else {
-				Log::Info("BeltBlockEntity at {} is not a controller but has no controller set in NBT!", mPosition);
                 controller = std::nullopt;
             }
         }

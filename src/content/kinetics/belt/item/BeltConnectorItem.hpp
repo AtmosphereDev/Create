@@ -88,7 +88,6 @@ public:
         for (const BlockPos& pos : beltsToCreate) {
             const Block& existingBlock = region.getBlock(pos);
             if (existingBlock.mLegacyBlock->mDestroySpeed == -1 && !existingBlock.isAir()) {
-				Log::Info("Failed due to block at {}", pos);
                 failed = true;
                 break;
             }
@@ -112,8 +111,6 @@ public:
 
         if (!failed)
             return;
-
-        Log::Info("Failed! Destroying belts!");
 
         for (const BlockPos& pos : beltsToCreate) {
             if (AllBlocks::BELT == region.getBlock(pos).mLegacyBlock) {
@@ -149,7 +146,6 @@ public:
     }
 
     static std::vector<BlockPos> getBeltChainBetween(const BlockPos& start, const BlockPos& end, BeltSlope::Type slope, FacingID facing) {
-        Log::Info("Getting belt chain between {} and {} with slope {} and direction {}", start, end, (int)slope, (int)facing);
         std::vector<BlockPos> positions;
         int limit = 1000;
         BlockPos current = start;
@@ -175,7 +171,6 @@ public:
     static bool canConnect(Dimension& dim, const BlockPos& first, const BlockPos& second) {
         BlockSource& region = *dim.mBlockSource;
         if (!region.areChunksFullyLoaded(first, 1) || !region.areChunksFullyLoaded(second, 1)) {
-            Log::Info("werent fully loaded!");
             return false;
         }
         if (!second.closerThan(first, maxLength())) 

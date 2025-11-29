@@ -12,9 +12,7 @@ public:
 	// AbstractComputerBehaviour computerBehaviour; // this is purely for computer craft integration
 
     CreativeMotorBlockEntity(const BlockPos& pos, const std::string& id)
-        : GeneratingKineticBlockEntity(pos, id) {
-            Log::Info("Creative motor block entity created!!");
-        }
+        : GeneratingKineticBlockEntity(pos, id) {}
 
     virtual void addBehaviours(std::vector<std::shared_ptr<BlockEntityBehaviour>>& behavioursList) override {
         GeneratingKineticBlockEntity::addBehaviours(behavioursList);
@@ -27,7 +25,6 @@ public:
 		generatedSpeed->between(-max, max);
 		generatedSpeed->value = DEFAULT_SPEED;
         generatedSpeed->withCallback([this](int newValue) {
-            Log::Info("Creative motor speed changed to {}", newValue);
             this->updateGeneratedRotation();
         });
         behavioursList.push_back(generatedSpeed);
@@ -37,9 +34,7 @@ public:
         GeneratingKineticBlockEntity::initialize();
         if (!hasSource() || getGeneratedSpeed() > getTheoreticalSpeed()) {
             updateGeneratedRotation();
-            Log::Info("updateGeneratedRotation called in initialize");
         }
-        Log::Info("Creative motor initialize!! generated speed {}, speed {}", getGeneratedSpeed(), speed);
     }
 
     virtual float getGeneratedSpeed() const override;
