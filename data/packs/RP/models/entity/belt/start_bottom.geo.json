@@ -30,9 +30,9 @@
 							"origin": [-5, 5, -6],
 							"size": [10, 1, 14],
 							"uv": {
-								"east": {"uv": [12, 2], "uv_size": [1, 14], "uv_rotation": 270},
+								"east": {"uv": [12, 2], "uv_size": [1, 14], "uv_rotation": 90},
 								"west": {"uv": [3, 2], "uv_size": [1, 14], "uv_rotation": 90},
-								"up": {"uv": [13, 16], "uv_size": [-10, -14], "uv_rotation": 180}
+								"up": {"uv": [13, 16], "uv_size": [-10, -14]}
 							}
 						}
 					]

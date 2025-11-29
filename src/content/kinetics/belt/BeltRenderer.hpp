@@ -9,6 +9,8 @@
 #include <mc/src-client/common/client/renderer/RenderMaterialGroup.hpp>
 #include <mc/src-client/common/client/renderer/game/ItemInHandRenderer.hpp>
 #include <mc/src-client/common/client/world/item/ItemIconManager.hpp>
+#include <mc/src-client/common/client/renderer/ActorShaderManager.hpp>
+#include <mc/src/common/world/phys/Vec4.hpp>
 
 class BeltRenderer : public KineticBlockEntityRenderer {
 public:
@@ -17,7 +19,6 @@ public:
     mce::MaterialPtr& getBeltMaterial() {
         if (mBeltMaterial.isNull()) {
             mBeltMaterial = mce::RenderMaterialGroup::switchable.getMaterial("mechanical_belt");
-            Log::Info("Loaded belt material {}", mBeltMaterial.mRenderMaterialInfoPtr->mHashedName);
         }
 
         return mBeltMaterial;
@@ -46,27 +47,38 @@ public:
 
         MatrixStack& stack = ctx.mScreenContext.camera->worldMatrixStack;
         auto msr = stack.push();
-        msr->translate(0.0f, -1.0f, 0.0f); // .center
-        msr->rotateYDegrees(Facing::horizontalAngle(facing) + (upward ? 180.0f : 0.0f) + (sideways ? 270.0f : 0.0f));
+        msr->translate(0.0f, 0.5f, 0.0f); // .center
+        msr->rotateYDegrees(Facing::horizontalAngle(facing) + (upward ? 180.0f : 0.0f) + (sideways ? 270.0f : 0.0f)); 
         msr->rotateZDegrees(sideways ? 90.0f : 0.0f);
         msr->rotateXDegrees(!diagonal && beltSlope != BeltSlope::HORIZONTAL ? 90.0f : 0.0f);
-        msr->translate(0.0, 1.0f, 0.0f); // .uncenter
+        msr->translate(0.0, -0.5f, 0.0f); // .uncenter
 
         if (downward || beltSlope == BeltSlope::VERTICAL && axisDirection == Facing::AxisDirection::POSITIVE) {
             bool b = start;
             start = end;
             end = b;
         }
-
         
         float renderTime = getTime() / 8.0f;
+        // Vec4 test = Vec4::Vec4();
+
+        // ActorShaderManager::setupShaderParameters(
+        //     ctx.mScreenContext,
+        //     data.renderSource,
+        //     be.mPosition,
+        //     0.0f,
+        //     true,
+        //     *ctx.mClientInstance.mLightTexture.get(),
+        //     Vec2::ONE,
+        //     test
+        // );
 
         for (bool bottom : {false, true}) {
             auto beltPartial = getBeltPartial(diagonal, start, end, bottom);
             auto beltBuffer = Models::partial(ctx.mScreenContext.tessellator, beltPartial);
 
             auto* uvOffset = ctx.mScreenContext.constantBuffers.entityConstantBuffer.UV_ANIM;
-            auto data = uvOffset->getData();
+            glm::vec4 data = uvOffset->getData();
 
             // UV shift
             float speed = be.getSpeed();
@@ -97,7 +109,6 @@ public:
                 break;
         }
 
-        // if has pulley
         if (be.hasPulley()) {
             FacingID dir = sideways ? FacingID::UP
                 : Facing::getClockWise(blockState.getState<FacingID>(HorizontalKineticBlock::HORIZONTAL_FACING()));
@@ -109,7 +120,7 @@ public:
             if (Facing::getAxis(dir) == Facing::Axis::Y) pulleyStack->rotateYDegrees(90.0f);
             else if (Facing::getAxis(dir) == Facing::Axis::X) pulleyStack->rotateZDegrees(90.0f);
             pulleyStack->rotateXDegrees(90.0f);
-            
+        
             standardKineticRotationTransform(be, *pulleyStack);
 
             pulleyStack->translate(renderPos.x + 0.5f, renderPos.y + 0.5f, renderPos.z + 0.5f);

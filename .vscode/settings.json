@@ -99,7 +99,9 @@
         "xutility": "cpp",
         "pointers": "cpp",
         "multi_span": "cpp",
-        "gsl_assert": "cpp"
+        "gsl_assert": "cpp",
+        "span_ext": "cpp",
+        "string_span": "cpp"
     },
     "deno.enable": true,
     "deno.enablePaths": ["data/packs/", ".github/workflows/"],
