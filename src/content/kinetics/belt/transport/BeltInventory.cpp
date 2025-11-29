@@ -9,6 +9,7 @@
 #include "foundation/utility/ServerSpeedProvider.hpp"
 #include <mc/src/common/world/level/Spawner.hpp>
 #include <mc/src/common/world/actor/item/ItemActor.hpp>
+#include <mc/src/common/world/entity/components/StateVectorComponent.hpp>
 
 void BeltInventory::tick()
 {
@@ -322,7 +323,6 @@ void BeltInventory::eject(TransportedItemStack &stack)
     float movementSpeed = std::max(std::abs(belt->getBeltMovementSpeed()), 1 / 8.0f);
     Vec3 outMotion = (Vec3::atLowerCornerOf(belt->getBeltChainDirection()) * movementSpeed) + Vec3(0, 1 / 8.0f, 0);
     outPos = outPos + (outMotion.normalized() * 0.001);
-    outPos.y += 1.0f;
     
     ItemActor* item = belt->getLevel().getLevel().getSpawner().spawnItem(
         belt->getLevel().getBlockSource(), ejected, nullptr, outPos + Vec3(0, 0.6f, 0), 10
@@ -332,9 +332,10 @@ void BeltInventory::eject(TransportedItemStack &stack)
         return;
     }
 
+    // For some reason the item starts with some velocity that seems almost pseudo-random which caused variations in the direction
+    // An item would travel when it was ejected, so this just resets its velocity to 0, resulting in consistent landing locations
+    item->mBuiltInComponents.mStateVectorComponent->mPosDelta = Vec3::ZERO; 
     item->applyImpulse(outMotion);
-    
-    Log::Info("outPos: {}, impulse: {}", outPos, outMotion);
 }
 
 void BeltInventory::ejectAll()
