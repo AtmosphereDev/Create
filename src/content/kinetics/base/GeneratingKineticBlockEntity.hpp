@@ -14,8 +14,10 @@ protected:
     }
 
     virtual void removeSource() override {
+        Log::Info("GeneratingKineticBlockEntity at {} removing source (type: {})", mPosition, getBlock().getFullName().getString());
         if (hasSource() && isSource()) {
             reActivateSource = true;
+            Log::Info("reActivateSource set to true for GeneratingKineticBlockEntity at {} (type: {})", mPosition, getBlock().getFullName().getString());
         } 
         KineticBlockEntity::removeSource();
     }
@@ -29,11 +31,12 @@ protected:
         const KineticBlockEntity& sourceBE = static_cast<const KineticBlockEntity&>(*blockEntity);
         if (reActivateSource && std::abs(sourceBE.getSpeed()) >= std::abs(getGeneratedSpeed())) {
             reActivateSource = false;
+            Log::Info("reActivateSource set to false for GeneratingKineticBlockEntity at {} (type: {})", mPosition, getBlock().getFullName().getString());
         }
     }
 
-    virtual void tick(BlockSource& source) override {
-        KineticBlockEntity::tick(source);
+    virtual void tick(BlockSource& region) override {
+        KineticBlockEntity::tick(region);
 
         if (level == nullptr) {
 			Log::Warning("GeneratingKineticBlockEntity tick called with null level at {}", mPosition);
@@ -43,12 +46,14 @@ protected:
         if (reActivateSource) {
             updateGeneratedRotation();
             reActivateSource = false;
+			Log::Info("reActivateSource set to false for GeneratingKineticBlockEntity at {} (type: {})", mPosition, getBlock().getFullName().getString());
         }
     }
 
     void updateGeneratedRotation() {
         float speed = getGeneratedSpeed();
         float prevSpeed = this->speed;
+        Log::Info("GeneratingKineticBlockEntity at {} updating generated speed from {} to {}", mPosition, prevSpeed, speed);
 
         if (level == nullptr || level->isClientSide()) return;
 
@@ -73,9 +78,13 @@ protected:
 
         onSpeedChanged(prevSpeed);
         sendData();
+
+        Log::Info("GeneratingKineticBlockEntity at {} applied new speed {}", mPosition, this->speed);
     }
 
     void applyNewSpeed(float prevSpeed, float speed) {
+        Log::Info("GeneratingKineticBlockEntity at {} changing speed from {} to {}", mPosition, prevSpeed, speed);
+        
         // Speed changed to 0
         if (speed == 0) {
             if (hasSource()) {
@@ -111,7 +120,10 @@ protected:
             // Faster than the attached network -> become the new source
             detachKinetics();
             setSpeed(speed);
+
             source = std::nullopt;
+            // removeSource(); // original code just sets source to null, but this doesnt update GeneratingKineticBlockEntity
+
             setNetwork(createNetworkId());
             attachKinetics();
             return;

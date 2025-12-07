@@ -5,7 +5,7 @@
 
 class KineticScrollValueBehaviour : public ScrollValueBehaviour {
 public:
-    KineticScrollValueBehaviour(std::string label, SmartBlockEntity* be, std::shared_ptr<ValueBoxTransform> slot)
+    KineticScrollValueBehaviour(std::string label, std::shared_ptr<SmartBlockEntity> be, std::shared_ptr<ValueBoxTransform> slot)
         : ScrollValueBehaviour(label, be, slot) {
             withFormatter([](int v) {
                 return std::to_string(std::max(1, std::abs(v)));

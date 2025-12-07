@@ -340,7 +340,10 @@ void BeltInventory::eject(TransportedItemStack &stack)
 
 void BeltInventory::ejectAll()
 {
-    Log::Info("BeltInventory::ejectAll not implemented yet");
+    for (auto& stack : items) {
+        eject(*stack.get());
+    }
+    items.clear();
 }
 
 void BeltInventory::applyToEachWithin(float position, float maxDistanceToPosition, std::function<std::optional<TransportedItemStackHandlerBehaviour::TransportedResult>(TransportedItemStack &)> func)

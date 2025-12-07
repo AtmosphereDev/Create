@@ -19,7 +19,7 @@ public:
         int max = MAX_SPEED;
 
         generatedSpeed = std::make_shared<KineticScrollValueBehaviour>(
-            "kinetics.creative_motor.rotation_speed", this, std::make_shared<MotorValueBox>()
+            "kinetics.creative_motor.rotation_speed", this->getShared<SmartBlockEntity>(), std::make_shared<MotorValueBox>()
         );
 
 		generatedSpeed->between(-max, max);

@@ -23,7 +23,7 @@ private:
     ProcessingCallback continueProcessing;
 
 public:
-    explicit BeltProcessingBehaviour(SmartBlockEntity* be)
+    explicit BeltProcessingBehaviour(std::shared_ptr<SmartBlockEntity> be)
         : BlockEntityBehaviour(be),
           onItemEnter([](auto&, auto&) { return ProcessingResult::PASS; }),
           continueProcessing([](auto&, auto&) { return ProcessingResult::PASS; }) {}

@@ -172,6 +172,9 @@ void RotationPropagator::propagateNewSource(KineticBlockEntity &currentTE)
         float newSpeed = getConveyedSpeed(currentTE, *neighbourTE);
         float oppositeSpeed = getConveyedSpeed(*neighbourTE, currentTE);
 
+        Log::Info("Current TE is {} at {}, current speed {}, needs speed update: {}", currentTE.getBlock().getFullName().getString(), currentTE.getBlockPos(), speedOfCurrent, currentTE.needsSpeedUpdate() );
+        Log::Info("Neighbour TE is {} at {}, current speed {}, needs speed update: {}", neighbourTE->getBlock().getFullName().getString(), neighbourTE->getBlockPos(), speedOfNeighbour, neighbourTE->needsSpeedUpdate());
+
         if (newSpeed == 0 && oppositeSpeed == 0)
             continue;
 

@@ -36,7 +36,7 @@ public:
 		// 	.setInsertionHandler(this::tryInsertingFromSide).considerOccupiedWhen(this::isOccupied));
 
 		auto transportedItemStackHandlerBehaviour = std::make_shared<TransportedItemStackHandlerBehaviour>(
-			this, 
+			this->getShared<SmartBlockEntity>(), 
 			[this](
 				float maxDistanceFromCenter,
 				std::function<std::optional<TransportedItemStackHandlerBehaviour::TransportedResult>(TransportedItemStack &)> process

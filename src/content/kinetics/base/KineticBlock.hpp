@@ -18,6 +18,5 @@ public:
         return getRotationAxis(oldState) == getRotationAxis(newState);
     }
 
-    // equivalent of updateIndirectNeighbourShapes (i hope, not entirely sure)
     virtual void neighborChanged(BlockSource& unk0, const BlockPos& unk1, const BlockPos& unk2) const override;
 };

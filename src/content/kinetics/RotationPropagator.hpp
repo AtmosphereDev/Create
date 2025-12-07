@@ -44,8 +44,10 @@ public:
 		if (worldIn.isClientSide())
 			return;
 
-        if (!worldIn.mBlockSource->areChunksFullyLoaded(pos, 1))
-            return;
+        if (!worldIn.mBlockSource->areChunksFullyLoaded(pos, 1)) {
+			Log::Info("Chunks not fully loaded around {}, skipping handleAdded", pos);
+			return;
+		}
 
 		propagateNewSource(addedTE);
 	}

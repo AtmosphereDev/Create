@@ -73,7 +73,7 @@ private:
     PositionGetter positionGetter;
 
 public:
-    explicit TransportedItemStackHandlerBehaviour(SmartBlockEntity* be, ProcessingCallback callback)
+    explicit TransportedItemStackHandlerBehaviour(std::shared_ptr<SmartBlockEntity> be, ProcessingCallback callback)
         : BlockEntityBehaviour(be),
           processingCallback(std::move(callback)),
           positionGetter([be](TransportedItemStack&) {

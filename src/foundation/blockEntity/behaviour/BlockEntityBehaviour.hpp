@@ -11,12 +11,12 @@ class BlockSource;
 
 class BlockEntityBehaviour {
 protected:
-    SmartBlockEntity* blockEntity = nullptr;
+    std::shared_ptr<SmartBlockEntity> blockEntity = nullptr;
     int lazyTickRate = 10;
     int lazyTickCounter = 10;
 
 public:
-    explicit BlockEntityBehaviour(SmartBlockEntity* be) : blockEntity(be) {}
+    explicit BlockEntityBehaviour(std::shared_ptr<SmartBlockEntity> be) : blockEntity(be) {}
     virtual ~BlockEntityBehaviour() = default;
 
     virtual const BehaviourType& getType() const = 0;

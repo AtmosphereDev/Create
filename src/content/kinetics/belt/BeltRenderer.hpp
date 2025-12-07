@@ -177,6 +177,9 @@ public:
             sideOffset = transported.sideOffset;
         }
 
+        // TODO: NOT IN ORIGINAL, JANK FIX TO HAVE ITEMS CENTERED ON BELT
+        sideOffset = -0.25f;
+
         if (offset < 0.5f) {
             verticalMovement = 0;
         }
@@ -197,7 +200,6 @@ public:
 
         auto itemMat = ms.push();
 
-        //ResolvedItemIconInfo iconInfo = transported.stack.getItem()->getIconInfo(transported.stack, 0, false);
 		TextureAtlasItem* atlasItem = ItemIconManager::getIcon(transported.stack.getItem()->getIconInfo(transported.stack, 0, false));
         float iconWidth = atlasItem->pixelWidth();
 

@@ -109,7 +109,7 @@ public:
 
 		if (speed != 0) {
 			if (getGeneratedSpeed() == 0) {
-				speed = 0;
+				setSpeed(0);
 			}
 		}
 	}
@@ -219,7 +219,7 @@ public:
 			return;
 		}
 
-		speed = compound.getFloat("Speed");
+		setSpeed(compound.getFloat("Speed"));
 		// sequenceContext = SequenceContext.fromNBT(compound.getCompound("Sequence"));
 
 		source = std::nullopt;
@@ -271,6 +271,12 @@ public:
 	}
 
 	void setSpeed(float speed) {
+		Log::Info("KineticBlockEntity speed at {} for {} set to {} from {}",
+			getBlockPos(),
+			getBlock().getFullName().getString(),
+			speed,
+			this->speed
+		);
 		this->speed = speed;
 	}
 
@@ -302,7 +308,7 @@ public:
 	virtual void removeSource() {
 		float prevSpeed = getSpeed();
 
-		speed = 0;
+		setSpeed(0);
 		source = std::nullopt;
 		setNetwork(std::nullopt);
 		// sequenceContext = null;
@@ -337,6 +343,7 @@ public:
 
 	void attachKinetics() {
 		updateSpeed = false;
+		Log::Info("attachKinetics called for KineticBlockEntity at {} (type: {})", mPosition, getBlock().getFullName().getString());
 		RotationPropagator::handleAdded(*level, mPosition, *this);
 	}
 
@@ -390,8 +397,12 @@ public:
 	virtual void addBehaviours(std::vector<std::shared_ptr<BlockEntityBehaviour>>& behavioursList) override {}
 
 	virtual void clearKineticInformation() {
-		speed = 0;
+		Log::Info("Clearing kinetic information for KineticBlockEntity at {} (type: {})", mPosition, getBlock().getFullName().getString());
+		setSpeed(0);
+
 		source = std::nullopt;
+		// removeSource(); // original just set source = null, but this doesnt make generating kinetic block entities update, so idk how the original works..
+
 		network = std::nullopt;
 		overStressed = false;
 		stress = 0;

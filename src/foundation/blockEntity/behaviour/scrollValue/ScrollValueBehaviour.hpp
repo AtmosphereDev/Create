@@ -21,7 +21,7 @@ public:
 	std::function<bool()> isActiveCallback;
 	bool needsWrench;
 
-    ScrollValueBehaviour(std::string label, SmartBlockEntity* be, std::shared_ptr<ValueBoxTransform> slot) 
+    ScrollValueBehaviour(std::string label, std::shared_ptr<SmartBlockEntity> be, std::shared_ptr<ValueBoxTransform> slot) 
         : BlockEntityBehaviour(be)
     {
         setLabel(label);
