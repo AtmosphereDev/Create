@@ -150,7 +150,7 @@ public:
 		return capacity;
 	}
 
-	void onSpeedChanged(float previousSpeed) {
+	virtual void onSpeedChanged(float previousSpeed) {
 		bool fromOrToZero = (previousSpeed == 0) != (getSpeed() == 0);
 
 		bool directionSwap = !fromOrToZero && mce::Math::signum(previousSpeed) != mce::Math::signum(getSpeed());
