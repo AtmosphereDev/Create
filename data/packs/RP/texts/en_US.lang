@@ -3,3 +3,9 @@ gui.value_settings.release_to_confirm=Release Right Button to Confirm
 gui.value_settings.hold_to_edit=Click and hold to edit
 
 item.fx_create:belt_connector.name=Mechanical Belt
+
+tile.fx_create:creative_motor.name=Creative Motor
+tile.fx_create:large_cogwheel.name=Large Cogwheel
+tile.fx_create:cogwheel.name=Cogwheel
+tile.fx_create:gearbox.name=Gearbox
+tile.fx_create:shaft.name=Shaft
