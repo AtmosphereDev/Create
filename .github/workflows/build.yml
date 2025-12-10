@@ -38,7 +38,7 @@ jobs:
             - name: Push bumped version
               shell: powershell
               env:
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                GITHUB_TOKEN: ${{ secrets.SECRET_PAT }}
               run: |
                 git config user.name "github-actions[bot]"
                 git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -100,7 +100,7 @@ jobs:
                 gh release create $tag_name --title "$release_name" --notes "Automated release" --target main --repo ${{ github.repository }} --draft=false --prerelease=false
               shell: pwsh
               env:
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                GITHUB_TOKEN: ${{ secrets.SECRET_PAT }}
 
             - name: Upload Release Asset
               run: |
@@ -109,4 +109,4 @@ jobs:
                 gh release upload "v$env:NEW_VERSION" "$asset_path#$asset_label" --repo ${{ github.repository }}
               shell: pwsh
               env:
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                GITHUB_TOKEN: ${{ secrets.SECRET_PAT }}
